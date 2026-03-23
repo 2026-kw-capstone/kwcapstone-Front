@@ -1,10 +1,4 @@
-# README.md 전체를 **전부 Markdown**으로 다시 작성
-
-질문을 요약하면, 이전 답변에서 `UI 설계 원칙`, `시작하기`, `기술 스택` 부분이 **코드블록 바깥에 설명처럼 섞여 있어서**, 파일에 바로 붙여 넣을 수 있는 **완전한 Markdown 본문**이 아니었다는 뜻이야.
-그래서 아래에는 **README 전체 내용만** 처음부터 끝까지 **순수 Markdown**으로 다시 정리해줄게.
-
-````md
-# 🖥️ AI Speech Frontend for Communication Rehabilitation
+# AI Speech Frontend for Communication Rehabilitation
 
 이 프로젝트는 성인 의사소통 및 조음 장애 사용자의 재활 훈련을 돕기 위한 **AI 기반 언어 훈련 서비스의 프론트엔드 애플리케이션**입니다.  
 사용자가 워밍업, 시나리오 훈련, 자유 대화, 리포트 확인까지 자연스럽게 이어서 사용할 수 있도록 **직관적인 UI/UX**를 제공하며,  
@@ -66,7 +60,7 @@ frontend/
 ├── tsconfig.json
 ├── vite.config.ts
 └── README.md
-````
+```
 
 ---
 
