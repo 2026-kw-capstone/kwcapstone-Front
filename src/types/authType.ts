@@ -1,8 +1,8 @@
-﻿export type CommonResponse<T> = {
-  status: number;
+﻿export type ApiResponse<T> = {
+  isSuccess: boolean;
+  code: string;
   message: string;
-  data: T;
-};
+  result: T;
 };
 
 export type RequestSignupDto = {
@@ -10,67 +10,34 @@ export type RequestSignupDto = {
   password: string;
   nickname: string;
 };
+
+export type Member = {
+  memberId: number;
+  email: string;
   nickname: string;
 };
 
-export type ResponseSignupDto = {
-  isSuccess: boolean;
-  code: string;
-  message: string;
-  result: {
-    memberId: number;
-export type ResponseSignupDto = {
-  isSuccess: boolean;
-  code: string;
-  message: string;
-  result: {
-    memberId: number;
-    email: string;
-    nickname: string;
-  };
-};
-    nickname: string;
-  };
-};
+export type ResponseSignupDto = ApiResponse<Member>;
 
 export type RequestSigninDto = {
   email: string;
   password: string;
 };
-};
 
-export type ResponseSigninDto = {
-  isSuccess: boolean;
-  code: string;
-  message: string;
-  result: {
-    accessToken: string;
-    member: {
-      memberId: number;
-      email: string;
-      nickname: string;
-    };
-  };
-};
+export type ResponseSigninDto = ApiResponse<{
+  accessToken: string;
+  member: Member;
+}>;
 
-export type ResponseReissueDto = {
-  isSuccess: boolean;
-  code: string;
-  message: string;
-  result: {
-    accessToken: string;
-  };
-};
+export type ResponseReissueDto = ApiResponse<{
+  accessToken: string;
+}>;
 
-export type ResponseSignoutDto = CommonResponse<{
-  success: boolean;
+export type ResponseSignoutDto = ApiResponse<{
   success: boolean;
 }>;
 
-export type ResponseMyInfoDto = CommonResponse<{
-  id: number | string;
-  email: string;
-  name: string;
+export type ResponseMyInfoDto = ApiResponse<{
   id: number | string;
   email: string;
   name: string;
