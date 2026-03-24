@@ -12,7 +12,7 @@ import type {
 export const postSignup = async (
   body: RequestSignupDto
 ): Promise<ResponseSignupDto> => {
-  const { data } = await axiosInstance.post("/v1/auth/signup", body);
+  const { data } = await axiosInstance.post("/auth/signup", body);
   return data;
 };
 
