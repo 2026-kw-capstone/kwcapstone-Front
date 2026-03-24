@@ -3,13 +3,22 @@ export type CommonResponse<T> = {
   message: string;
   data: T;
 };
+};
 
 export type RequestSignupDto = {
   email: string;
   password: string;
   nickname: string;
 };
+  nickname: string;
+};
 
+export type ResponseSignupDto = {
+  isSuccess: boolean;
+  code: string;
+  message: string;
+  result: {
+    memberId: number;
 export type ResponseSignupDto = {
   isSuccess: boolean;
   code: string;
@@ -20,10 +29,14 @@ export type ResponseSignupDto = {
     nickname: string;
   };
 };
+    nickname: string;
+  };
+};
 
 export type RequestSigninDto = {
   email: string;
   password: string;
+};
 };
 
 export type ResponseSigninDto = {
@@ -51,9 +64,13 @@ export type ResponseReissueDto = {
 
 export type ResponseSignoutDto = CommonResponse<{
   success: boolean;
+  success: boolean;
 }>;
 
 export type ResponseMyInfoDto = CommonResponse<{
+  id: number | string;
+  email: string;
+  name: string;
   id: number | string;
   email: string;
   name: string;
