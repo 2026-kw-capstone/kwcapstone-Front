@@ -19,13 +19,12 @@ export const postSignup = async (
 export const postSignin = async (
   body: RequestSigninDto
 ): Promise<ResponseSigninDto> => {
-  const response = await axiosInstance.post("/auth/login", body);
-  console.log(response);
-  return response.data;
+  const { data } = await axiosInstance.post("/auth/login", body);
+  return data;
 };
 
 export const postSignout = async (): Promise<ResponseSignoutDto> => {
-  const { data } = await axiosInstance.post("/v1/auth/signout");
+  const { data } = await axiosInstance.post("/auth/logout");
   return data;
 };
 

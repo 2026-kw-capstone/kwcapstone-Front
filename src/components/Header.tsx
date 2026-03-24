@@ -1,4 +1,4 @@
-import { MessageCircle } from "lucide-react";
+﻿import { MessageCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { usePostSignout } from "../hooks/mutations/usePostSignout";
@@ -6,7 +6,7 @@ import { useGetMyInfo } from "../hooks/queries/useGetMyInfo";
 
 const Header = () => {
   const { isLoggedIn } = useAuth();
-  const { mutate: signout } = usePostSignout();
+  const { mutate: signout, isPending: isSignoutPending } = usePostSignout();
   const { data: myInfo } = useGetMyInfo();
 
   const userName = myInfo?.name ?? "사용자";
@@ -23,8 +23,6 @@ const Header = () => {
           </h1>
         </Link>
 
-        {/* 실제 인증 연동 시 사용 */}
-        {/*
         {!isLoggedIn ? (
           <div className="flex items-center gap-2 text-sm font-medium text-slate-600 md:gap-3">
             <Link
@@ -48,34 +46,15 @@ const Header = () => {
             </span>
             <span className="hidden text-slate-300 sm:inline">|</span>
             <button
+              type="button"
+              disabled={isSignoutPending}
               onClick={() => signout()}
-              className="cursor-pointer rounded-lg px-2 py-2 transition hover:bg-slate-100 hover:text-slate-900 md:px-3"
+              className="cursor-pointer rounded-lg px-2 py-2 transition hover:bg-slate-100 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-60 md:px-3"
             >
-              로그아웃
+              {isSignoutPending ? "로그아웃 중..." : "로그아웃"}
             </button>
           </div>
         )}
-        */}
-
-        {/* 테스트용 UI */}
-        <div className="flex items-center gap-2 text-sm font-medium text-slate-700 md:gap-3">
-          <span className="hidden rounded-lg bg-slate-100 px-3 py-2 sm:inline-flex">
-            {userName}님 반갑습니다
-          </span>
-          <span className="hidden text-slate-300 sm:inline">|</span>
-          <Link
-            to="/login"
-            className="rounded-lg px-2 py-2 transition hover:bg-slate-100 hover:text-slate-900 md:px-3"
-          >
-            로그인
-          </Link>
-          <Link
-            to="/signup"
-            className="rounded-lg px-2 py-2 transition hover:bg-slate-100 hover:text-slate-900 md:px-3"
-          >
-            회원가입
-          </Link>
-        </div>
       </div>
     </header>
   );

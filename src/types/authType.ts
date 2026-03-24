@@ -33,9 +33,11 @@ export type ResponseReissueDto = ApiResponse<{
   accessToken: string;
 }>;
 
-export type ResponseSignoutDto = ApiResponse<{
-  success: boolean;
-}>;
+export type ResponseSignoutDto = {
+  isSuccess: boolean;
+  code: string;
+  message: string;
+};
 
 export type ResponseMyInfoDto = ApiResponse<{
   id: number | string;
