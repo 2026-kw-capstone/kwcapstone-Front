@@ -1,6 +1,16 @@
-import { createContext, useContext, useState, type PropsWithChildren } from "react";
-import { LOCAL_STORAGE_KEY } from "../constants/key";
-import { useLocalStorage } from "../hooks/useLocalStorage";
+﻿import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  type PropsWithChildren,
+} from "react";
+import {
+  ACCESS_TOKEN_UPDATED_EVENT,
+  clearStoredAccessToken,
+  getStoredAccessToken,
+  setStoredAccessToken,
+} from "../hooks/accessToken";
 
 interface AuthContextType {
   accessToken: string | null;
@@ -18,36 +28,19 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: PropsWithChildren) => {
-  const accessTokenStorage = useLocalStorage<string>(LOCAL_STORAGE_KEY.accessToken);
-  // const refreshTokenStorage = useLocalStorage<string>(LOCAL_STORAGE_KEY.refreshToken);
-
   const [accessTokenState, setAccessTokenState] = useState<string | null>(
-    accessTokenStorage.getItem()
+    getStoredAccessToken()
   );
-
-  // const [refreshTokenState, setRefreshTokenState] = useState<string | null>(
-  //   refreshTokenStorage.getItem()
-  // );
 
   const setAccessToken = (token: string | null) => {
     setAccessTokenState(token);
 
     if (token) {
-      accessTokenStorage.setItem(token);
+      setStoredAccessToken(token);
     } else {
-      accessTokenStorage.removeItem();
+      clearStoredAccessToken();
     }
   };
-
-  // const setRefreshToken = (token: string | null) => {
-  //   setRefreshTokenState(token);
-  //
-  //   if (token) {
-  //     refreshTokenStorage.setItem(token);
-  //   } else {
-  //     refreshTokenStorage.removeItem();
-  //   }
-  // };
 
   const login = ({
     accessToken,
@@ -74,6 +67,22 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     login,
     logout,
   };
+
+  useEffect(() => {
+    const handleAccessTokenUpdated = (event: Event) => {
+      const customEvent = event as CustomEvent<string | null>;
+      setAccessTokenState(customEvent.detail);
+    };
+
+    window.addEventListener(ACCESS_TOKEN_UPDATED_EVENT, handleAccessTokenUpdated);
+
+    return () => {
+      window.removeEventListener(
+        ACCESS_TOKEN_UPDATED_EVENT,
+        handleAccessTokenUpdated
+      );
+    };
+  }, []);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
