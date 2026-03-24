@@ -32,9 +32,16 @@ axiosInstance.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config as CustomInternalAxiosRequestConfig;
     const isUnauthorized = error.response?.status === 401;
-    const isReissueRequest = originalRequest?.url?.includes("/auth/reissue");
+    const requestUrl = originalRequest?.url ?? "";
+    const isReissueRequest = requestUrl.includes("/auth/reissue");
+    const isLoginRequest = requestUrl.includes("/auth/login");
 
-    if (isUnauthorized && !originalRequest?._retry && !isReissueRequest) {
+    if (
+      isUnauthorized &&
+      !originalRequest?._retry &&
+      !isReissueRequest &&
+      !isLoginRequest
+    ) {
       originalRequest._retry = true;
 
       try {

@@ -1,4 +1,4 @@
-import { useMutation } from "@tanstack/react-query";
+﻿import { useMutation } from "@tanstack/react-query";
 import { postSignin } from "../../apis/auth";
 import { useAuth } from "../../contexts/AuthContext";
 
@@ -8,18 +8,14 @@ export const usePostSignin = () => {
   return useMutation({
     mutationFn: postSignin,
     onSuccess: (response) => {
-      const accessToken = response.data.accessToken;
+      const accessToken = response.result.accessToken;
 
-      login({
-        accessToken,
-        // refreshToken: response.data.refreshToken,
-      });
+      login({ accessToken });
 
       window.location.href = "/";
     },
     onError: (error) => {
       console.error("로그인 실패", error);
-      alert("로그인에 실패했습니다.");
     },
   });
 };
