@@ -5,11 +5,13 @@ import PasswordChangeModal from "../components/mypage/PasswordChangeModal";
 import UserProfileSection from "../components/mypage/UserProfileSection";
 import WithdrawModal from "../components/mypage/WithdrawModal";
 import { useGetMyInfo } from "../hooks/queries/useGetMyInfo";
+import { usePostSignout } from "../hooks/mutations/usePostSignout";
 
 type ModalType = "password" | "withdraw" | null;
 
 const MyPage = () => {
   const { data: myInfo } = useGetMyInfo();
+  const { mutate: signout, isPending: isSignoutPending } = usePostSignout();
 
   const initialNickname = useMemo(() => myInfo?.name ?? "홍길동", [myInfo?.name]);
   const email = myInfo?.email ?? "name@email.com";
@@ -96,13 +98,6 @@ const MyPage = () => {
               마이페이지
             </h1>
           </div>
-
-          <button
-            type="button"
-            className="rounded-lg px-3 py-2 text-sm font-semibold text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
-          >
-            로그아웃
-          </button>
         </header>
 
         <div className="relative bg-gradient-to-br from-white via-slate-50 to-sky-50/70 px-5 py-6 sm:px-7 sm:py-8">
@@ -127,7 +122,9 @@ const MyPage = () => {
               icon={<LogOut size={18} />}
               title="로그아웃"
               onClick={() => {
-                // TODO: API 연동 시 로그아웃 로직 연결
+                if (!isSignoutPending) {
+                  signout();
+                }
               }}
             />
             <MyPageActionRow

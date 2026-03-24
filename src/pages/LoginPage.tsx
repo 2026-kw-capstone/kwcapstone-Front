@@ -1,10 +1,36 @@
-import { Link, useNavigate } from "react-router-dom";
+﻿import axios from "axios";
+import { Link } from "react-router-dom";
 import { MessageCircle } from "lucide-react";
 import z from "zod";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { usePostSignin } from "../hooks/mutations/usePostSignin";
+
+type SigninErrorResponse = {
+  isSuccess?: boolean;
+  code?: string;
+  message?: string;
+};
+
+const extractSigninErrorMessage = (error: unknown): string => {
+  if (!axios.isAxiosError<SigninErrorResponse>(error)) {
+    return "로그인에 실패했습니다.";
+  }
+
+  const status = error.response?.status;
+  const data = error.response?.data;
+
+  if (typeof data?.message === "string" && data.message.trim().length > 0) {
+    return data.message;
+  }
+
+  if (status === 401) {
+    return "인증되지 않은 요청입니다.";
+  }
+
+  return "로그인에 실패했습니다.";
+};
 
 const schema = z.object({
   email: z.string().email({ message: "올바른 이메일 형식이 아닙니다." }),
@@ -17,8 +43,8 @@ const schema = z.object({
 type FormFields = z.infer<typeof schema>;
 
 const Login = () => {
-  const navigate = useNavigate();
   const { mutate: signin, isPending } = usePostSignin();
+  const [loginErrorMessage, setLoginErrorMessage] = useState("");
 
   const {
     register,
@@ -41,7 +67,13 @@ const Login = () => {
   }, [email, password, isValid, isPending]);
 
   const onSubmit: SubmitHandler<FormFields> = (data) => {
-    signin(data);
+    setLoginErrorMessage("");
+
+    signin(data, {
+      onError: (error) => {
+        setLoginErrorMessage(extractSigninErrorMessage(error));
+      },
+    });
   };
 
   return (
@@ -56,7 +88,7 @@ const Login = () => {
               <MessageCircle className="fill-white text-white" size={28} />
             </div>
             <span className="text-2xl font-extrabold tracking-tight text-slate-900">
-            이음
+              이음
             </span>
           </Link>
         </div>
@@ -98,6 +130,10 @@ const Login = () => {
             <p className="mt-2 text-sm text-red-500">{errors.password.message}</p>
           )}
         </div>
+
+        {loginErrorMessage && (
+          <p className="text-sm text-red-500">{loginErrorMessage}</p>
+        )}
 
         <button
           type="submit"

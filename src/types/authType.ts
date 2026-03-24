@@ -1,41 +1,46 @@
-export type CommonResponse<T> = {
-  status: number;
+﻿export type ApiResponse<T> = {
+  isSuccess: boolean;
+  code: string;
   message: string;
-  data: T;
-}
+  result: T;
+};
 
-// 회원가입
 export type RequestSignupDto = {
   email: string;
   password: string;
-  name: string;
-}
+  nickname: string;
+};
 
-export type ResponseSignupDto = CommonResponse<{
-    id: number | string;
-    email: string;
-    name: string;
-}>
+export type Member = {
+  memberId: number;
+  email: string;
+  nickname: string;
+};
 
-// 로그인
+export type ResponseSignupDto = ApiResponse<Member>;
+
 export type RequestSigninDto = {
   email: string;
   password: string;
-}
+};
 
-export type ResponseSigninDto = CommonResponse<{
-    accessToken: string;
-    // refreshToken?: string;
+export type ResponseSigninDto = ApiResponse<{
+  accessToken: string;
+  member: Member;
 }>;
 
-// 로그아웃
-export type ResponseSignoutDto = CommonResponse<{
-    success: boolean;
+export type ResponseReissueDto = ApiResponse<{
+  accessToken: string;
 }>;
 
-// 내 정보 조회
-export type ResponseMyInfoDto = CommonResponse<{
-    id: number | string;
-    email: string;
-    name: string;
+export type ResponseSignoutDto = {
+  isSuccess: boolean;
+  code: string;
+  message: string;
+};
+
+export type ResponseMyInfoDto = ApiResponse<{
+  id: number | string;
+  email: string;
+  name: string;
 }>;

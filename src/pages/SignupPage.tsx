@@ -1,3 +1,4 @@
+import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { MessageCircle } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -5,6 +6,13 @@ import { useForm, type SubmitHandler } from "react-hook-form";
 import z from "zod";
 import { useMemo, useState } from "react";
 import { postSignup } from "../apis/auth";
+
+type SignupErrorResponse = {
+  isSuccess?: boolean;
+  code?: string;
+  message?: string;
+  result?: string | Record<string, string> | null;
+};
 
 const schema = z
   .object({
@@ -17,7 +25,7 @@ const schema = z
       .string()
       .min(8, { message: "비밀번호 확인은 8자 이상이어야 합니다." })
       .max(20, { message: "비밀번호 확인은 20자 이하여야 합니다." }),
-    name: z.string().min(1, { message: "이름을 입력해주세요." }),
+    nickname: z.string().min(1, { message: "닉네임을 입력해 주세요." }),
   })
   .refine((data) => data.password === data.passwordCheck, {
     message: "비밀번호가 일치하지 않습니다.",
@@ -25,6 +33,36 @@ const schema = z
   });
 
 type FormFields = z.infer<typeof schema>;
+
+const extractSignupErrorMessage = (error: unknown): string => {
+  if (!axios.isAxiosError<SignupErrorResponse>(error)) {
+    return "회원가입에 실패했습니다.";
+  }
+
+  const status = error.response?.status;
+  const data = error.response?.data;
+
+  if (status === 409) {
+    return data?.message ?? "이미 존재하는 이메일입니다.";
+  }
+
+  if (status === 400) {
+    if (typeof data?.result === "string") {
+      return data.result;
+    }
+
+    if (data?.result && typeof data.result === "object") {
+      const firstMessage = Object.values(data.result)[0];
+      if (firstMessage) {
+        return firstMessage;
+      }
+    }
+
+    return data?.message ?? "입력값이 올바르지 않습니다.";
+  }
+
+  return data?.message ?? "회원가입에 실패했습니다.";
+};
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -40,7 +78,7 @@ const Signup = () => {
       email: "",
       password: "",
       passwordCheck: "",
-      name: "",
+      nickname: "",
     },
     resolver: zodResolver(schema),
     mode: "onChange",
@@ -51,19 +89,19 @@ const Signup = () => {
   const email = watch("email");
   const password = watch("password");
   const passwordCheck = watch("passwordCheck");
-  const name = watch("name");
+  const nickname = watch("nickname");
 
   const canSubmit = useMemo(() => {
     return (
       !!email &&
       !!password &&
       !!passwordCheck &&
-      !!name &&
+      !!nickname &&
       isValid &&
       !isSubmitting &&
       !isSubmittingApi
     );
-  }, [email, password, passwordCheck, name, isValid, isSubmitting, isSubmittingApi]);
+  }, [email, password, passwordCheck, nickname, isValid, isSubmitting, isSubmittingApi]);
 
   const onSubmit: SubmitHandler<FormFields> = async (data) => {
     const { passwordCheck: _passwordCheck, ...body } = data;
@@ -75,7 +113,7 @@ const Signup = () => {
       navigate("/login");
     } catch (error) {
       console.error("회원가입 실패", error);
-      alert("회원가입에 실패했습니다.");
+      alert(extractSignupErrorMessage(error));
     } finally {
       setIsSubmittingApi(false);
     }
@@ -92,9 +130,7 @@ const Signup = () => {
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-500 shadow-md shadow-emerald-200">
               <MessageCircle className="fill-white text-white" size={28} />
             </div>
-            <span className="text-2xl font-extrabold tracking-tight text-slate-900">
-            이음
-            </span>
+            <span className="text-2xl font-extrabold tracking-tight text-slate-900">이음</span>
           </Link>
         </div>
 
@@ -108,7 +144,7 @@ const Signup = () => {
           <input
             {...register("email")}
             type="email"
-            placeholder="이메일을 입력해주세요"
+            placeholder="이메일을 입력해 주세요"
             className={`min-h-12 w-full rounded-xl border px-4 py-3 text-base outline-none transition ${
               touchedFields.email && errors.email
                 ? "border-red-500"
@@ -124,7 +160,7 @@ const Signup = () => {
           <input
             {...register("password")}
             type="password"
-            placeholder="비밀번호를 입력해주세요"
+            placeholder="비밀번호를 입력해 주세요"
             className={`min-h-12 w-full rounded-xl border px-4 py-3 text-base outline-none transition ${
               touchedFields.password && errors.password
                 ? "border-red-500"
@@ -140,7 +176,7 @@ const Signup = () => {
           <input
             {...register("passwordCheck")}
             type="password"
-            placeholder="비밀번호를 다시 입력해주세요"
+            placeholder="비밀번호를 다시 입력해 주세요"
             className={`min-h-12 w-full rounded-xl border px-4 py-3 text-base outline-none transition ${
               touchedFields.passwordCheck && errors.passwordCheck
                 ? "border-red-500"
@@ -148,25 +184,23 @@ const Signup = () => {
             }`}
           />
           {touchedFields.passwordCheck && errors.passwordCheck && (
-            <p className="mt-2 text-sm text-red-500">
-              {errors.passwordCheck.message}
-            </p>
+            <p className="mt-2 text-sm text-red-500">{errors.passwordCheck.message}</p>
           )}
         </div>
 
         <div>
           <input
-            {...register("name")}
+            {...register("nickname")}
             type="text"
-            placeholder="이름 또는 닉네임을 입력해주세요"
+            placeholder="닉네임을 입력해 주세요"
             className={`min-h-12 w-full rounded-xl border px-4 py-3 text-base outline-none transition ${
-              touchedFields.name && errors.name
+              touchedFields.nickname && errors.nickname
                 ? "border-red-500"
                 : "border-slate-300 focus:border-emerald-500"
             }`}
           />
-          {touchedFields.name && errors.name && (
-            <p className="mt-2 text-sm text-red-500">{errors.name.message}</p>
+          {touchedFields.nickname && errors.nickname && (
+            <p className="mt-2 text-sm text-red-500">{errors.nickname.message}</p>
           )}
         </div>
 
@@ -175,7 +209,7 @@ const Signup = () => {
           disabled={!canSubmit}
           className="mt-2 min-h-12 rounded-xl bg-emerald-500 px-4 py-3 font-semibold text-white transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:bg-slate-300"
         >
-          {isSubmittingApi ? "처리 중..." : "회원가입 완료"}
+          {isSubmittingApi ? "처리 중..." : "회원가입"}
         </button>
       </form>
 
