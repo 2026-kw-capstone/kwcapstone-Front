@@ -3,6 +3,7 @@ import type {
   RequestSigninDto,
   RequestSignupDto,
   ResponseMyInfoDto,
+  ResponseReissueDto,
   ResponseSigninDto,
   ResponseSignoutDto,
   ResponseSignupDto,
@@ -24,6 +25,11 @@ export const postSignin = async (
 
 export const postSignout = async (): Promise<ResponseSignoutDto> => {
   const { data } = await axiosInstance.post("/v1/auth/signout");
+  return data;
+};
+
+export const postReissue = async (): Promise<ResponseReissueDto> => {
+  const { data } = await axiosInstance.post("/auth/reissue");
   return data;
 };
 

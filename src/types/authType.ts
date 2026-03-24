@@ -28,6 +28,16 @@ export type ResponseSigninDto = CommonResponse<{
     // refreshToken?: string;
 }>;
 
+// 액세스 토큰 재발급
+export type ResponseReissueDto = {
+  isSuccess: boolean;
+  code: string;
+  message: string;
+  result: {
+    accessToken: string;
+  };
+};
+
 // 로그아웃
 export type ResponseSignoutDto = CommonResponse<{
     success: boolean;
