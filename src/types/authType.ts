@@ -26,9 +26,19 @@ export type RequestSigninDto = {
   password: string;
 };
 
-export type ResponseSigninDto = CommonResponse<{
-  accessToken: string;
-}>;
+export type ResponseSigninDto = {
+  isSuccess: boolean;
+  code: string;
+  message: string;
+  result: {
+    accessToken: string;
+    member: {
+      memberId: number;
+      email: string;
+      nickname: string;
+    };
+  };
+};
 
 export type ResponseReissueDto = {
   isSuccess: boolean;

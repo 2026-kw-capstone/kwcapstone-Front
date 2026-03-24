@@ -14,13 +14,10 @@ import {
 
 interface AuthContextType {
   accessToken: string | null;
-  // refreshToken: string | null;
   isLoggedIn: boolean;
   setAccessToken: (token: string | null) => void;
-  // setRefreshToken: (token: string | null) => void;
   login: (params: {
     accessToken: string;
-    // refreshToken?: string;
   }) => void;
   logout: () => void;
 }
