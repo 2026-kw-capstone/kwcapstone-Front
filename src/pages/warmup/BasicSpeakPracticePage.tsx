@@ -1,5 +1,6 @@
 ﻿import { useMemo, useState } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
+import BackLinkButton from "../../components/BackLinkButton";
 import BasicSpeakStudyCard from "../../components/warmup/basic-speak/BasicSpeakStudyCard";
 import BasicSpeakResultCard from "../../components/warmup/basic-speak/BasicSpeakResultCard";
 import {
@@ -74,9 +75,10 @@ const BasicSpeakPracticePage = () => {
   return (
     <div className="mx-auto flex w-full max-w-md flex-col gap-5">
       <section className="flex flex-col gap-2">
-        <h1 className="text-[28px] font-extrabold tracking-tight text-slate-900">
-          기초 발성 연습
-        </h1>
+        <div className="flex items-center gap-2">
+          <BackLinkButton to="/warmup/basic-speak" label="기초 발성 목록으로" />
+          <h1 className="text-[28px] font-extrabold tracking-tight text-slate-900">기초 발성 연습</h1>
+        </div>
 
         <p className="text-sm leading-6 text-slate-500">
           {card.category} "{card.subtitle}" 발성을 연습해요.

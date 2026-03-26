@@ -1,4 +1,4 @@
-﻿import { ArrowLeft } from "lucide-react";
+﻿import BackLinkButton from "../../BackLinkButton";
 import type { PracticeStep, StepResult } from "../../../types/scenarioPracticeType";
 
 interface PracticeHeaderProps {
@@ -23,14 +23,7 @@ const PracticeHeader = ({
   return (
     <header className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <button
-          type="button"
-          onClick={onBack}
-          className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
-        >
-          <ArrowLeft size={18} />
-          레벨 선택으로
-        </button>
+        <BackLinkButton onClick={onBack} label="레벨 선택으로" />
 
         <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5">
           <p className="text-sm font-extrabold text-emerald-700">

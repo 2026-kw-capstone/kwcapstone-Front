@@ -1,4 +1,5 @@
-﻿import { Check, Sparkles } from "lucide-react";
+﻿import { Check } from "lucide-react";
+import BackLinkButton from "../../BackLinkButton";
 
 interface PracticeSummaryPanelProps {
   averageAccuracy: number;
@@ -51,14 +52,8 @@ const PracticeSummaryPanel = ({
         >
           같은 단계 다시 연습
         </button>
-        <button
-          type="button"
-          onClick={onBackToLevel}
-          className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-600"
-        >
-          레벨 선택으로
-          <Sparkles size={16} />
-        </button>
+
+        <BackLinkButton onClick={onBackToLevel} label="레벨 선택으로" />
       </div>
     </section>
   );

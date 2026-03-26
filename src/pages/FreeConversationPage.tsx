@@ -1,4 +1,5 @@
 ﻿import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import ConversationHeader from "../components/free-conversation/ConversationHeader";
 import ConversationInput from "../components/free-conversation/ConversationInput";
 import ConversationMessages from "../components/free-conversation/ConversationMessages";
@@ -9,6 +10,7 @@ import {
 } from "../constants/freeConversation";
 
 const FreeConversationPage = () => {
+  const navigate = useNavigate();
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(
     null
   );
@@ -74,6 +76,7 @@ const FreeConversationPage = () => {
               setIsMobileConversationListOpen((prev) => !prev)
             }
             currentConversationTitle={currentConversationTitle}
+            onBackToPractice={() => navigate("/ai-practice")}
           />
 
           <div className="relative flex min-h-0 flex-1 flex-col px-2 pb-3 pt-2">

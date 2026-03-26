@@ -1,21 +1,19 @@
-﻿import BasicSpeakCard from "../../components/warmup/basic-speak/BasicSpeakCard";
+﻿import BackLinkButton from "../../components/BackLinkButton";
+import BasicSpeakCard from "../../components/warmup/basic-speak/BasicSpeakCard";
 import { BASIC_SPEAK_CARDS } from "../../constants/basicSpeak";
 
 const BasicSpeakPage = () => {
   return (
     <div className="mx-auto flex w-full max-w-md flex-col gap-5">
       <section className="flex flex-col gap-2">
-        <h1 className="text-[28px] font-extrabold tracking-tight text-slate-900">
-          기초 발성 연습
-        </h1>
+        <div className="flex items-center gap-2">
+          <BackLinkButton to="/warmup" label="워밍업으로" />
+          <h1 className="text-[28px] font-extrabold tracking-tight text-slate-900">기초 발성 연습</h1>
+        </div>
 
-        <p className="text-sm leading-6 text-slate-500">
-          기초적인 발음부터 차근차근 연습해요.
-        </p>
+        <p className="text-sm leading-6 text-slate-500">기초적인 발음부터 차근차근 연습해요.</p>
 
-        <p className="pt-2 text-sm leading-6 text-slate-500">
-          연습하고 싶은 카드를 선택해주세요.
-        </p>
+        <p className="pt-2 text-sm leading-6 text-slate-500">연습하고 싶은 카드를 선택해주세요.</p>
       </section>
 
       <section className="grid grid-cols-2 gap-3">

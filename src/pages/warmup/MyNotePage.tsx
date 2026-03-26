@@ -1,4 +1,5 @@
 ﻿import { useMemo, useState } from "react";
+import BackLinkButton from "../../components/BackLinkButton";
 import MyNoteStudyCard from "../../components/warmup/my-note/MyNoteStudyCard";
 import MyNoteResultCard from "../../components/warmup/my-note/MyNoteResultCard";
 import MyNoteSentenceList from "../../components/warmup/my-note/MyNoteSentenceList";
@@ -7,7 +8,6 @@ import type {
   MyNoteSentenceItem,
 } from "../../types/myNoteType";
 
-// 기능 동작 확인용 임시 데이터
 const INITIAL_SENTENCES: MyNoteSentenceItem[] = [
   {
     id: 1,
@@ -134,9 +134,10 @@ const MyNotePage = () => {
   return (
     <div className="mx-auto flex w-full max-w-md flex-col gap-5">
       <section className="flex flex-col gap-1">
-        <h1 className="text-[28px] font-extrabold tracking-tight text-slate-900">
-          나만의 문장 노트
-        </h1>
+        <div className="flex items-center gap-2">
+          <BackLinkButton to="/warmup" label="워밍업으로" />
+          <h1 className="text-[28px] font-extrabold tracking-tight text-slate-900">나만의 문장 노트</h1>
+        </div>
         <p className="text-sm leading-6 text-slate-500">
           자주 쓰는 문장을 저장하고 듣고 말하고 결과까지 확인해보세요.
         </p>
