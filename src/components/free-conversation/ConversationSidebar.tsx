@@ -23,11 +23,11 @@ const ConversationSidebar = ({
   return (
     <aside
       className={`
-        fixed left-0 top-16 z-50 h-[calc(100vh-64px)] w-[78%] max-w-[280px] border-r border-slate-200 bg-slate-50 transition-transform duration-200
+        absolute inset-y-0 left-0 z-50 w-[78%] max-w-[280px] border-r border-slate-200 bg-slate-50 transition-transform duration-200
         ${isMobileOpen ? "translate-x-0" : "-translate-x-full"}
       `}
     >
-      <div className="h-full px-3 pb-3 pt-4">
+      <div className="flex h-full min-h-0 flex-col px-3 pb-3 pt-[15px]">
         <h2 className="text-xl font-extrabold tracking-tight text-slate-800">
           AI 자유 대화
         </h2>
@@ -41,9 +41,9 @@ const ConversationSidebar = ({
           새 대화
         </button>
 
-        <div className="mt-5">
+        <div className="mt-5 min-h-0 flex-1">
           <p className="text-xs font-semibold text-slate-400">이전 대화</p>
-          <div className="mt-2.5 space-y-1">
+          <div className="mt-2.5 min-h-0 space-y-1 overflow-y-auto pr-1">
             {conversations.map((conversation) => {
               const isSelected = conversation.id === selectedConversationId;
 
