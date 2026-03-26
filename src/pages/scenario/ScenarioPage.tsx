@@ -109,8 +109,7 @@ const ScenarioPage = () => {
               <div className="mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-400">
                 <Plus size={24} />
               </div>
-              <p className="text-sm font-medium text-slate-500">아직 추가된 시나리오가 없습니다.</p>
-              <p className="mt-1 text-sm text-slate-400">우측 상단 버튼을 눌러 나만의 상황을 만들어보세요.</p>
+              <p className="mt-1 text-sm text-slate-400">상단의 시나리오 추가 버튼을 눌러<br/>나만의 상황을 만들어보세요.</p>
             </div>
           ) : (
             <div className="space-y-3">

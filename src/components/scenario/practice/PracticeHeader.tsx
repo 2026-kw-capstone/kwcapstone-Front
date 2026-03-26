@@ -34,13 +34,6 @@ const PracticeHeader = ({
 
       {!isSummaryMode && (
         <div className="mt-4">
-          <div className="mb-3 flex items-center justify-between text-sm font-semibold text-slate-500">
-            <span>진행 상황</span>
-            <span>
-              Step {currentStepIndex + 1} / {steps.length}
-            </span>
-          </div>
-
           <div className="grid grid-cols-3 gap-2">
             {steps.map((step, index) => {
               const isActive = index === currentStepIndex;
