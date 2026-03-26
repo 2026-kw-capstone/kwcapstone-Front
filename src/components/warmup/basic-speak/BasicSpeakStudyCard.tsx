@@ -30,14 +30,16 @@ const BasicSpeakStudyCard = ({
       </div>
 
       <div className="rounded-[20px] border border-dashed border-emerald-200 bg-emerald-50/30 p-5">
-        <div className="flex min-h-[320px] flex-col items-center justify-center text-center">
+        <div className="flex min-h-[240px] flex-col items-center justify-center text-center min-[380px]:min-h-[320px]">
           <p className="text-sm font-semibold text-emerald-600">{card.category}</p>
 
-          <div className="mt-5 text-[72px] font-extrabold leading-none tracking-tight text-emerald-600">
+          <div className="mt-5 text-[56px] font-extrabold leading-none tracking-tight text-emerald-600 min-[380px]:text-[72px]">
             {card.title}
           </div>
 
-          <p className="mt-4 text-2xl font-semibold text-slate-500">{card.subtitle}</p>
+          <p className="mt-4 text-xl font-semibold text-slate-500 min-[380px]:text-2xl">
+            {card.subtitle}
+          </p>
 
           <p className="mt-4 max-w-xl text-sm leading-6 text-slate-500">
             {card.guideText ?? card.description}

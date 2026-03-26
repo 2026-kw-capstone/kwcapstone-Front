@@ -23,7 +23,7 @@ const ConversationSidebar = ({
   return (
     <aside
       className={`
-        absolute inset-y-0 left-0 z-50 w-[78%] max-w-[280px] border-r border-slate-200 bg-slate-50 transition-transform duration-200
+        absolute inset-y-0 left-0 z-50 w-[84%] max-w-[320px] border-r border-slate-200 bg-slate-50 transition-transform duration-200 min-[390px]:w-[78%]
         ${isMobileOpen ? "translate-x-0" : "-translate-x-full"}
       `}
     >

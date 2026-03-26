@@ -31,7 +31,7 @@ const MyNoteStudyCard = ({
       </div>
 
       <div className="rounded-[20px] border border-dashed border-emerald-200 bg-emerald-50/40 p-5">
-        <div className="flex min-h-[260px] flex-col items-center justify-center text-center">
+        <div className="flex min-h-[220px] flex-col items-center justify-center text-center min-[380px]:min-h-[260px]">
 
           <p className="text-sm font-semibold text-emerald-600">학습 문장</p>
 

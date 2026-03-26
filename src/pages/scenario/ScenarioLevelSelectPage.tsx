@@ -35,9 +35,9 @@ const ScenarioLevelSelectPage = () => {
   return (
     <div className="mx-auto flex w-full max-w-md flex-col gap-5">
       <section>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <BackLinkButton to="/ai-practice/scenario" label="시나리오 목록으로" />
-          <h1 className="text-[28px] font-extrabold tracking-tight text-slate-900">
+          <h1 className="text-[24px] font-extrabold leading-tight tracking-tight text-slate-900 min-[380px]:text-[28px]">
             {scenarioName} 레벨 선택
           </h1>
         </div>

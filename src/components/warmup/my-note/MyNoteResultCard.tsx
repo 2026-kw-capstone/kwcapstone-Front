@@ -45,9 +45,9 @@ const MyNoteResultCard = ({
         </button>
       </div>
 
-      <div className="min-h-[368px] rounded-[20px] border border-slate-100 bg-slate-50/70 p-5">
+      <div className="min-h-[280px] rounded-[20px] border border-slate-100 bg-slate-50/70 p-5 min-[380px]:min-h-[368px]">
         {!hasResult ? (
-          <div className="flex h-full min-h-[320px] flex-col items-center justify-center text-center">
+          <div className="flex h-full min-h-[240px] flex-col items-center justify-center text-center min-[380px]:min-h-[320px]">
             <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-300">
               <Trophy size={34} />
             </div>

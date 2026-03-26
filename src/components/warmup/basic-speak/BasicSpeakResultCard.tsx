@@ -50,9 +50,9 @@ const BasicSpeakResultCard = ({
         </button>
       </div>
 
-      <div className="min-h-[320px] rounded-[20px] border border-slate-100 bg-slate-50/70 p-5">
+      <div className="min-h-[260px] rounded-[20px] border border-slate-100 bg-slate-50/70 p-5 min-[380px]:min-h-[320px]">
         {!hasResult ? (
-          <div className="flex h-full min-h-[270px] flex-col items-center justify-center text-center">
+          <div className="flex h-full min-h-[220px] flex-col items-center justify-center text-center min-[380px]:min-h-[270px]">
             <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-300">
               <Trophy size={34} />
             </div>
@@ -63,7 +63,7 @@ const BasicSpeakResultCard = ({
             </p>
           </div>
         ) : (
-          <div className="flex min-h-[270px] flex-col justify-center gap-4">
+          <div className="flex min-h-[220px] flex-col justify-center gap-4 min-[380px]:min-h-[270px]">
             <div className="grid grid-cols-1 gap-3">
               <ScoreItem label="발음 정확도" value={`${result.pronunciationScore}점`} />
               <ScoreItem label="발화 안정성" value={`${result.stabilityScore}점`} />

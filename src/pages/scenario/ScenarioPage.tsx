@@ -72,9 +72,9 @@ const ScenarioPage = () => {
       <div className="mx-auto flex w-full max-w-md flex-col gap-6 pb-1">
         <section className="flex flex-col gap-4">
           <div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <BackLinkButton to="/ai-practice" label="실전대화연습으로" />
-              <h1 className="text-[28px] font-extrabold tracking-tight text-slate-900">
+              <h1 className="text-[24px] font-extrabold leading-tight tracking-tight text-slate-900 min-[380px]:text-[28px]">
                 시나리오 대화 연습
               </h1>
             </div>

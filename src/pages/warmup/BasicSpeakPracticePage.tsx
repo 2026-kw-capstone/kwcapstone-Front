@@ -75,9 +75,11 @@ const BasicSpeakPracticePage = () => {
   return (
     <div className="mx-auto flex w-full max-w-md flex-col gap-5">
       <section className="flex flex-col gap-2">
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <BackLinkButton to="/warmup/basic-speak" label="기초 발성 목록으로" />
-          <h1 className="text-[28px] font-extrabold tracking-tight text-slate-900">기초 발성 연습</h1>
+          <h1 className="text-[24px] font-extrabold leading-tight tracking-tight text-slate-900 min-[380px]:text-[28px]">
+            기초 발성 연습
+          </h1>
         </div>
 
         <p className="text-sm leading-6 text-slate-500">
@@ -107,7 +109,7 @@ const BasicSpeakPracticePage = () => {
       <section className="rounded-[24px] border border-slate-200 bg-white p-4 shadow-sm">
         <h2 className="text-lg font-bold text-slate-900">다른 카드로 이동하기</h2>
 
-        <div className="mt-4 grid grid-cols-2 gap-3">
+        <div className="mt-4 grid grid-cols-1 gap-3 min-[360px]:grid-cols-2">
           {BASIC_SPEAK_CARDS.filter((item) => item.id !== card.id).map((item) => (
             <Link
               key={item.id}
