@@ -1,4 +1,4 @@
-import axios from "axios";
+﻿import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { MessageCircle } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -120,7 +120,7 @@ const Signup = () => {
   };
 
   return (
-    <div className="w-full rounded-[20px] border border-slate-200 bg-white p-4 shadow-sm sm:rounded-[28px] sm:p-8">
+    <div className="w-full rounded-[20px] border border-slate-200 bg-white p-4 shadow-sm">
       <div className="mb-6 flex flex-col gap-4">
         <div className="flex justify-center">
           <Link
@@ -135,7 +135,7 @@ const Signup = () => {
         </div>
 
         <div className="flex items-center justify-center">
-          <h1 className="text-xl font-bold text-slate-900 sm:text-2xl">회원가입</h1>
+          <h1 className="text-xl font-bold text-slate-900">회원가입</h1>
         </div>
       </div>
 

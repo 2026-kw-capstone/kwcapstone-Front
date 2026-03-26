@@ -32,7 +32,7 @@ const ScenarioLevelSelectPage = () => {
   };
 
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 md:gap-7">
+    <div className="mx-auto flex w-full max-w-md flex-col gap-5">
       <button
         type="button"
         onClick={() => navigate("/ai-practice/scenario")}
@@ -58,10 +58,10 @@ const ScenarioLevelSelectPage = () => {
       </section>
 
       <section>
-        <h1 className="text-[28px] font-extrabold tracking-tight text-slate-900 sm:text-[32px]">
+        <h1 className="text-[28px] font-extrabold tracking-tight text-slate-900">
           {scenarioName} 레벨 선택
         </h1>
-        <p className="mt-2 text-sm leading-6 text-slate-500 sm:text-base">
+        <p className="mt-2 text-sm leading-6 text-slate-500">
           원하는 난이도를 선택해 대화 연습을 시작하세요.
         </p>
       </section>

@@ -1,4 +1,4 @@
-const PRONUNCIATION_LEVELS = [24, 38, 52, 46, 64, 72, 76];
+﻿const PRONUNCIATION_LEVELS = [24, 38, 52, 46, 64, 72, 76];
 
 const REPORT_POINTS = [
   { label: "4.18", pronunciation: 68, communication: 45 },
@@ -39,26 +39,20 @@ const communicationPath = buildLinePath(
 
 const ReportPage = () => {
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-5 pb-6 md:gap-7">
+    <div className="mx-auto flex w-full max-w-md flex-col gap-5 pb-6">
       <section>
-        <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 md:text-[38px]">
-          레포트
-        </h1>
-        <p className="mt-2 text-sm leading-6 text-slate-500 md:text-lg">
+        <h1 className="text-2xl font-extrabold tracking-tight text-slate-900">레포트</h1>
+        <p className="mt-2 text-sm leading-6 text-slate-500">
           사용자의 연습 결과를 분석해 성장 흐름을 보여드려요.
         </p>
       </section>
 
-      <section className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-        <article className="rounded-[26px] border border-slate-200 bg-white p-5 shadow-sm md:p-7">
-          <p className="text-xs font-semibold tracking-wide text-slate-400 md:text-sm">
-            평균 정확도
-          </p>
-          <p className="mt-2 text-4xl font-black leading-none text-emerald-500 md:text-5xl">
-            82.4%
-          </p>
+      <section className="grid grid-cols-1 gap-4">
+        <article className="rounded-[26px] border border-slate-200 bg-white p-5 shadow-sm">
+          <p className="text-xs font-semibold tracking-wide text-slate-400">평균 정확도</p>
+          <p className="mt-2 text-4xl font-black leading-none text-emerald-500">82.4%</p>
 
-          <div className="mt-7 grid h-28 grid-cols-7 items-end gap-2 md:h-36 md:gap-2.5">
+          <div className="mt-7 grid h-28 grid-cols-7 items-end gap-2">
             {PRONUNCIATION_LEVELS.map((level, index) => (
               <div
                 key={`pronunciation-level-${index}`}
@@ -73,30 +67,22 @@ const ReportPage = () => {
           </div>
         </article>
 
-        <article className="rounded-[26px] border border-slate-200 bg-white p-5 shadow-sm md:p-7">
-          <p className="text-xs font-semibold tracking-wide text-slate-400 md:text-sm">
-            의사소통 지표 (MTSR)
-          </p>
-          <p className="mt-2 text-4xl font-black leading-none text-blue-500 md:text-5xl">
-            76%
-          </p>
+        <article className="rounded-[26px] border border-slate-200 bg-white p-5 shadow-sm">
+          <p className="text-xs font-semibold tracking-wide text-slate-400">의사소통 지수 (MTSR)</p>
+          <p className="mt-2 text-4xl font-black leading-none text-blue-500">76%</p>
 
           <div className="mt-7 rounded-2xl bg-slate-50 px-5 py-4 text-slate-600">
-            <p className="text-xs font-semibold text-slate-500 md:text-sm">
-              MTSR 계산식
-            </p>
-            <p className="mt-2 text-[13px] leading-6 md:text-sm">
-              MTSR = (발화 성공 단계 수 N_s / 전체 시나리오 단계 수 N_t) x 100
+            <p className="text-xs font-semibold text-slate-500">MTSR 계산식</p>
+            <p className="mt-2 text-[13px] leading-6">
+              MTSR = (발화 성공 횟수 N_s / 전체 시나리오 횟수 N_t) × 100
             </p>
           </div>
         </article>
       </section>
 
-      <section className="rounded-[28px] border border-slate-200 bg-white p-4 shadow-sm md:p-6">
-        <div className="mb-5 flex flex-col gap-3 md:mb-7 md:flex-row md:items-center md:justify-between">
-          <h2 className="text-xl font-bold text-slate-900 md:text-2xl">
-            일별 추이
-          </h2>
+      <section className="rounded-[28px] border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="mb-5 flex flex-col gap-3">
+          <h2 className="text-xl font-bold text-slate-900">일별 추이</h2>
           <button
             type="button"
             className="w-fit rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600"
@@ -105,13 +91,13 @@ const ReportPage = () => {
           </button>
         </div>
 
-        <div className="overflow-x-auto">
-          <div className="min-w-[620px]">
+        <div className="overflow-x-auto pb-1">
+          <div className="min-w-[540px]">
             <svg
               viewBox={`0 0 ${chartWidth} ${chartHeight}`}
-              className="h-[280px] w-full md:h-[320px]"
+              className="h-[240px] w-full"
               role="img"
-              aria-label="발성 정확도 및 의사소통 성공 지수 일별 추이 그래프"
+              aria-label="발성 정확도와 의사소통 성공 지수의 일별 추이 그래프"
             >
               {[25, 50, 75, 100].map((value) => (
                 <g key={`grid-${value}`}>
@@ -136,8 +122,7 @@ const ReportPage = () => {
               ))}
 
               {REPORT_POINTS.map((point, index) => {
-                const step =
-                  (chartWidth - chartPadding * 2) / (REPORT_POINTS.length - 1);
+                const step = (chartWidth - chartPadding * 2) / (REPORT_POINTS.length - 1);
                 const x = chartPadding + step * index;
 
                 return (
@@ -181,30 +166,15 @@ const ReportPage = () => {
               />
 
               {REPORT_POINTS.map((point, index) => {
-                const step =
-                  (chartWidth - chartPadding * 2) / (REPORT_POINTS.length - 1);
+                const step = (chartWidth - chartPadding * 2) / (REPORT_POINTS.length - 1);
                 const x = chartPadding + step * index;
                 const pronunciationY = getPointY(point.pronunciation);
                 const communicationY = getPointY(point.communication);
 
                 return (
                   <g key={`marker-${point.label}`}>
-                    <circle
-                      cx={x}
-                      cy={pronunciationY}
-                      r="6"
-                      fill="white"
-                      stroke="#7EA8F8"
-                      strokeWidth="3"
-                    />
-                    <circle
-                      cx={x}
-                      cy={communicationY}
-                      r="6"
-                      fill="white"
-                      stroke="#F2A35A"
-                      strokeWidth="3"
-                    />
+                    <circle cx={x} cy={pronunciationY} r="6" fill="white" stroke="#7EA8F8" strokeWidth="3" />
+                    <circle cx={x} cy={communicationY} r="6" fill="white" stroke="#F2A35A" strokeWidth="3" />
                   </g>
                 );
               })}

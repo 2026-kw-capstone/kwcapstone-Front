@@ -1,4 +1,4 @@
-import { MessageCircle } from "lucide-react";
+﻿import { MessageCircle } from "lucide-react";
 import { isRouteErrorResponse, Link, useRouteError } from "react-router-dom";
 
 const NotFound = () => {
@@ -14,7 +14,7 @@ const NotFound = () => {
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-[#F8FAFB] px-6 text-slate-900">
-      <section className="w-full max-w-xl rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-sm sm:p-10">
+      <section className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-sm">
         <Link to="/" className="mx-auto mb-6 inline-flex items-center gap-3">
           <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-500 shadow-md shadow-emerald-200">
             <MessageCircle className="fill-white text-white" size={22} />

@@ -1,4 +1,4 @@
-import { ArrowLeft } from "lucide-react";
+﻿import { ArrowLeft } from "lucide-react";
 import type { PracticeStep, StepResult } from "../../../types/scenarioPracticeType";
 
 interface PracticeHeaderProps {
@@ -21,7 +21,7 @@ const PracticeHeader = ({
   onBack,
 }: PracticeHeaderProps) => {
   return (
-    <header className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm md:p-5">
+    <header className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <button
           type="button"

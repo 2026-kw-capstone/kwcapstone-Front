@@ -14,7 +14,7 @@ const ScenarioRowCard = ({ scenario, onClick, onDelete }: ScenarioRowCardProps) 
     <button
       type="button"
       onClick={onClick}
-      className="group flex w-full items-center gap-3 rounded-[22px] border border-slate-200 bg-white px-4 py-4 text-left shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow md:gap-4 md:px-5"
+      className="group flex w-full items-center gap-3 rounded-[22px] border border-slate-200 bg-white px-4 py-4 text-left shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow"
     >
       <div
         className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${scenario.iconClassName}`}

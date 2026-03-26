@@ -12,7 +12,7 @@ const ModalBackdrop = ({ onClose, children }: ModalBackdropProps) => {
       onClick={onClose}
     >
       <div
-        className="w-full max-w-md rounded-3xl bg-white p-5 shadow-2xl sm:p-6"
+        className="w-full max-w-md rounded-3xl bg-white p-5 shadow-2xl"
         onClick={(event) => event.stopPropagation()}
       >
         {children}

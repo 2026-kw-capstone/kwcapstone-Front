@@ -60,7 +60,7 @@ const ScenarioCreateModal = ({
           />
         </label>
 
-        <div className="flex flex-col-reverse gap-2 pt-1 sm:flex-row sm:justify-end">
+        <div className="flex flex-col-reverse gap-2 pt-1">
           <button
             type="button"
             onClick={onClose}
@@ -82,3 +82,4 @@ const ScenarioCreateModal = ({
 };
 
 export default ScenarioCreateModal;
+

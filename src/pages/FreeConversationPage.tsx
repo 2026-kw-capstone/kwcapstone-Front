@@ -47,11 +47,11 @@ const FreeConversationPage = () => {
 
   return (
     <div className="h-full min-h-0 w-full overflow-hidden bg-white">
-      <div className="flex h-full min-h-0 flex-col overflow-hidden md:flex-row">
+      <div className="flex h-full min-h-0 flex-col overflow-hidden">
         {isMobileConversationListOpen ? (
           <button
             type="button"
-            className="fixed inset-0 z-40 bg-slate-900/35 md:hidden"
+            className="fixed inset-0 z-40 bg-slate-900/35"
             aria-label="대화 목록 닫기"
             onClick={() => setIsMobileConversationListOpen(false)}
           />
@@ -76,7 +76,7 @@ const FreeConversationPage = () => {
             currentConversationTitle={currentConversationTitle}
           />
 
-          <div className="relative flex min-h-0 flex-1 flex-col px-2 pb-3 pt-2 sm:px-5 sm:pb-5 sm:pt-3 md:px-8 md:pb-6 md:pt-5">
+          <div className="relative flex min-h-0 flex-1 flex-col px-2 pb-3 pt-2">
             <div className="pointer-events-none absolute inset-x-0 bottom-0 h-52 bg-gradient-to-t from-emerald-100/40 to-transparent" />
 
             <div className="relative flex-1 overflow-y-auto pr-1">

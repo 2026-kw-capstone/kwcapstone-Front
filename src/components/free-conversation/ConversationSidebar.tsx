@@ -23,12 +23,12 @@ const ConversationSidebar = ({
   return (
     <aside
       className={`
-        fixed left-0 top-20 z-50 h-[calc(100vh-80px)] w-[252px] border-r border-slate-200 bg-slate-50 transition-transform duration-200 md:static md:z-auto md:w-[290px] md:translate-x-0
-        ${isMobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
+        fixed left-0 top-16 z-50 h-[calc(100vh-64px)] w-[78%] max-w-[280px] border-r border-slate-200 bg-slate-50 transition-transform duration-200
+        ${isMobileOpen ? "translate-x-0" : "-translate-x-full"}
       `}
     >
-      <div className="h-full px-3 pb-3 pt-4 md:flex md:flex-col md:px-5 md:pb-5 md:pt-6">
-        <h2 className="text-xl font-extrabold tracking-tight text-slate-800 md:text-[30px]">
+      <div className="h-full px-3 pb-3 pt-4">
+        <h2 className="text-xl font-extrabold tracking-tight text-slate-800">
           AI 자유 대화
         </h2>
 
