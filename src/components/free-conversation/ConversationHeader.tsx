@@ -2,14 +2,12 @@
 import BackLinkButton from "../BackLinkButton";
 
 type ConversationHeaderProps = {
-  isMobileConversationListOpen: boolean;
   onToggleConversationList: () => void;
   currentConversationTitle: string;
   onBackToPractice: () => void;
 };
 
 const ConversationHeader = ({
-  isMobileConversationListOpen,
   onToggleConversationList,
   currentConversationTitle,
   onBackToPractice,

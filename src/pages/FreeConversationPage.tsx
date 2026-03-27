@@ -71,7 +71,6 @@ const FreeConversationPage = () => {
 
         <section className="relative flex min-h-0 flex-1 flex-col overflow-hidden bg-gradient-to-b from-white via-[#f8fbff] to-[#edf5f3]">
           <ConversationHeader
-            isMobileConversationListOpen={isMobileConversationListOpen}
             onToggleConversationList={() =>
               setIsMobileConversationListOpen((prev) => !prev)
             }
