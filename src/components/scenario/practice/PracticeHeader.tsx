@@ -1,4 +1,4 @@
-import { ArrowLeft } from "lucide-react";
+﻿import BackLinkButton from "../../BackLinkButton";
 import type { PracticeStep, StepResult } from "../../../types/scenarioPracticeType";
 
 interface PracticeHeaderProps {
@@ -21,16 +21,9 @@ const PracticeHeader = ({
   onBack,
 }: PracticeHeaderProps) => {
   return (
-    <header className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm md:p-5">
+    <header className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <button
-          type="button"
-          onClick={onBack}
-          className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
-        >
-          <ArrowLeft size={18} />
-          레벨 선택으로
-        </button>
+        <BackLinkButton onClick={onBack} label="레벨 선택으로" />
 
         <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5">
           <p className="text-sm font-extrabold text-emerald-700">
@@ -41,13 +34,6 @@ const PracticeHeader = ({
 
       {!isSummaryMode && (
         <div className="mt-4">
-          <div className="mb-3 flex items-center justify-between text-sm font-semibold text-slate-500">
-            <span>진행 상황</span>
-            <span>
-              Step {currentStepIndex + 1} / {steps.length}
-            </span>
-          </div>
-
           <div className="grid grid-cols-3 gap-2">
             {steps.map((step, index) => {
               const isActive = index === currentStepIndex;

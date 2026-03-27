@@ -22,10 +22,10 @@ const UserProfileSection = ({
   onSaveEdit,
 }: UserProfileSectionProps) => {
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white/90 p-5 backdrop-blur sm:p-6">
+    <section className="rounded-2xl border border-slate-200 bg-white/90 p-5 backdrop-blur">
       <p className="text-sm font-semibold text-slate-500">사용자 정보</p>
 
-      <div className="mt-3 flex flex-col gap-3 sm:mt-4 sm:flex-row sm:items-end sm:justify-between">
+      <div className="mt-3 flex flex-col gap-3">
         <div>
           {isEditingNickname ? (
             <label className="block">
@@ -37,12 +37,12 @@ const UserProfileSection = ({
               />
             </label>
           ) : (
-            <p className="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">
+            <p className="text-2xl font-black tracking-tight text-slate-900">
               {nickname}
             </p>
           )}
 
-          <p className="mt-2 text-sm text-slate-500 sm:text-base">{email}</p>
+          <p className="mt-2 text-sm text-slate-500">{email}</p>
         </div>
 
         <div className="flex gap-2">

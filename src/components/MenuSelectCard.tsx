@@ -12,24 +12,22 @@ const MenuSelectCard = ({ item }: MenuSelectCardProps) => {
     <Link
       to={to}
       className="
-        group rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm
+        group rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm
         transition-all duration-200
         hover:-translate-y-1 hover:border-slate-300 hover:shadow-md
         focus:outline-none focus:ring-2 focus:ring-slate-200
-        sm:p-8
       "
     >
-      <div
-        className={`mb-5 flex h-14 w-14 items-center justify-center rounded-2xl ${iconClassName}`}
-      >
-        <Icon size={28} strokeWidth={2.2} />
+      <div className="mb-4 flex items-center gap-3">
+        <div className={`flex h-14 w-14 items-center justify-center rounded-2xl ${iconClassName}`}>
+          <Icon size={28} strokeWidth={2.2} />
+        </div>
+        <h2 className="text-xl font-extrabold tracking-tight text-slate-900">
+          {title}
+        </h2>
       </div>
 
-      <h2 className="text-2xl font-extrabold tracking-tight text-slate-900">
-        {title}
-      </h2>
-
-      <p className="mt-3 text-sm leading-6 text-slate-500 sm:text-[15px]">
+      <p className="mt-3 text-sm leading-6 text-slate-500">
         {description}
       </p>
     </Link>

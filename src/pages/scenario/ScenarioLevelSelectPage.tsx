@@ -1,4 +1,5 @@
 ﻿import { useNavigate, useOutlet, useOutletContext, useParams } from "react-router-dom";
+import BackLinkButton from "../../components/BackLinkButton";
 import ScenarioLevelCard from "../../components/scenario/ScenarioLevelCard";
 import ScenarioSwitchSection from "../../components/scenario/ScenarioSwitchSection";
 import { RECOMMENDED_SCENARIOS } from "../../constants/scenario";
@@ -32,14 +33,18 @@ const ScenarioLevelSelectPage = () => {
   };
 
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 md:gap-7">
-      <button
-        type="button"
-        onClick={() => navigate("/ai-practice/scenario")}
-        className="self-start rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
-      >
-        시나리오 목록
-      </button>
+    <div className="mx-auto flex w-full max-w-md flex-col gap-5">
+      <section>
+        <div className="flex flex-wrap items-center gap-2">
+          <BackLinkButton to="/ai-practice/scenario" label="시나리오 목록으로" />
+          <h1 className="text-[24px] font-extrabold leading-tight tracking-tight text-slate-900 min-[380px]:text-[28px]">
+            {scenarioName} 레벨 선택
+          </h1>
+        </div>
+        <p className="mt-2 text-sm leading-6 text-slate-500">
+          원하는 난이도를 선택해 대화 연습을 시작하세요.
+        </p>
+      </section>
 
       <section className="space-y-4">
         <ScenarioSwitchSection
@@ -55,15 +60,6 @@ const ScenarioLevelSelectPage = () => {
           currentScenarioId={normalizedScenarioId}
           onSelect={moveToScenario}
         />
-      </section>
-
-      <section>
-        <h1 className="text-[28px] font-extrabold tracking-tight text-slate-900 sm:text-[32px]">
-          {scenarioName} 레벨 선택
-        </h1>
-        <p className="mt-2 text-sm leading-6 text-slate-500 sm:text-base">
-          원하는 난이도를 선택해 대화 연습을 시작하세요.
-        </p>
       </section>
 
       <section className="space-y-3">

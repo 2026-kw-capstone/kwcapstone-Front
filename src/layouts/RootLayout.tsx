@@ -4,15 +4,17 @@ import Sidebar from "../components/sidebar/Sidebar";
 
 const RootLayout = () => {
   return (
-    <div className="h-screen overflow-hidden bg-[#F8FAFB] text-slate-900">
-      <Header />
-      <Sidebar />
+    <div className="min-h-screen min-h-[100dvh] bg-[#E9EBEF]">
+      <div className="relative mx-auto h-screen h-[100dvh] w-full max-w-[430px] overflow-hidden bg-[#F8FAFB] text-slate-900">
+        <Header />
+        <Sidebar />
 
-      <main className="mt-20 h-[calc(100vh-80px-76px)] overflow-y-auto md:ml-[260px] md:h-[calc(100vh-80px)]">
-        <div className="min-h-full px-4 py-4 pb-24 sm:px-6 sm:py-6 md:p-8 md:pb-8">
-          <Outlet />
-        </div>
-      </main>
+        <main className="mt-16 h-[calc(100vh-64px-72px)] h-[calc(100dvh-64px-72px)] overflow-y-auto">
+          <div className="min-h-full px-4 py-4 pb-6">
+            <Outlet />
+          </div>
+        </main>
+      </div>
     </div>
   );
 };

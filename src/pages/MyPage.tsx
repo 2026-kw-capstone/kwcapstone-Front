@@ -87,20 +87,20 @@ const MyPage = () => {
   const isWithdrawFormInvalid = withdrawConfirmText !== "탈퇴";
 
   return (
-    <div className="mx-auto w-full max-w-5xl pb-6">
+    <div className="mx-auto w-full max-w-md pb-6">
       <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-        <header className="flex items-center justify-between border-b border-slate-200 px-5 py-4 sm:px-7 sm:py-5">
+        <header className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
           <div className="flex items-center gap-2.5">
             <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
               <UserRound size={18} />
             </div>
-            <h1 className="text-xl font-extrabold tracking-tight text-slate-900 sm:text-2xl">
+            <h1 className="text-xl font-extrabold tracking-tight text-slate-900">
               마이페이지
             </h1>
           </div>
         </header>
 
-        <div className="relative bg-gradient-to-br from-white via-slate-50 to-sky-50/70 px-5 py-6 sm:px-7 sm:py-8">
+        <div className="relative bg-gradient-to-br from-white via-slate-50 to-sky-50/70 px-5 py-6">
           <UserProfileSection
             nickname={nickname}
             email={email}

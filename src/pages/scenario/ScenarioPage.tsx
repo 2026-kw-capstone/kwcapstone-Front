@@ -1,6 +1,7 @@
 ﻿import { useState, type FormEvent } from "react";
 import { Plus, Sparkles, UserRoundPlus } from "lucide-react";
 import { useNavigate, useOutlet } from "react-router-dom";
+import BackLinkButton from "../../components/BackLinkButton";
 import {
   createScenarioRequest,
   deleteMyScenarioRequest,
@@ -14,7 +15,6 @@ import type { ScenarioItem, ScenarioOutletContext } from "../../types/scenarioTy
 const ScenarioPage = () => {
   const navigate = useNavigate();
 
-  // TODO: 추후 React Query + 실제 API(DB) 조회/변경으로 교체 예정
   const [myScenarios, setMyScenarios] = useState<ScenarioItem[]>(
     getMyScenariosSnapshot()
   );
@@ -69,13 +69,16 @@ const ScenarioPage = () => {
 
   return (
     <>
-      <div className="mx-auto flex w-full max-w-5xl flex-col gap-7 pb-1 md:gap-8">
-        <section className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+      <div className="mx-auto flex w-full max-w-md flex-col gap-6 pb-1">
+        <section className="flex flex-col gap-4">
           <div>
-            <h1 className="text-[28px] font-extrabold tracking-tight text-slate-900 sm:text-[32px]">
-              시나리오 대화 연습
-            </h1>
-            <p className="mt-2 text-sm leading-6 text-slate-500 sm:text-base">
+            <div className="flex flex-wrap items-center gap-2">
+              <BackLinkButton to="/ai-practice" label="실전대화연습으로" />
+              <h1 className="text-[24px] font-extrabold leading-tight tracking-tight text-slate-900 min-[380px]:text-[28px]">
+                시나리오 대화 연습
+              </h1>
+            </div>
+            <p className="mt-2 text-sm leading-6 text-slate-500">
               연습하고 싶은 시나리오를 선택하세요.
             </p>
           </div>
@@ -83,7 +86,7 @@ const ScenarioPage = () => {
           <button
             type="button"
             onClick={() => setIsModalOpen(true)}
-            className="inline-flex items-center justify-center gap-2 self-start rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 px-5 py-3 text-sm font-bold text-white shadow-md shadow-emerald-100 transition hover:brightness-105 md:min-w-[162px]"
+            className="inline-flex items-center justify-center gap-2 self-start rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 px-5 py-3 text-sm font-bold text-white shadow-md shadow-emerald-100 transition hover:brightness-105"
           >
             <Plus size={18} />
             시나리오 추가
@@ -93,7 +96,7 @@ const ScenarioPage = () => {
         <section>
           <div className="mb-3 flex items-center gap-2">
             <UserRoundPlus size={18} className="text-emerald-500" />
-            <h2 className="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-[26px]">
+            <h2 className="text-2xl font-extrabold tracking-tight text-slate-900">
               나만의 시나리오
             </h2>
             <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-emerald-100 px-2 text-xs font-bold text-emerald-700">
@@ -106,12 +109,7 @@ const ScenarioPage = () => {
               <div className="mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-400">
                 <Plus size={24} />
               </div>
-              <p className="text-sm font-medium text-slate-500 sm:text-base">
-                아직 추가된 시나리오가 없습니다.
-              </p>
-              <p className="mt-1 text-sm text-slate-400">
-                우측 상단 버튼을 눌러 나만의 상황을 만들어보세요.
-              </p>
+              <p className="mt-1 text-sm text-slate-400">상단의 시나리오 추가 버튼을 눌러<br/>나만의 상황을 만들어보세요.</p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -132,9 +130,7 @@ const ScenarioPage = () => {
         <section>
           <div className="mb-3 flex items-center gap-2">
             <Sparkles size={18} className="text-blue-500" />
-            <h2 className="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-[26px]">
-              추천 시나리오
-            </h2>
+            <h2 className="text-2xl font-extrabold tracking-tight text-slate-900">추천 시나리오</h2>
           </div>
 
           <div className="space-y-3">

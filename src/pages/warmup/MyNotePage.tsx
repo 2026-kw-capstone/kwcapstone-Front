@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+﻿import { useMemo, useState } from "react";
+import BackLinkButton from "../../components/BackLinkButton";
 import MyNoteStudyCard from "../../components/warmup/my-note/MyNoteStudyCard";
 import MyNoteResultCard from "../../components/warmup/my-note/MyNoteResultCard";
 import MyNoteSentenceList from "../../components/warmup/my-note/MyNoteSentenceList";
@@ -7,25 +8,23 @@ import type {
   MyNoteSentenceItem,
 } from "../../types/myNoteType";
 
-// 기능이 잘 작동하는지 확인하기 위한 테스트
-// 실제 api 적용하면 사라질 코드
 const INITIAL_SENTENCES: MyNoteSentenceItem[] = [
   {
     id: 1,
-    text: "아이스 아메리카노 한 잔 주세요.",
+    text: "아이스 아메리카노 한 잔 주세요",
     createdAt: new Date().toISOString(),
   },
   {
     id: 2,
-    text: "병원 예약을 다음 주 월요일로 변경하고 싶어요.",
+    text: "병원 예약을 다음 주 월요일로 변경하고 싶어요",
     createdAt: new Date(Date.now() - 1000 * 60).toISOString(),
   },
 ];
 
 const MyNotePage = () => {
-  const [sentences, setSentences] = useState<MyNoteSentenceItem[]>([
-    ...INITIAL_SENTENCES,
-  ].sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt)));
+  const [sentences, setSentences] = useState<MyNoteSentenceItem[]>(
+    [...INITIAL_SENTENCES].sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt))
+  );
 
   const [selectedSentenceId, setSelectedSentenceId] = useState<number | null>(null);
 
@@ -59,8 +58,6 @@ const MyNotePage = () => {
     if (!selectedSentence) return;
 
     setIsPlayingTts(true);
-
-    // 추후 TTS API 연동
     window.setTimeout(() => {
       setIsPlayingTts(false);
     }, 900);
@@ -70,8 +67,6 @@ const MyNotePage = () => {
     if (!selectedSentence) return;
 
     setIsRecording(true);
-
-    // 추후 녹음 + 분석 API 연동
     window.setTimeout(() => {
       setIsRecording(false);
       setHasRecording(true);
@@ -81,7 +76,7 @@ const MyNotePage = () => {
         stabilityScore: 82,
         deliveryScore: 85,
         feedback:
-          "문장 끝맺음이 비교적 안정적입니다. 첫 음절을 조금 더 분명하게 시작하면 전달력이 더 좋아질 수 있어요.",
+          "문장 시작은 안정적입니다. 첫 음절을 조금 더 분명하게 시작하면 전달력이 더 좋아질 수 있어요.",
       });
     }, 1200);
   };
@@ -90,8 +85,6 @@ const MyNotePage = () => {
     if (!hasRecording) return;
 
     setIsPlayingUserAudio(true);
-
-    // 추후 녹음 파일 재생 로직 연동
     window.setTimeout(() => {
       setIsPlayingUserAudio(false);
     }, 900);
@@ -101,8 +94,6 @@ const MyNotePage = () => {
     if (!result || !selectedSentence) return;
 
     setIsSavingReport(true);
-
-    // 추후 레포트 저장 API 연동
     window.setTimeout(() => {
       setIsSavingReport(false);
       alert("레포트에 저장되었습니다.");
@@ -112,7 +103,6 @@ const MyNotePage = () => {
   const handleAddSentence = async (text: string) => {
     setIsAddingSentence(true);
 
-    // 추후 문장 추가 API 연동
     window.setTimeout(() => {
       const newSentence: MyNoteSentenceItem = {
         id: Date.now(),
@@ -121,9 +111,7 @@ const MyNotePage = () => {
       };
 
       setSentences((prev) =>
-        [newSentence, ...prev].sort(
-          (a, b) => +new Date(b.createdAt) - +new Date(a.createdAt)
-        )
+        [newSentence, ...prev].sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt))
       );
 
       setIsAddingSentence(false);
@@ -144,17 +132,20 @@ const MyNotePage = () => {
   };
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-5 md:gap-6">
+    <div className="mx-auto flex w-full max-w-md flex-col gap-5">
       <section className="flex flex-col gap-1">
-        <h1 className="text-[28px] font-extrabold tracking-tight text-slate-900 sm:text-[32px]">
-          나만의 문장 노트
-        </h1>
-        <p className="text-sm leading-6 text-slate-500 sm:text-base">
-          자주 쓰는 문장을 저장하고, 듣고, 말하고, 결과까지 확인해보세요.
+        <div className="flex flex-wrap items-center gap-2">
+          <BackLinkButton to="/warmup" label="워밍업으로" />
+          <h1 className="text-[24px] font-extrabold leading-tight tracking-tight text-slate-900 min-[380px]:text-[28px]">
+            나만의 문장 노트
+          </h1>
+        </div>
+        <p className="text-sm leading-6 text-slate-500">
+          자주 쓰는 문장을 저장하고 듣고 말하고 결과까지 확인해보세요.
         </p>
       </section>
 
-      <section className="grid grid-cols-1 gap-5 xl:grid-cols-[1.2fr_0.8fr]">
+      <section className="grid grid-cols-1 gap-4">
         <MyNoteStudyCard
           selectedSentence={selectedSentence?.text ?? null}
           hasRecording={hasRecording}

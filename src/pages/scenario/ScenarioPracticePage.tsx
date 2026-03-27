@@ -168,7 +168,7 @@ const ScenarioPracticePage = () => {
   };
 
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col gap-5 pb-2 md:gap-6">
+    <div className="mx-auto flex w-full max-w-md flex-col gap-4 pb-2">
       <PracticeHeader
         scenarioName={scenarioName}
         levelLabel={levelLabel}

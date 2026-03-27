@@ -1,11 +1,5 @@
-import React from 'react'
+﻿const MissionPage = () => {
+  return <div />;
+};
 
-const MissionPage = () => {
-  return (
-    <div>
-      
-    </div>
-  )
-}
-
-export default MissionPage
+export default MissionPage;

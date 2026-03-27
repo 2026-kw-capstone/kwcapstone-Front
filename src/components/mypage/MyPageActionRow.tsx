@@ -20,7 +20,7 @@ const MyPageActionRow = ({
     <button
       type="button"
       onClick={onClick}
-      className="flex w-full items-center justify-between gap-3 border-b border-slate-200 px-4 py-4 text-left transition hover:bg-slate-50 last:border-b-0 sm:px-5"
+      className="flex w-full items-center justify-between gap-3 border-b border-slate-200 px-4 py-4 text-left transition hover:bg-slate-50 last:border-b-0"
     >
       <div className="flex items-center gap-3">
         <span

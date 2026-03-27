@@ -8,13 +8,12 @@ const Sidebar = () => {
   return (
     <aside
       className="
-        fixed z-40 bg-white/95 backdrop-blur-sm
-        left-0 right-0 bottom-0 h-[76px] border-t border-slate-200
-        md:left-0 md:right-auto md:top-20 md:h-[calc(100vh-80px)] md:w-[260px] md:border-r md:border-t-0
+        fixed bottom-0 left-1/2 z-40 h-[72px] w-full max-w-[430px] -translate-x-1/2
+        border-t border-slate-200 bg-white/95 backdrop-blur-sm
       "
     >
-      <div className="h-full px-2 py-2 md:px-4 md:py-6">
-        <nav className="flex h-full items-center justify-around md:flex-col md:items-stretch md:justify-start md:gap-2">
+      <div className="h-full px-2 py-2">
+        <nav className="flex h-full items-center justify-around">
           {sidebarMenuItems.map((item) => (
             <SidebarMenuItem
               key={item.path}

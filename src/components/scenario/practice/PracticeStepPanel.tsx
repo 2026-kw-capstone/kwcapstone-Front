@@ -1,4 +1,4 @@
-import {
+﻿import {
   Coffee,
   Mic,
   MicOff,
@@ -40,16 +40,14 @@ const PracticeStepPanel = ({
 }: PracticeStepPanelProps) => {
   return (
     <>
-      <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm md:p-6">
+      <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
         <div className="flex items-start gap-4">
           <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-600">
             <Coffee size={22} />
           </div>
 
           <div>
-            <p className="text-xs font-bold text-emerald-600">
-              {currentStep.title} 연습 중
-            </p>
+            <p className="text-xs font-bold text-emerald-600">{currentStep.title} 연습 중</p>
             <h2 className="mt-1 text-2xl font-extrabold leading-tight text-slate-900">
               "{currentStep.prompt}"
             </h2>
@@ -58,15 +56,13 @@ const PracticeStepPanel = ({
         </div>
       </section>
 
-      <section className="rounded-3xl border border-slate-200 bg-white px-4 py-8 text-center shadow-sm md:px-6 md:py-10">
+      <section className="rounded-3xl border border-slate-200 bg-white px-4 py-8 text-center shadow-sm">
         <button
           type="button"
           onClick={onRecord}
           disabled={isRecording || isAnalyzing}
-          className={`mx-auto inline-flex h-24 w-24 items-center justify-center rounded-full text-white transition md:h-28 md:w-28 ${
-            isRecording
-              ? "bg-rose-500"
-              : "bg-emerald-500 hover:brightness-105"
+          className={`mx-auto inline-flex h-24 w-24 items-center justify-center rounded-full text-white transition ${
+            isRecording ? "bg-rose-500" : "bg-emerald-500 hover:brightness-105"
           }`}
         >
           {isRecording ? <MicOff size={40} /> : <Mic size={40} />}
@@ -77,7 +73,7 @@ const PracticeStepPanel = ({
             ? "녹음 중입니다..."
             : isAnalyzing
               ? "분석 중입니다..."
-              : "마이크를 눌러 대답하세요"}
+              : "마이크 버튼을 눌러 녹음하세요"}
         </p>
 
         {currentResult && !isRecording && !isAnalyzing && (
@@ -93,7 +89,7 @@ const PracticeStepPanel = ({
       </section>
 
       {currentResult && (
-        <section className="rounded-3xl border border-emerald-200 bg-white p-5 shadow-sm md:p-6">
+        <section className="rounded-3xl border border-emerald-200 bg-white p-5 shadow-sm">
           <div className="flex items-center gap-2">
             <Signal className="text-emerald-500" size={20} />
             <h3 className="text-2xl font-extrabold text-slate-900">발음 분석 결과</h3>
@@ -110,24 +106,18 @@ const PracticeStepPanel = ({
             ))}
           </div>
 
-          <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div className="mt-5 grid grid-cols-1 gap-3">
             <div className="rounded-2xl bg-slate-50 p-4">
               <p className="text-sm font-semibold text-slate-500">정확도</p>
-              <p className="mt-1 text-5xl font-extrabold text-blue-500">
-                {currentResult.accuracy}%
-              </p>
+              <p className="mt-1 text-5xl font-extrabold text-blue-500">{currentResult.accuracy}%</p>
             </div>
             <div className="rounded-2xl bg-slate-50 p-4">
               <p className="text-sm font-semibold text-slate-500">유창성</p>
-              <p className="mt-1 text-5xl font-extrabold text-amber-500">
-                {currentResult.fluency}%
-              </p>
+              <p className="mt-1 text-5xl font-extrabold text-amber-500">{currentResult.fluency}%</p>
             </div>
           </div>
 
-          <p className="mt-4 text-sm font-medium text-slate-600">
-            피드백: {currentResult.feedback}
-          </p>
+          <p className="mt-4 text-sm font-medium text-slate-600">피드백: {currentResult.feedback}</p>
         </section>
       )}
 
