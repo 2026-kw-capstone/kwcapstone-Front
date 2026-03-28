@@ -2,6 +2,7 @@
   Coffee,
   Mic,
   MicOff,
+  Play,
   RotateCcw,
   Signal,
   StepBack,
@@ -18,8 +19,11 @@ interface PracticeStepPanelProps {
   isAnalyzing: boolean;
   canGoPrev: boolean;
   canGoNext: boolean;
+  hasRecordedAudio: boolean;
+  isPlayingUserAudio: boolean;
   onRecord: () => void;
   onReRecord: () => void;
+  onPlayRecordedAudio: () => void;
   onPrev: () => void;
   onNext: () => void;
 }
@@ -33,11 +37,15 @@ const PracticeStepPanel = ({
   isAnalyzing,
   canGoPrev,
   canGoNext,
+  hasRecordedAudio,
+  isPlayingUserAudio,
   onRecord,
   onReRecord,
+  onPlayRecordedAudio,
   onPrev,
   onNext,
 }: PracticeStepPanelProps) => {
+  // UI 전용 컴포넌트입니다. 녹음/재생 처리기는 부모 페이지에서 주입합니다.
   return (
     <>
       <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -60,31 +68,45 @@ const PracticeStepPanel = ({
         <button
           type="button"
           onClick={onRecord}
-          disabled={isRecording || isAnalyzing}
+          disabled={isAnalyzing}
           className={`mx-auto inline-flex h-24 w-24 items-center justify-center rounded-full text-white transition ${
             isRecording ? "bg-rose-500" : "bg-emerald-500 hover:brightness-105"
           }`}
         >
+          {/* 페이지에서 주입한 녹음 토글 함수(시작/종료+업로드)를 호출 */}
           {isRecording ? <MicOff size={40} /> : <Mic size={40} />}
         </button>
 
         <p className="mt-5 text-base font-semibold text-slate-500">
           {isRecording
-            ? "녹음 중입니다..."
+            ? "녹음 중입니다... 버튼을 다시 누르면 종료됩니다."
             : isAnalyzing
               ? "분석 중입니다..."
               : "마이크 버튼을 눌러 녹음하세요"}
         </p>
 
         {currentResult && !isRecording && !isAnalyzing && (
-          <button
-            type="button"
-            onClick={onReRecord}
-            className="mt-4 inline-flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
-          >
-            <RotateCcw size={16} />
-            재녹음
-          </button>
+          <div className="mt-4 flex items-center justify-center gap-2">
+            <button
+              type="button"
+              onClick={onReRecord}
+              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
+            >
+              <RotateCcw size={16} />
+              재녹음
+            </button>
+
+            <button
+              type="button"
+              onClick={onPlayRecordedAudio}
+              disabled={!hasRecordedAudio}
+              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-300"
+            >
+              {/* 현재 단계에 저장된 음성 URL 재생 요청 */}
+              <Play size={16} />
+              {isPlayingUserAudio ? "재생 중..." : "내 음성 듣기"}
+            </button>
+          </div>
         )}
       </section>
 

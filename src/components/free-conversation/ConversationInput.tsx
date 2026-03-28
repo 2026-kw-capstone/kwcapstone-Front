@@ -1,15 +1,33 @@
-﻿import { Mic, Send } from "lucide-react";
+﻿import { Mic, MicOff, Send } from "lucide-react";
 
-const ConversationInput = () => {
+interface ConversationInputProps {
+  isRecording: boolean;
+  isVoiceBusy: boolean;
+  onToggleVoiceRecord: () => void;
+}
+
+const ConversationInput = ({
+  isRecording,
+  isVoiceBusy,
+  onToggleVoiceRecord,
+}: ConversationInputProps) => {
+  // UI 전용 컴포넌트입니다. 녹음 시작/종료 요청만 페이지로 전달합니다.
   return (
     <form className="relative z-10 mt-3">
       <div className="mx-auto flex w-full items-center gap-1.5 rounded-xl border border-slate-200 bg-white/95 px-1.5 py-1.5 shadow-[0_8px_25px_rgba(15,23,42,0.08)] backdrop-blur-sm">
         <button
           type="button"
-          className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 transition hover:bg-emerald-200"
+          className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition ${
+            isRecording
+              ? "bg-rose-100 text-rose-600 hover:bg-rose-200"
+              : "bg-emerald-100 text-emerald-600 hover:bg-emerald-200"
+          }`}
           aria-label="음성 입력"
+          onClick={onToggleVoiceRecord}
+          disabled={isVoiceBusy}
         >
-          <Mic size={17} />
+          {/* 페이지에서 주입한 녹음 토글 함수(시작/종료+업로드)를 호출 */}
+          {isRecording ? <MicOff size={17} /> : <Mic size={17} />}
         </button>
 
         <input

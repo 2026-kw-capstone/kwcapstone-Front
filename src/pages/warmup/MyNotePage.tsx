@@ -1,8 +1,13 @@
-﻿import { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
+import { uploadMyNoteVoice } from "../../apis/voicePlaceholder";
+import { getRecordErrorMessage } from "../../constants/recordingMessage";
 import BackLinkButton from "../../components/BackLinkButton";
-import MyNoteStudyCard from "../../components/warmup/my-note/MyNoteStudyCard";
 import MyNoteResultCard from "../../components/warmup/my-note/MyNoteResultCard";
 import MyNoteSentenceList from "../../components/warmup/my-note/MyNoteSentenceList";
+import MyNoteStudyCard from "../../components/warmup/my-note/MyNoteStudyCard";
+import { useRecord } from "../../contexts/RecordContext";
+import { useAudioPlayer } from "../../hooks/audio/useAudioPlayer";
+import { useRecordUploadFlow } from "../../hooks/audio/useRecordUploadFlow";
 import type {
   MyNoteAnalysisResult,
   MyNoteSentenceItem,
@@ -22,18 +27,24 @@ const INITIAL_SENTENCES: MyNoteSentenceItem[] = [
 ];
 
 const MyNotePage = () => {
+  // 전역 녹음 컨텍스트: 시작/종료와 상태만 담당
+  const { isRecording, status, lastError, startRecording, stopRecording } =
+    useRecord();
+  // 페이지 재생 상태: 업로드 응답 mp3Url(또는 로컬 blob URL) 재생 담당
+  const { audioUrl, isPlaying, setAudioUrl, clearAudioUrl, playAudio } =
+    useAudioPlayer();
+
   const [sentences, setSentences] = useState<MyNoteSentenceItem[]>(
-    [...INITIAL_SENTENCES].sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt))
+    [...INITIAL_SENTENCES].sort(
+      (a, b) => +new Date(b.createdAt) - +new Date(a.createdAt)
+    )
   );
-
-  const [selectedSentenceId, setSelectedSentenceId] = useState<number | null>(null);
-
-  const [hasRecording, setHasRecording] = useState(false);
+  const [selectedSentenceId, setSelectedSentenceId] = useState<number | null>(
+    null
+  );
+  const [hasRecordedAudio, setHasRecordedAudio] = useState(false);
   const [result, setResult] = useState<MyNoteAnalysisResult | null>(null);
-
-  const [isRecording, setIsRecording] = useState(false);
   const [isPlayingTts, setIsPlayingTts] = useState(false);
-  const [isPlayingUserAudio, setIsPlayingUserAudio] = useState(false);
   const [isAddingSentence, setIsAddingSentence] = useState(false);
   const [isSavingReport, setIsSavingReport] = useState(false);
 
@@ -42,12 +53,36 @@ const MyNotePage = () => {
   }, [sentences, selectedSentenceId]);
 
   const resetStudyState = () => {
-    setHasRecording(false);
-    setIsRecording(false);
+    setHasRecordedAudio(false);
     setIsPlayingTts(false);
-    setIsPlayingUserAudio(false);
+    clearAudioUrl();
     setResult(null);
   };
+
+  // 녹음 버튼 1회 클릭: 녹음 시작
+  // 녹음 버튼 2회 클릭: 녹음 종료 -> 업로드 -> 응답(mp3Url/분석 결과) 저장
+  const { isUploading, toggleRecordAndUpload } = useRecordUploadFlow({
+    isRecording,
+    status,
+    startRecording,
+    stopRecording,
+    uploadFn: uploadMyNoteVoice,
+    onBeforeStart: () => {
+      setResult(null);
+      setHasRecordedAudio(false);
+      clearAudioUrl();
+    },
+    onUploadSuccess: ({ analysis, mp3Url }, blob) => {
+      setAudioUrl(mp3Url || URL.createObjectURL(blob));
+      setHasRecordedAudio(true);
+      setResult({
+        pronunciationScore: analysis.pronunciationScore,
+        stabilityScore: analysis.stabilityScore,
+        deliveryScore: analysis.deliveryScore,
+        feedback: analysis.feedback ?? "",
+      });
+    },
+  });
 
   const handleSelectSentence = (sentence: MyNoteSentenceItem) => {
     setSelectedSentenceId(sentence.id);
@@ -65,29 +100,14 @@ const MyNotePage = () => {
 
   const handleRecord = async () => {
     if (!selectedSentence) return;
-
-    setIsRecording(true);
-    window.setTimeout(() => {
-      setIsRecording(false);
-      setHasRecording(true);
-
-      setResult({
-        pronunciationScore: 87,
-        stabilityScore: 82,
-        deliveryScore: 85,
-        feedback:
-          "문장 시작은 안정적입니다. 첫 음절을 조금 더 분명하게 시작하면 전달력이 더 좋아질 수 있어요.",
-      });
-    }, 1200);
+    // 녹음 토글 + 업로드까지 한 번에 실행
+    await toggleRecordAndUpload();
   };
 
   const handlePlayRecordedAudio = async () => {
-    if (!hasRecording) return;
-
-    setIsPlayingUserAudio(true);
-    window.setTimeout(() => {
-      setIsPlayingUserAudio(false);
-    }, 900);
+    if (!hasRecordedAudio || !audioUrl) return;
+    // 현재 저장된 음성 URL을 재생
+    await playAudio();
   };
 
   const handleSaveReport = async () => {
@@ -111,9 +131,10 @@ const MyNotePage = () => {
       };
 
       setSentences((prev) =>
-        [newSentence, ...prev].sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt))
+        [newSentence, ...prev].sort(
+          (a, b) => +new Date(b.createdAt) - +new Date(a.createdAt)
+        )
       );
-
       setIsAddingSentence(false);
     }, 500);
   };
@@ -131,6 +152,8 @@ const MyNotePage = () => {
     }
   };
 
+  const recordErrorMessage = getRecordErrorMessage(lastError);
+
   return (
     <div className="mx-auto flex w-full max-w-md flex-col gap-5">
       <section className="flex flex-col gap-1">
@@ -143,15 +166,19 @@ const MyNotePage = () => {
         <p className="text-sm leading-6 text-slate-500">
           자주 쓰는 문장을 저장하고 듣고 말하고 결과까지 확인해보세요.
         </p>
+        {recordErrorMessage ? (
+          <p className="text-xs font-semibold text-rose-500">{recordErrorMessage}</p>
+        ) : null}
       </section>
 
       <section className="grid grid-cols-1 gap-4">
         <MyNoteStudyCard
           selectedSentence={selectedSentence?.text ?? null}
-          hasRecording={hasRecording}
+          hasRecordedAudio={hasRecordedAudio}
           isRecording={isRecording}
           isPlayingTts={isPlayingTts}
-          isPlayingUserAudio={isPlayingUserAudio}
+          isPlayingUserAudio={isPlaying}
+          isInteractionLocked={isUploading}
           onPlayTts={handlePlayTts}
           onRecord={handleRecord}
           onPlayRecordedAudio={handlePlayRecordedAudio}
@@ -159,7 +186,7 @@ const MyNotePage = () => {
 
         <MyNoteResultCard
           result={result}
-          isSavingReport={isSavingReport}
+          isSavingReport={isSavingReport || isUploading}
           onSaveReport={handleSaveReport}
         />
       </section>

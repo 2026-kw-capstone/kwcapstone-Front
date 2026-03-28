@@ -19,6 +19,7 @@ import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import PracticeSelectPage from './pages/PracticeSelectPage';
 import { AuthProvider } from './contexts/AuthContext';
+import { RecordProvider } from './contexts/RecordContext';
 import NotFound from './pages/NotFound';
 
 const routes: RouteObject[] = [
@@ -108,7 +109,9 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <RouterProvider router={router} />
+        <RecordProvider>
+          <RouterProvider router={router} />
+        </RecordProvider>
       </AuthProvider>
       {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
     </QueryClientProvider>

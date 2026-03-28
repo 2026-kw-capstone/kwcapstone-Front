@@ -3,10 +3,11 @@ import type { BasicSpeakCardItem } from "../../../types/basicSpeakType";
 
 interface BasicSpeakStudyCardProps {
   card: BasicSpeakCardItem;
-  hasRecording: boolean;
+  hasRecordedAudio: boolean;
   isRecording?: boolean;
   isPlayingGuideAudio?: boolean;
   isPlayingUserAudio?: boolean;
+  isInteractionLocked?: boolean;
   onPlayGuideAudio: () => void;
   onRecord: () => void;
   onPlayRecordedAudio: () => void;
@@ -14,14 +15,16 @@ interface BasicSpeakStudyCardProps {
 
 const BasicSpeakStudyCard = ({
   card,
-  hasRecording,
+  hasRecordedAudio,
   isRecording = false,
   isPlayingGuideAudio = false,
   isPlayingUserAudio = false,
+  isInteractionLocked = false,
   onPlayGuideAudio,
   onRecord,
   onPlayRecordedAudio,
 }: BasicSpeakStudyCardProps) => {
+  // 이 컴포넌트는 UI 버튼만 담당하고 실제 녹음/업로드 로직은 페이지 훅에서 처리합니다.
   return (
     <section className="rounded-[24px] border border-slate-200 bg-white p-4 shadow-sm">
       <div className="mb-4 flex items-center gap-2">
@@ -49,7 +52,8 @@ const BasicSpeakStudyCard = ({
             <button
               type="button"
               onClick={onPlayGuideAudio}
-              className="inline-flex min-h-12 flex-1 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-emerald-300 hover:bg-emerald-50"
+              disabled={isInteractionLocked}
+              className="inline-flex min-h-12 flex-1 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-emerald-300 hover:bg-emerald-50 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-400"
             >
               <Volume2 size={18} />
               {isPlayingGuideAudio ? "재생 중..." : "가이드 듣기"}
@@ -58,18 +62,21 @@ const BasicSpeakStudyCard = ({
             <button
               type="button"
               onClick={onRecord}
-              className="inline-flex min-h-12 flex-1 cursor-pointer items-center justify-center gap-2 rounded-2xl bg-emerald-500 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-600"
+              disabled={isInteractionLocked}
+              className="inline-flex min-h-12 flex-1 cursor-pointer items-center justify-center gap-2 rounded-2xl bg-emerald-500 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:bg-slate-300"
             >
+              {/* 페이지에서 주입한 녹음 토글 함수(시작/종료+업로드)를 호출 */}
               <Mic size={18} />
-              {isRecording ? "녹음 중..." : hasRecording ? "다시 녹음" : "녹음"}
+              {isRecording ? "녹음 중..." : hasRecordedAudio ? "다시 녹음" : "녹음"}
             </button>
 
             <button
               type="button"
               onClick={onPlayRecordedAudio}
-              disabled={!hasRecording}
+              disabled={!hasRecordedAudio || isInteractionLocked}
               className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-emerald-300 hover:bg-emerald-50 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-400"
             >
+              {/* 페이지에 저장된 음성 URL 재생 요청 */}
               <Play size={18} />
               {isPlayingUserAudio ? "재생 중..." : "재생하기"}
             </button>

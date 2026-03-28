@@ -21,9 +21,7 @@ const HomePage = () => {
             오늘도 함께 성장해요!
           </h2>
 
-          <p className="mt-3 text-sm text-emerald-50/95">
-            당신의 목소리는 매일 더 또렷해지고 있습니다.
-          </p>
+          <p className="mt-3 text-sm text-emerald-50/95">당신의 목소리는 매일 더 또렷해지고 있습니다.</p>
 
           <div className="mt-5">
             <button className="inline-flex items-center gap-1.5 rounded-full bg-white px-5 py-2 text-sm font-semibold text-emerald-600 transition hover:bg-emerald-50">
