@@ -60,6 +60,7 @@ const MyNoteStudyCard = ({
               disabled={!isSentenceSelected || isInteractionLocked}
               className="inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-2xl bg-emerald-500 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:bg-slate-300"
             >
+              {/* 페이지에서 주입한 녹음 토글 함수(시작/종료+업로드)를 호출 */}
               {hasRecordedAudio ? <RotateCcw size={18} /> : <Mic size={18} />}
               {isRecording ? "녹음 중..." : hasRecordedAudio ? "재녹음" : "녹음"}
             </button>
@@ -70,6 +71,7 @@ const MyNoteStudyCard = ({
               disabled={!hasRecordedAudio || isInteractionLocked}
               className="inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-emerald-300 hover:bg-emerald-50 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-400"
             >
+              {/* 페이지에 저장된 음성 URL 재생 요청 */}
               <Play size={18} />
               {isPlayingUserAudio ? "재생 중..." : "내 음성 듣기"}
             </button>

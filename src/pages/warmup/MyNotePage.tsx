@@ -27,8 +27,10 @@ const INITIAL_SENTENCES: MyNoteSentenceItem[] = [
 ];
 
 const MyNotePage = () => {
+  // 전역 녹음 컨텍스트: 시작/종료와 상태만 담당
   const { isRecording, status, lastError, startRecording, stopRecording } =
     useRecord();
+  // 페이지 재생 상태: 업로드 응답 mp3Url(또는 로컬 blob URL) 재생 담당
   const { audioUrl, isPlaying, setAudioUrl, clearAudioUrl, playAudio } =
     useAudioPlayer();
 
@@ -57,9 +59,8 @@ const MyNotePage = () => {
     setResult(null);
   };
 
-  // Record flow contract:
-  // click 1 -> start recording
-  // click 2 -> stop recording -> upload -> store mp3Url/result
+  // 녹음 버튼 1회 클릭: 녹음 시작
+  // 녹음 버튼 2회 클릭: 녹음 종료 -> 업로드 -> 응답(mp3Url/분석 결과) 저장
   const { isUploading, toggleRecordAndUpload } = useRecordUploadFlow({
     isRecording,
     status,
@@ -99,11 +100,13 @@ const MyNotePage = () => {
 
   const handleRecord = async () => {
     if (!selectedSentence) return;
+    // 녹음 토글 + 업로드까지 한 번에 실행
     await toggleRecordAndUpload();
   };
 
   const handlePlayRecordedAudio = async () => {
     if (!hasRecordedAudio || !audioUrl) return;
+    // 현재 저장된 음성 URL을 재생
     await playAudio();
   };
 
@@ -201,4 +204,3 @@ const MyNotePage = () => {
 };
 
 export default MyNotePage;
-

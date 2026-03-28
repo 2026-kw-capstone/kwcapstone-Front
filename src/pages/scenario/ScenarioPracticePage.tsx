@@ -26,8 +26,10 @@ const ScenarioPracticePage = () => {
   const { scenarioId, level } = useParams<{ scenarioId: string; level: string }>();
   const navigate = useNavigate();
   const { myScenarios } = useOutletContext<ScenarioOutletContext>();
+  // 전역 녹음 컨텍스트: 시작/종료와 상태만 담당
   const { isRecording, status, lastError, startRecording, stopRecording } =
     useRecord();
+  // 단계별 저장된 mp3Url 재생 상태를 관리
   const { isPlaying, playAudio } = useAudioPlayer();
 
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
@@ -149,6 +151,7 @@ const ScenarioPracticePage = () => {
   });
 
   const handleRecord = async () => {
+    // 현재 단계의 녹음을 시작/종료하고, 종료 시 업로드를 수행
     await toggleRecordAndUpload();
   };
 
@@ -176,6 +179,7 @@ const ScenarioPracticePage = () => {
 
   const handlePlayRecordedAudio = async () => {
     if (!currentMp3Url) return;
+    // 현재 단계에 저장된 mp3Url을 재생
     await playAudio(currentMp3Url);
   };
 
@@ -256,4 +260,3 @@ const ScenarioPracticePage = () => {
 };
 
 export default ScenarioPracticePage;
-

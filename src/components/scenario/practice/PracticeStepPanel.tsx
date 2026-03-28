@@ -73,6 +73,7 @@ const PracticeStepPanel = ({
             isRecording ? "bg-rose-500" : "bg-emerald-500 hover:brightness-105"
           }`}
         >
+          {/* 페이지에서 주입한 녹음 토글 함수(시작/종료+업로드)를 호출 */}
           {isRecording ? <MicOff size={40} /> : <Mic size={40} />}
         </button>
 
@@ -101,6 +102,7 @@ const PracticeStepPanel = ({
               disabled={!hasRecordedAudio}
               className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-300"
             >
+              {/* 현재 단계에 저장된 음성 URL 재생 요청 */}
               <Play size={16} />
               {isPlayingUserAudio ? "재생 중..." : "내 음성 듣기"}
             </button>

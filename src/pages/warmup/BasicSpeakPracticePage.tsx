@@ -18,8 +18,10 @@ type PracticeResult = {
 
 const BasicSpeakPracticePage = () => {
   const { cardId } = useParams<{ cardId: string }>();
+  // 전역 녹음 컨텍스트: 시작/종료와 상태만 담당
   const { isRecording, status, lastError, startRecording, stopRecording } =
     useRecord();
+  // 페이지 재생 상태: 업로드 응답 mp3Url(또는 로컬 blob URL) 재생 담당
   const { audioUrl, isPlaying, setAudioUrl, clearAudioUrl, playAudio } =
     useAudioPlayer();
   const card = useMemo(() => getBasicSpeakCardById(cardId), [cardId]);
@@ -63,11 +65,13 @@ const BasicSpeakPracticePage = () => {
   };
 
   const handleRecord = async () => {
+    // 녹음 토글 + 업로드까지 한 번에 실행
     await toggleRecordAndUpload();
   };
 
   const handlePlayRecordedAudio = async () => {
     if (!hasRecordedAudio || !audioUrl) return;
+    // 현재 저장된 음성 URL을 재생
     await playAudio();
   };
 
@@ -141,4 +145,3 @@ const BasicSpeakPracticePage = () => {
 };
 
 export default BasicSpeakPracticePage;
-
