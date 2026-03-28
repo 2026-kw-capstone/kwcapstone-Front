@@ -6,6 +6,7 @@ interface MyNoteStudyCardProps {
   isRecording?: boolean;
   isPlayingTts?: boolean;
   isPlayingUserAudio?: boolean;
+  isInteractionLocked?: boolean;
   onPlayTts: () => void;
   onRecord: () => void;
   onPlayRecordedAudio: () => void;
@@ -17,6 +18,7 @@ const MyNoteStudyCard = ({
   isRecording = false,
   isPlayingTts = false,
   isPlayingUserAudio = false,
+  isInteractionLocked = false,
   onPlayTts,
   onRecord,
   onPlayRecordedAudio,
@@ -47,7 +49,7 @@ const MyNoteStudyCard = ({
             <button
               type="button"
               onClick={onPlayTts}
-              disabled={!isSentenceSelected}
+              disabled={!isSentenceSelected || isInteractionLocked}
               className="inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-emerald-300 hover:bg-emerald-50 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-400"
             >
               <Volume2 size={18} />
@@ -57,7 +59,7 @@ const MyNoteStudyCard = ({
             <button
               type="button"
               onClick={onRecord}
-              disabled={!isSentenceSelected}
+              disabled={!isSentenceSelected || isInteractionLocked}
               className="inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-2xl bg-emerald-500 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:bg-slate-300"
             >
               {hasRecording ? <RotateCcw size={18} /> : <Mic size={18} />}
@@ -67,7 +69,7 @@ const MyNoteStudyCard = ({
             <button
               type="button"
               onClick={onPlayRecordedAudio}
-              disabled={!hasRecording}
+              disabled={!hasRecording || isInteractionLocked}
               className="inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-emerald-300 hover:bg-emerald-50 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-400"
             >
               <Play size={18} />

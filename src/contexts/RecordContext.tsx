@@ -12,7 +12,7 @@ import {
 // 녹음 상태 전이 규약:
 // idle -> requesting_permission -> recording -> stopping -> idle
 // 오류 발생 시 언제든 error 상태로 전이될 수 있습니다.
-type RecordStatus =
+export type RecordStatus =
   | 'idle'
   | 'requesting_permission'
   | 'recording'
@@ -87,6 +87,7 @@ export const RecordProvider = ({ children }: PropsWithChildren) => {
   }, []);
 
   const startRecording = useCallback(async () => {
+    // startRecording: 권한 요청 후 MediaRecorder를 시작합니다.
     // 권한 요청 중/종료 처리 중에는 새 녹음을 시작하지 않음
     if (status === 'requesting_permission' || status === 'stopping') {
       setLastError('recording_busy');
@@ -168,6 +169,7 @@ export const RecordProvider = ({ children }: PropsWithChildren) => {
   }, [cleanupResources, status]);
 
   const stopRecording = useCallback(async (): Promise<Blob | null> => {
+    // stopRecording: 녹음을 종료하고 webm Blob을 반환합니다.
     const recorder = mediaRecorderRef.current;
 
     // 녹음 중이 아닐 때 stop 호출 시 null 반환

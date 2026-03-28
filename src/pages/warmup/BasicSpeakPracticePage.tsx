@@ -1,12 +1,13 @@
-﻿import { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
+import { uploadBasicSpeakVoice } from "../../apis/voicePlaceholder";
 import BackLinkButton from "../../components/BackLinkButton";
-import BasicSpeakStudyCard from "../../components/warmup/basic-speak/BasicSpeakStudyCard";
 import BasicSpeakResultCard from "../../components/warmup/basic-speak/BasicSpeakResultCard";
-import {
-  BASIC_SPEAK_CARDS,
-  getBasicSpeakCardById,
-} from "../../constants/basicSpeak";
+import BasicSpeakStudyCard from "../../components/warmup/basic-speak/BasicSpeakStudyCard";
+import { BASIC_SPEAK_CARDS, getBasicSpeakCardById } from "../../constants/basicSpeak";
+import { useRecord } from "../../contexts/RecordContext";
+import { useAudioPlayer } from "../../hooks/audio/useAudioPlayer";
+import { useRecordUploadFlow } from "../../hooks/audio/useRecordUploadFlow";
 
 type PracticeResult = {
   pronunciationScore: number;
@@ -16,15 +17,40 @@ type PracticeResult = {
 
 const BasicSpeakPracticePage = () => {
   const { cardId } = useParams<{ cardId: string }>();
-
+  const { isRecording, status, lastError, startRecording, stopRecording } =
+    useRecord();
+  const { audioUrl, isPlaying, setAudioUrl, clearAudioUrl, playAudio } =
+    useAudioPlayer();
   const card = useMemo(() => getBasicSpeakCardById(cardId), [cardId]);
 
   const [hasRecording, setHasRecording] = useState(false);
-  const [isRecording, setIsRecording] = useState(false);
   const [isPlayingGuideAudio, setIsPlayingGuideAudio] = useState(false);
-  const [isPlayingUserAudio, setIsPlayingUserAudio] = useState(false);
   const [isSavingReport, setIsSavingReport] = useState(false);
   const [result, setResult] = useState<PracticeResult | null>(null);
+
+  const { isUploading, toggleRecordAndUpload } = useRecordUploadFlow({
+    isRecording,
+    status,
+    startRecording,
+    stopRecording,
+    uploadFn: uploadBasicSpeakVoice,
+    onBeforeStart: () => {
+      // 새 녹음을 시작할 때 이전 결과/재생 URL을 초기화합니다.
+      setResult(null);
+      setHasRecording(false);
+      clearAudioUrl();
+    },
+    onUploadSuccess: ({ analysis, mp3Url }, blob) => {
+      // 업로드 응답의 mp3Url을 저장하고 결과 점수를 화면 상태에 반영합니다.
+      setAudioUrl(mp3Url || URL.createObjectURL(blob));
+      setHasRecording(true);
+      setResult({
+        pronunciationScore: analysis.pronunciationScore,
+        stabilityScore: analysis.stabilityScore,
+        deliveryScore: analysis.deliveryScore,
+      });
+    },
+  });
 
   if (!card) {
     return <Navigate to="/warmup/basic-speak" replace />;
@@ -38,28 +64,15 @@ const BasicSpeakPracticePage = () => {
     }, 900);
   };
 
-  const handleRecord = () => {
-    setIsRecording(true);
-
-    window.setTimeout(() => {
-      setIsRecording(false);
-      setHasRecording(true);
-      setResult({
-        pronunciationScore: 86,
-        stabilityScore: 83,
-        deliveryScore: 85,
-      });
-    }, 1200);
+  const handleRecord = async () => {
+    // 1회 클릭: 녹음 시작 / 녹음 중 클릭: 녹음 종료 + 업로드
+    await toggleRecordAndUpload();
   };
 
-  const handlePlayRecordedAudio = () => {
-    if (!hasRecording) return;
-
-    setIsPlayingUserAudio(true);
-
-    window.setTimeout(() => {
-      setIsPlayingUserAudio(false);
-    }, 900);
+  const handlePlayRecordedAudio = async () => {
+    if (!hasRecording || !audioUrl) return;
+    // API 응답으로 받은 mp3Url을 재생합니다.
+    await playAudio();
   };
 
   const handleSaveReport = () => {
@@ -85,6 +98,9 @@ const BasicSpeakPracticePage = () => {
         <p className="text-sm leading-6 text-slate-500">
           {card.category} "{card.subtitle}" 발성을 연습해요.
         </p>
+        {lastError ? (
+          <p className="text-xs font-semibold text-rose-500">녹음 오류: {lastError}</p>
+        ) : null}
       </section>
 
       <section className="grid grid-cols-1 gap-4">
@@ -93,7 +109,8 @@ const BasicSpeakPracticePage = () => {
           hasRecording={hasRecording}
           isRecording={isRecording}
           isPlayingGuideAudio={isPlayingGuideAudio}
-          isPlayingUserAudio={isPlayingUserAudio}
+          isPlayingUserAudio={isPlaying}
+          isInteractionLocked={isUploading}
           onPlayGuideAudio={handlePlayGuideAudio}
           onRecord={handleRecord}
           onPlayRecordedAudio={handlePlayRecordedAudio}
@@ -101,7 +118,7 @@ const BasicSpeakPracticePage = () => {
 
         <BasicSpeakResultCard
           result={result}
-          isSavingReport={isSavingReport}
+          isSavingReport={isSavingReport || isUploading}
           onSaveReport={handleSaveReport}
         />
       </section>

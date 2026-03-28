@@ -1,5 +1,6 @@
-﻿import { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { uploadFreeConversationVoice } from "../apis/voicePlaceholder";
 import ConversationHeader from "../components/free-conversation/ConversationHeader";
 import ConversationInput from "../components/free-conversation/ConversationInput";
 import ConversationMessages from "../components/free-conversation/ConversationMessages";
@@ -8,14 +9,32 @@ import {
   MOCK_CONVERSATION_LIST,
   MOCK_MESSAGES_BY_CONVERSATION,
 } from "../constants/freeConversation";
+import { useRecord } from "../contexts/RecordContext";
+import { useAudioPlayer } from "../hooks/audio/useAudioPlayer";
+import { useRecordUploadFlow } from "../hooks/audio/useRecordUploadFlow";
 
 const FreeConversationPage = () => {
   const navigate = useNavigate();
+  const { isRecording, status, lastError, startRecording, stopRecording } =
+    useRecord();
+  const { audioUrl, isPlaying, setAudioUrl, playAudio } = useAudioPlayer();
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(
     null
   );
   const [isMobileConversationListOpen, setIsMobileConversationListOpen] =
     useState(false);
+
+  const { isUploading, toggleRecordAndUpload } = useRecordUploadFlow({
+    isRecording,
+    status,
+    startRecording,
+    stopRecording,
+    uploadFn: uploadFreeConversationVoice,
+    onUploadSuccess: ({ mp3Url }, blob) => {
+      // 업로드 응답 mp3Url을 저장해 재생 버튼에서 사용합니다.
+      setAudioUrl(mp3Url || URL.createObjectURL(blob));
+    },
+  });
 
   const selectedMessages = useMemo(() => {
     if (!selectedConversationId) {
@@ -45,6 +64,17 @@ const FreeConversationPage = () => {
   const handleSelectConversation = (conversationId: string) => {
     setSelectedConversationId(conversationId);
     setIsMobileConversationListOpen(false);
+  };
+
+  const handleToggleVoiceRecord = async () => {
+    // 1회 클릭: 녹음 시작 / 녹음 중 클릭: 녹음 종료 + 업로드
+    await toggleRecordAndUpload();
+  };
+
+  const handlePlayRecordedAudio = async () => {
+    if (!audioUrl || isUploading) return;
+    // 가장 최근 응답 mp3Url을 재생합니다.
+    await playAudio();
   };
 
   return (
@@ -85,7 +115,22 @@ const FreeConversationPage = () => {
               <ConversationMessages messages={selectedMessages} />
             </div>
 
-            <ConversationInput />
+            {lastError ? (
+              <p className="pb-1 text-xs font-semibold text-rose-500">
+                녹음 오류: {lastError}
+              </p>
+            ) : null}
+
+            <ConversationInput
+              isRecording={isRecording}
+              isVoiceBusy={
+                status === "requesting_permission" || status === "stopping" || isUploading
+              }
+              hasRecordedAudio={!!audioUrl}
+              isPlayingRecordedAudio={isPlaying}
+              onToggleVoiceRecord={handleToggleVoiceRecord}
+              onPlayRecordedAudio={handlePlayRecordedAudio}
+            />
           </div>
         </section>
       </div>

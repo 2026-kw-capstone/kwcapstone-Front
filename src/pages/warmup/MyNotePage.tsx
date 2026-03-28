@@ -1,8 +1,12 @@
-﻿import { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
+import { uploadMyNoteVoice } from "../../apis/voicePlaceholder";
 import BackLinkButton from "../../components/BackLinkButton";
-import MyNoteStudyCard from "../../components/warmup/my-note/MyNoteStudyCard";
 import MyNoteResultCard from "../../components/warmup/my-note/MyNoteResultCard";
 import MyNoteSentenceList from "../../components/warmup/my-note/MyNoteSentenceList";
+import MyNoteStudyCard from "../../components/warmup/my-note/MyNoteStudyCard";
+import { useRecord } from "../../contexts/RecordContext";
+import { useAudioPlayer } from "../../hooks/audio/useAudioPlayer";
+import { useRecordUploadFlow } from "../../hooks/audio/useRecordUploadFlow";
 import type {
   MyNoteAnalysisResult,
   MyNoteSentenceItem,
@@ -22,18 +26,21 @@ const INITIAL_SENTENCES: MyNoteSentenceItem[] = [
 ];
 
 const MyNotePage = () => {
+  const { isRecording, status, lastError, startRecording, stopRecording } =
+    useRecord();
+  const { audioUrl, isPlaying, setAudioUrl, clearAudioUrl, playAudio } =
+    useAudioPlayer();
   const [sentences, setSentences] = useState<MyNoteSentenceItem[]>(
-    [...INITIAL_SENTENCES].sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt))
+    [...INITIAL_SENTENCES].sort(
+      (a, b) => +new Date(b.createdAt) - +new Date(a.createdAt)
+    )
   );
-
-  const [selectedSentenceId, setSelectedSentenceId] = useState<number | null>(null);
-
+  const [selectedSentenceId, setSelectedSentenceId] = useState<number | null>(
+    null
+  );
   const [hasRecording, setHasRecording] = useState(false);
   const [result, setResult] = useState<MyNoteAnalysisResult | null>(null);
-
-  const [isRecording, setIsRecording] = useState(false);
   const [isPlayingTts, setIsPlayingTts] = useState(false);
-  const [isPlayingUserAudio, setIsPlayingUserAudio] = useState(false);
   const [isAddingSentence, setIsAddingSentence] = useState(false);
   const [isSavingReport, setIsSavingReport] = useState(false);
 
@@ -43,11 +50,35 @@ const MyNotePage = () => {
 
   const resetStudyState = () => {
     setHasRecording(false);
-    setIsRecording(false);
     setIsPlayingTts(false);
-    setIsPlayingUserAudio(false);
+    clearAudioUrl();
     setResult(null);
   };
+
+  const { isUploading, toggleRecordAndUpload } = useRecordUploadFlow({
+    isRecording,
+    status,
+    startRecording,
+    stopRecording,
+    uploadFn: uploadMyNoteVoice,
+    onBeforeStart: () => {
+      // 새 녹음을 시작할 때 이전 결과/재생 URL을 초기화합니다.
+      setResult(null);
+      setHasRecording(false);
+      clearAudioUrl();
+    },
+    onUploadSuccess: ({ analysis, mp3Url }, blob) => {
+      // 업로드 응답의 mp3Url과 분석 결과를 페이지 상태로 저장합니다.
+      setAudioUrl(mp3Url || URL.createObjectURL(blob));
+      setHasRecording(true);
+      setResult({
+        pronunciationScore: analysis.pronunciationScore,
+        stabilityScore: analysis.stabilityScore,
+        deliveryScore: analysis.deliveryScore,
+        feedback: analysis.feedback ?? "",
+      });
+    },
+  });
 
   const handleSelectSentence = (sentence: MyNoteSentenceItem) => {
     setSelectedSentenceId(sentence.id);
@@ -65,29 +96,14 @@ const MyNotePage = () => {
 
   const handleRecord = async () => {
     if (!selectedSentence) return;
-
-    setIsRecording(true);
-    window.setTimeout(() => {
-      setIsRecording(false);
-      setHasRecording(true);
-
-      setResult({
-        pronunciationScore: 87,
-        stabilityScore: 82,
-        deliveryScore: 85,
-        feedback:
-          "문장 시작은 안정적입니다. 첫 음절을 조금 더 분명하게 시작하면 전달력이 더 좋아질 수 있어요.",
-      });
-    }, 1200);
+    // 1회 클릭: 녹음 시작 / 녹음 중 클릭: 녹음 종료 + 업로드
+    await toggleRecordAndUpload();
   };
 
   const handlePlayRecordedAudio = async () => {
-    if (!hasRecording) return;
-
-    setIsPlayingUserAudio(true);
-    window.setTimeout(() => {
-      setIsPlayingUserAudio(false);
-    }, 900);
+    if (!hasRecording || !audioUrl) return;
+    // API 응답으로 받은 mp3Url을 재생합니다.
+    await playAudio();
   };
 
   const handleSaveReport = async () => {
@@ -111,7 +127,9 @@ const MyNotePage = () => {
       };
 
       setSentences((prev) =>
-        [newSentence, ...prev].sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt))
+        [newSentence, ...prev].sort(
+          (a, b) => +new Date(b.createdAt) - +new Date(a.createdAt)
+        )
       );
 
       setIsAddingSentence(false);
@@ -143,6 +161,9 @@ const MyNotePage = () => {
         <p className="text-sm leading-6 text-slate-500">
           자주 쓰는 문장을 저장하고 듣고 말하고 결과까지 확인해보세요.
         </p>
+        {lastError ? (
+          <p className="text-xs font-semibold text-rose-500">녹음 오류: {lastError}</p>
+        ) : null}
       </section>
 
       <section className="grid grid-cols-1 gap-4">
@@ -151,7 +172,8 @@ const MyNotePage = () => {
           hasRecording={hasRecording}
           isRecording={isRecording}
           isPlayingTts={isPlayingTts}
-          isPlayingUserAudio={isPlayingUserAudio}
+          isPlayingUserAudio={isPlaying}
+          isInteractionLocked={isUploading}
           onPlayTts={handlePlayTts}
           onRecord={handleRecord}
           onPlayRecordedAudio={handlePlayRecordedAudio}
@@ -159,7 +181,7 @@ const MyNotePage = () => {
 
         <MyNoteResultCard
           result={result}
-          isSavingReport={isSavingReport}
+          isSavingReport={isSavingReport || isUploading}
           onSaveReport={handleSaveReport}
         />
       </section>
