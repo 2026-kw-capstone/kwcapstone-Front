@@ -1,7 +1,6 @@
 ﻿import { ChevronRight, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import QuickMenuCard from "../components/home/QuickMenuCard";
-import RecordTestPanel from "../components/home/RecordTestPanel";
 import { homequickMenus } from "../constants/homeQuickMenus";
 import { useGetMyInfo } from "../hooks/queries/useGetMyInfo";
 
@@ -12,8 +11,6 @@ const HomePage = () => {
 
   return (
     <div className="mx-auto flex w-full max-w-md flex-col gap-5">
-      <RecordTestPanel />
-
       <section className="relative overflow-hidden rounded-[22px] bg-gradient-to-r from-emerald-500 to-teal-500 px-5 py-6 text-white shadow-md shadow-emerald-200">
         <div className="relative z-10 max-w-[75%]">
           <p className="mb-2 text-xs font-medium text-emerald-50">오늘의 응원 메시지</p>
