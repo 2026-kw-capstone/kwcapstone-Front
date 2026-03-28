@@ -3,7 +3,7 @@ import type { BasicSpeakCardItem } from "../../../types/basicSpeakType";
 
 interface BasicSpeakStudyCardProps {
   card: BasicSpeakCardItem;
-  hasRecording: boolean;
+  hasRecordedAudio: boolean;
   isRecording?: boolean;
   isPlayingGuideAudio?: boolean;
   isPlayingUserAudio?: boolean;
@@ -15,7 +15,7 @@ interface BasicSpeakStudyCardProps {
 
 const BasicSpeakStudyCard = ({
   card,
-  hasRecording,
+  hasRecordedAudio,
   isRecording = false,
   isPlayingGuideAudio = false,
   isPlayingUserAudio = false,
@@ -66,13 +66,13 @@ const BasicSpeakStudyCard = ({
               className="inline-flex min-h-12 flex-1 cursor-pointer items-center justify-center gap-2 rounded-2xl bg-emerald-500 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:bg-slate-300"
             >
               <Mic size={18} />
-              {isRecording ? "녹음 중..." : hasRecording ? "다시 녹음" : "녹음"}
+              {isRecording ? "녹음 중..." : hasRecordedAudio ? "다시 녹음" : "녹음"}
             </button>
 
             <button
               type="button"
               onClick={onPlayRecordedAudio}
-              disabled={!hasRecording || isInteractionLocked}
+              disabled={!hasRecordedAudio || isInteractionLocked}
               className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-emerald-300 hover:bg-emerald-50 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-400"
             >
               <Play size={18} />

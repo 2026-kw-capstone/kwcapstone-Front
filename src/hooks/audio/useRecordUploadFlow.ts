@@ -12,6 +12,16 @@ interface UseRecordUploadFlowParams<TResponse> {
   onUploadSuccess?: (response: TResponse, blob: Blob) => void;
 }
 
+interface UseRecordUploadFlowResult<TResponse> {
+  isUploading: boolean;
+  // 버튼 1개로 "녹음 시작" 또는 "녹음 종료+업로드"를 수행하는 진입점입니다.
+  toggleRecordAndUpload: () => Promise<TResponse | null>;
+}
+
+// 녹음/업로드 흐름을 묶는 훅:
+// - idle 상태: 녹음 시작
+// - recording 상태: 녹음 종료 -> 블롭 획득 -> 업로드 -> 성공 콜백
+// - busy 상태: 중복 동작 차단
 export const useRecordUploadFlow = <TResponse>({
   isRecording,
   status,
@@ -21,11 +31,14 @@ export const useRecordUploadFlow = <TResponse>({
   isBlocked = false,
   onBeforeStart,
   onUploadSuccess,
-}: UseRecordUploadFlowParams<TResponse>) => {
+}: UseRecordUploadFlowParams<TResponse>): UseRecordUploadFlowResult<TResponse> => {
   const [isUploading, setIsUploading] = useState(false);
 
+  // 현재 상태에 따라:
+  // 1) idle이면 녹음 시작
+  // 2) recording이면 녹음 종료 후 업로드
+  // 3) busy면 아무 동작도 하지 않음
   const toggleRecordAndUpload = useCallback(async () => {
-    // 녹음/권한/업로드 중에는 중복 동작을 막습니다.
     if (
       isBlocked ||
       isUploading ||
@@ -35,14 +48,14 @@ export const useRecordUploadFlow = <TResponse>({
       return null;
     }
 
-    // 녹음 중이 아니면 녹음을 시작합니다.
     if (!isRecording) {
+      // 녹음 시작 전 화면 상태 초기화가 필요하면 페이지에서 주입
       onBeforeStart?.();
       await startRecording();
       return null;
     }
 
-    // 녹음 중이면 종료 -> Blob 획득 -> 업로드 -> 성공 콜백 순서로 진행합니다.
+    // 녹음을 멈춰 Blob을 얻고, 업로드를 진행합니다.
     const blob = await stopRecording();
     if (!blob) return null;
 

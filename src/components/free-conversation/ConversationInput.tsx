@@ -1,4 +1,4 @@
-import { Mic, MicOff, Play, Send } from "lucide-react";
+﻿import { Mic, MicOff, Play, Send } from "lucide-react";
 
 interface ConversationInputProps {
   isRecording: boolean;
@@ -17,7 +17,7 @@ const ConversationInput = ({
   onToggleVoiceRecord,
   onPlayRecordedAudio,
 }: ConversationInputProps) => {
-  // 녹음/재생 동작은 페이지에서 처리하고, 이 컴포넌트는 버튼 UI만 담당합니다.
+  // UI 전용 컴포넌트입니다. 녹음/재생 로직은 페이지가 담당합니다.
   return (
     <form className="relative z-10 mt-3">
       <div className="mx-auto flex w-full items-center gap-1.5 rounded-xl border border-slate-200 bg-white/95 px-1.5 py-1.5 shadow-[0_8px_25px_rgba(15,23,42,0.08)] backdrop-blur-sm">
@@ -59,6 +59,7 @@ const ConversationInput = ({
           <Send size={16} />
         </button>
       </div>
+
       {isPlayingRecordedAudio ? (
         <p className="pt-1 text-xs font-semibold text-emerald-600">재생 중...</p>
       ) : null}

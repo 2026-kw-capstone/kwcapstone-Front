@@ -7,6 +7,7 @@ import {
   useParams,
 } from "react-router-dom";
 import { uploadScenarioVoice } from "../../apis/voicePlaceholder";
+import { getRecordErrorMessage } from "../../constants/recordingMessage";
 import PracticeHeader from "../../components/scenario/practice/PracticeHeader";
 import PracticeStepPanel from "../../components/scenario/practice/PracticeStepPanel";
 import PracticeSummaryPanel from "../../components/scenario/practice/PracticeSummaryPanel";
@@ -52,11 +53,9 @@ const ScenarioPracticePage = () => {
     stopRecording,
     uploadFn: uploadScenarioVoice,
     onBeforeStart: () => {
-      // 녹음 시작 시 요약 화면을 해제하고 현재 단계 연습 모드로 유지합니다.
       setIsSummaryMode(false);
     },
     onUploadSuccess: ({ analysis, mp3Url }, blob) => {
-      // 단계별 분석 결과와 mp3Url을 각각 저장합니다.
       const mockResult = buildMockResult(currentStep.step);
 
       setResultsByStep((prev) => {
@@ -85,7 +84,6 @@ const ScenarioPracticePage = () => {
     [...RECOMMENDED_SCENARIOS, ...myScenarios].find(
       (scenario) => scenario.id === (scenarioId ?? "")
     )?.title ?? "나만의 시나리오";
-
   const levelLabel = level ? `Level ${level}` : "Level 1";
 
   const isNavigationLocked =
@@ -100,11 +98,7 @@ const ScenarioPracticePage = () => {
     const completeResults = resultsByStep.filter(
       (result): result is StepResult => result !== null
     );
-
-    if (completeResults.length === 0) {
-      return 0;
-    }
-
+    if (completeResults.length === 0) return 0;
     return Math.round(
       completeResults.reduce((acc, result) => acc + result.accuracy, 0) /
         completeResults.length
@@ -115,11 +109,7 @@ const ScenarioPracticePage = () => {
     const completeResults = resultsByStep.filter(
       (result): result is StepResult => result !== null
     );
-
-    if (completeResults.length === 0) {
-      return 0;
-    }
-
+    if (completeResults.length === 0) return 0;
     return Math.round(
       completeResults.reduce((acc, result) => acc + result.fluency, 0) /
         completeResults.length
@@ -129,9 +119,7 @@ const ScenarioPracticePage = () => {
   const blocker = useBlocker(shouldBlockNavigation);
 
   useEffect(() => {
-    if (blocker.state !== "blocked") {
-      return;
-    }
+    if (blocker.state !== "blocked") return;
 
     const shouldLeave = window.confirm(
       "연습 결과가 저장되지 않고 사라집니다. 정말 이동하시겠어요?"
@@ -144,12 +132,10 @@ const ScenarioPracticePage = () => {
     }
   }, [blocker]);
 
-  // 최신 URL 배열을 ref에 유지해 언마운트 시점에만 안전하게 정리합니다.
   useEffect(() => {
     recordedMp3UrlByStepRef.current = recordedMp3UrlByStep;
   }, [recordedMp3UrlByStep]);
 
-  // 페이지 언마운트 시 남아있는 blob URL 정리
   useEffect(() => {
     return () => {
       recordedMp3UrlByStepRef.current.forEach((url) => revokeObjectUrlIfNeeded(url));
@@ -157,16 +143,12 @@ const ScenarioPracticePage = () => {
   }, []);
 
   useBeforeUnload((event) => {
-    if (!shouldBlockNavigation) {
-      return;
-    }
-
+    if (!shouldBlockNavigation) return;
     event.preventDefault();
     event.returnValue = "";
   });
 
   const handleRecord = async () => {
-    // 1회 클릭: 녹음 시작 / 녹음 중 클릭: 녹음 종료 + 업로드 + 결과 반영
     await toggleRecordAndUpload();
   };
 
@@ -180,34 +162,30 @@ const ScenarioPracticePage = () => {
       next[currentStepIndex] = null;
       return next;
     });
+
     setRecordedMp3UrlByStep((prev) => {
       const next = [...prev];
       revokeObjectUrlIfNeeded(next[currentStepIndex]);
       next[currentStepIndex] = null;
       return next;
     });
+
     setIsSummaryMode(false);
     await startRecording();
   };
 
   const handlePlayRecordedAudio = async () => {
     if (!currentMp3Url) return;
-    // 현재 단계의 mp3Url만 재생합니다.
     await playAudio(currentMp3Url);
   };
 
   const handlePrevStep = () => {
-    if (!canGoPrev) {
-      return;
-    }
-
+    if (!canGoPrev) return;
     setCurrentStepIndex((prev) => prev - 1);
   };
 
   const handleNextStep = () => {
-    if (!canGoNext) {
-      return;
-    }
+    if (!canGoNext) return;
 
     if (currentStepIndex === PRACTICE_STEPS.length - 1) {
       setIsSummaryMode(true);
@@ -229,6 +207,8 @@ const ScenarioPracticePage = () => {
     setRecordedMp3UrlByStep([null, null, null]);
   };
 
+  const recordErrorMessage = getRecordErrorMessage(lastError);
+
   return (
     <div className="mx-auto flex w-full max-w-md flex-col gap-4 pb-2">
       <PracticeHeader
@@ -241,8 +221,8 @@ const ScenarioPracticePage = () => {
         onBack={handleBackToLevel}
       />
 
-      {lastError ? (
-        <p className="text-xs font-semibold text-rose-500">녹음 오류: {lastError}</p>
+      {recordErrorMessage ? (
+        <p className="text-xs font-semibold text-rose-500">{recordErrorMessage}</p>
       ) : null}
 
       {!isSummaryMode ? (
@@ -276,3 +256,4 @@ const ScenarioPracticePage = () => {
 };
 
 export default ScenarioPracticePage;
+

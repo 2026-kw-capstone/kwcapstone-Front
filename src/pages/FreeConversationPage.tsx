@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { uploadFreeConversationVoice } from "../apis/voicePlaceholder";
+import { getRecordErrorMessage } from "../constants/recordingMessage";
 import ConversationHeader from "../components/free-conversation/ConversationHeader";
 import ConversationInput from "../components/free-conversation/ConversationInput";
 import ConversationMessages from "../components/free-conversation/ConversationMessages";
@@ -31,7 +32,6 @@ const FreeConversationPage = () => {
     stopRecording,
     uploadFn: uploadFreeConversationVoice,
     onUploadSuccess: ({ mp3Url }, blob) => {
-      // 업로드 응답 mp3Url을 저장해 재생 버튼에서 사용합니다.
       setAudioUrl(mp3Url || URL.createObjectURL(blob));
     },
   });
@@ -67,15 +67,15 @@ const FreeConversationPage = () => {
   };
 
   const handleToggleVoiceRecord = async () => {
-    // 1회 클릭: 녹음 시작 / 녹음 중 클릭: 녹음 종료 + 업로드
     await toggleRecordAndUpload();
   };
 
   const handlePlayRecordedAudio = async () => {
     if (!audioUrl || isUploading) return;
-    // 가장 최근 응답 mp3Url을 재생합니다.
     await playAudio();
   };
+
+  const recordErrorMessage = getRecordErrorMessage(lastError);
 
   return (
     <div className="h-full min-h-0 w-full overflow-hidden bg-white">
@@ -115,9 +115,9 @@ const FreeConversationPage = () => {
               <ConversationMessages messages={selectedMessages} />
             </div>
 
-            {lastError ? (
+            {recordErrorMessage ? (
               <p className="pb-1 text-xs font-semibold text-rose-500">
-                녹음 오류: {lastError}
+                {recordErrorMessage}
               </p>
             ) : null}
 
@@ -139,3 +139,4 @@ const FreeConversationPage = () => {
 };
 
 export default FreeConversationPage;
+

@@ -1,4 +1,4 @@
-import {
+﻿import {
   Coffee,
   Mic,
   MicOff,
@@ -45,7 +45,7 @@ const PracticeStepPanel = ({
   onPrev,
   onNext,
 }: PracticeStepPanelProps) => {
-  // 녹음/재녹음/재생 버튼의 실제 동작은 부모 페이지에서 주입합니다.
+  // UI 전용 컴포넌트입니다. 녹음/재생 처리기는 부모 페이지에서 주입합니다.
   return (
     <>
       <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -129,21 +129,15 @@ const PracticeStepPanel = ({
           <div className="mt-5 grid grid-cols-1 gap-3">
             <div className="rounded-2xl bg-slate-50 p-4">
               <p className="text-sm font-semibold text-slate-500">정확도</p>
-              <p className="mt-1 text-5xl font-extrabold text-blue-500">
-                {currentResult.accuracy}%
-              </p>
+              <p className="mt-1 text-5xl font-extrabold text-blue-500">{currentResult.accuracy}%</p>
             </div>
             <div className="rounded-2xl bg-slate-50 p-4">
               <p className="text-sm font-semibold text-slate-500">유창성</p>
-              <p className="mt-1 text-5xl font-extrabold text-amber-500">
-                {currentResult.fluency}%
-              </p>
+              <p className="mt-1 text-5xl font-extrabold text-amber-500">{currentResult.fluency}%</p>
             </div>
           </div>
 
-          <p className="mt-4 text-sm font-medium text-slate-600">
-            피드백: {currentResult.feedback}
-          </p>
+          <p className="mt-4 text-sm font-medium text-slate-600">피드백: {currentResult.feedback}</p>
         </section>
       )}
 

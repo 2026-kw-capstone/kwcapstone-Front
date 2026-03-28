@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
 import { uploadBasicSpeakVoice } from "../../apis/voicePlaceholder";
+import { getRecordErrorMessage } from "../../constants/recordingMessage";
 import BackLinkButton from "../../components/BackLinkButton";
 import BasicSpeakResultCard from "../../components/warmup/basic-speak/BasicSpeakResultCard";
 import BasicSpeakStudyCard from "../../components/warmup/basic-speak/BasicSpeakStudyCard";
@@ -23,7 +24,7 @@ const BasicSpeakPracticePage = () => {
     useAudioPlayer();
   const card = useMemo(() => getBasicSpeakCardById(cardId), [cardId]);
 
-  const [hasRecording, setHasRecording] = useState(false);
+  const [hasRecordedAudio, setHasRecordedAudio] = useState(false);
   const [isPlayingGuideAudio, setIsPlayingGuideAudio] = useState(false);
   const [isSavingReport, setIsSavingReport] = useState(false);
   const [result, setResult] = useState<PracticeResult | null>(null);
@@ -35,15 +36,13 @@ const BasicSpeakPracticePage = () => {
     stopRecording,
     uploadFn: uploadBasicSpeakVoice,
     onBeforeStart: () => {
-      // 새 녹음을 시작할 때 이전 결과/재생 URL을 초기화합니다.
       setResult(null);
-      setHasRecording(false);
+      setHasRecordedAudio(false);
       clearAudioUrl();
     },
     onUploadSuccess: ({ analysis, mp3Url }, blob) => {
-      // 업로드 응답의 mp3Url을 저장하고 결과 점수를 화면 상태에 반영합니다.
       setAudioUrl(mp3Url || URL.createObjectURL(blob));
-      setHasRecording(true);
+      setHasRecordedAudio(true);
       setResult({
         pronunciationScore: analysis.pronunciationScore,
         stabilityScore: analysis.stabilityScore,
@@ -58,32 +57,29 @@ const BasicSpeakPracticePage = () => {
 
   const handlePlayGuideAudio = () => {
     setIsPlayingGuideAudio(true);
-
     window.setTimeout(() => {
       setIsPlayingGuideAudio(false);
     }, 900);
   };
 
   const handleRecord = async () => {
-    // 1회 클릭: 녹음 시작 / 녹음 중 클릭: 녹음 종료 + 업로드
     await toggleRecordAndUpload();
   };
 
   const handlePlayRecordedAudio = async () => {
-    if (!hasRecording || !audioUrl) return;
-    // API 응답으로 받은 mp3Url을 재생합니다.
+    if (!hasRecordedAudio || !audioUrl) return;
     await playAudio();
   };
 
   const handleSaveReport = () => {
     if (!result) return;
-
     setIsSavingReport(true);
-
     window.setTimeout(() => {
       setIsSavingReport(false);
     }, 1000);
   };
+
+  const recordErrorMessage = getRecordErrorMessage(lastError);
 
   return (
     <div className="mx-auto flex w-full max-w-md flex-col gap-5">
@@ -98,15 +94,15 @@ const BasicSpeakPracticePage = () => {
         <p className="text-sm leading-6 text-slate-500">
           {card.category} "{card.subtitle}" 발성을 연습해요.
         </p>
-        {lastError ? (
-          <p className="text-xs font-semibold text-rose-500">녹음 오류: {lastError}</p>
+        {recordErrorMessage ? (
+          <p className="text-xs font-semibold text-rose-500">{recordErrorMessage}</p>
         ) : null}
       </section>
 
       <section className="grid grid-cols-1 gap-4">
         <BasicSpeakStudyCard
           card={card}
-          hasRecording={hasRecording}
+          hasRecordedAudio={hasRecordedAudio}
           isRecording={isRecording}
           isPlayingGuideAudio={isPlayingGuideAudio}
           isPlayingUserAudio={isPlaying}
@@ -145,3 +141,4 @@ const BasicSpeakPracticePage = () => {
 };
 
 export default BasicSpeakPracticePage;
+
