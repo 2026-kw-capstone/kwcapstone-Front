@@ -1,23 +1,17 @@
-﻿import { Mic, MicOff, Play, Send } from "lucide-react";
+﻿import { Mic, MicOff, Send } from "lucide-react";
 
 interface ConversationInputProps {
   isRecording: boolean;
   isVoiceBusy: boolean;
-  hasRecordedAudio: boolean;
-  isPlayingRecordedAudio: boolean;
   onToggleVoiceRecord: () => void;
-  onPlayRecordedAudio: () => void;
 }
 
 const ConversationInput = ({
   isRecording,
   isVoiceBusy,
-  hasRecordedAudio,
-  isPlayingRecordedAudio,
   onToggleVoiceRecord,
-  onPlayRecordedAudio,
 }: ConversationInputProps) => {
-  // UI 전용 컴포넌트입니다. 녹음/재생 로직은 페이지가 담당합니다.
+  // UI 전용 컴포넌트입니다. 녹음 시작/종료 요청만 페이지로 전달합니다.
   return (
     <form className="relative z-10 mt-3">
       <div className="mx-auto flex w-full items-center gap-1.5 rounded-xl border border-slate-200 bg-white/95 px-1.5 py-1.5 shadow-[0_8px_25px_rgba(15,23,42,0.08)] backdrop-blur-sm">
@@ -32,17 +26,8 @@ const ConversationInput = ({
           onClick={onToggleVoiceRecord}
           disabled={isVoiceBusy}
         >
+          {/* 페이지에서 주입한 녹음 토글 함수(시작/종료+업로드)를 호출 */}
           {isRecording ? <MicOff size={17} /> : <Mic size={17} />}
-        </button>
-
-        <button
-          type="button"
-          className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition hover:bg-slate-200 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-300"
-          aria-label="녹음 재생"
-          onClick={onPlayRecordedAudio}
-          disabled={!hasRecordedAudio || isVoiceBusy}
-        >
-          <Play size={16} />
         </button>
 
         <input
@@ -59,10 +44,6 @@ const ConversationInput = ({
           <Send size={16} />
         </button>
       </div>
-
-      {isPlayingRecordedAudio ? (
-        <p className="pt-1 text-xs font-semibold text-emerald-600">재생 중...</p>
-      ) : null}
     </form>
   );
 };

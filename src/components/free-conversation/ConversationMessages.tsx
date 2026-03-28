@@ -41,6 +41,7 @@ const ConversationMessages = ({ messages }: ConversationMessagesProps) => {
               }`}
             >
               {message.content}
+              {/* TODO: API 연동 후 사용자 메시지의 message.voiceUrl로 재생 버튼/플레이어를 여기서 렌더링 */}
             </div>
           </li>
         );

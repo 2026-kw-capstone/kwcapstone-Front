@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+﻿import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { uploadFreeConversationVoice } from "../apis/voicePlaceholder";
 import { getRecordErrorMessage } from "../constants/recordingMessage";
@@ -11,29 +11,27 @@ import {
   MOCK_MESSAGES_BY_CONVERSATION,
 } from "../constants/freeConversation";
 import { useRecord } from "../contexts/RecordContext";
-import { useAudioPlayer } from "../hooks/audio/useAudioPlayer";
 import { useRecordUploadFlow } from "../hooks/audio/useRecordUploadFlow";
 
 const FreeConversationPage = () => {
   const navigate = useNavigate();
+  // 전역 녹음 컨텍스트: 시작/종료와 상태만 담당
   const { isRecording, status, lastError, startRecording, stopRecording } =
     useRecord();
-  const { audioUrl, isPlaying, setAudioUrl, playAudio } = useAudioPlayer();
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(
     null
   );
   const [isMobileConversationListOpen, setIsMobileConversationListOpen] =
     useState(false);
 
+  // 녹음 종료 시 Blob을 업로드하고, 응답은 추후 사용자 메시지(voiceUrl 포함)로 반영할 예정
   const { isUploading, toggleRecordAndUpload } = useRecordUploadFlow({
     isRecording,
     status,
     startRecording,
     stopRecording,
     uploadFn: uploadFreeConversationVoice,
-    onUploadSuccess: ({ mp3Url }, blob) => {
-      setAudioUrl(mp3Url || URL.createObjectURL(blob));
-    },
+    // TODO: API 연동 시 mp3Url/voiceUrl을 사용자 메시지에 저장해 ConversationMessages로 전달
   });
 
   const selectedMessages = useMemo(() => {
@@ -67,12 +65,8 @@ const FreeConversationPage = () => {
   };
 
   const handleToggleVoiceRecord = async () => {
+    // 녹음 버튼 재클릭 시 업로드까지 이어지는 공통 흐름
     await toggleRecordAndUpload();
-  };
-
-  const handlePlayRecordedAudio = async () => {
-    if (!audioUrl || isUploading) return;
-    await playAudio();
   };
 
   const recordErrorMessage = getRecordErrorMessage(lastError);
@@ -123,13 +117,11 @@ const FreeConversationPage = () => {
 
             <ConversationInput
               isRecording={isRecording}
+              // 권한 요청/종료/업로드 중에는 중복 입력을 막아 버튼을 잠급니다.
               isVoiceBusy={
                 status === "requesting_permission" || status === "stopping" || isUploading
               }
-              hasRecordedAudio={!!audioUrl}
-              isPlayingRecordedAudio={isPlaying}
               onToggleVoiceRecord={handleToggleVoiceRecord}
-              onPlayRecordedAudio={handlePlayRecordedAudio}
             />
           </div>
         </section>
@@ -139,4 +131,3 @@ const FreeConversationPage = () => {
 };
 
 export default FreeConversationPage;
-
