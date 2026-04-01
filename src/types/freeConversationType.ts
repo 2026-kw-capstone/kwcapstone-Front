@@ -1,6 +1,9 @@
-﻿export type ConversationSummary = {
-  id: string;
+import type { ApiResponse } from "./authType";
+
+export type ConversationSummary = {
+  conversationId: number;
   title: string;
+  lastMessageAt: string;
 };
 
 export type MessageRole = "assistant" | "user";
@@ -12,3 +15,11 @@ export type ConversationMessage = {
   // 추후 API 연동 시 사용자 음성 재생을 위해 서버에서 전달받는 URL
   voiceUrl?: string;
 };
+
+export type ConversationSummaryDto = {
+  conversationId: number;
+  title: string;
+  lastMessageAt: string;
+};
+
+export type ResponseConversationListDto = ApiResponse<ConversationSummaryDto[]>;

@@ -6,23 +6,27 @@ import ConversationHeader from "../components/free-conversation/ConversationHead
 import ConversationInput from "../components/free-conversation/ConversationInput";
 import ConversationMessages from "../components/free-conversation/ConversationMessages";
 import ConversationSidebar from "../components/free-conversation/ConversationSidebar";
-import {
-  MOCK_CONVERSATION_LIST,
-  MOCK_MESSAGES_BY_CONVERSATION,
-} from "../constants/freeConversation";
 import { useRecord } from "../contexts/RecordContext";
 import { useRecordUploadFlow } from "../hooks/audio/useRecordUploadFlow";
+import { useGetConversations } from "../hooks/queries/useGetConversations";
 
 const FreeConversationPage = () => {
   const navigate = useNavigate();
   // 전역 녹음 컨텍스트: 시작/종료와 상태만 담당
   const { isRecording, status, lastError, startRecording, stopRecording } =
     useRecord();
-  const [selectedConversationId, setSelectedConversationId] = useState<string | null>(
+  const [selectedConversationId, setSelectedConversationId] = useState<number | null>(
     null
   );
   const [isMobileConversationListOpen, setIsMobileConversationListOpen] =
     useState(false);
+  const {
+    data: conversations = [],
+    isLoading: isConversationListLoading,
+    isError: isConversationListError,
+    error: conversationListError,
+    refetch: refetchConversationList,
+  } = useGetConversations();
 
   // 녹음 종료 시 Blob을 업로드하고, 응답은 추후 사용자 메시지(voiceUrl 포함)로 반영할 예정
   const { isUploading, toggleRecordAndUpload } = useRecordUploadFlow({
@@ -34,13 +38,7 @@ const FreeConversationPage = () => {
     // TODO: API 연동 시 mp3Url/voiceUrl을 사용자 메시지에 저장해 ConversationMessages로 전달
   });
 
-  const selectedMessages = useMemo(() => {
-    if (!selectedConversationId) {
-      return [];
-    }
-
-    return MOCK_MESSAGES_BY_CONVERSATION[selectedConversationId] ?? [];
-  }, [selectedConversationId]);
+  const selectedMessages = useMemo(() => [], []);
 
   const currentConversationTitle = useMemo(() => {
     if (!selectedConversationId) {
@@ -48,18 +46,18 @@ const FreeConversationPage = () => {
     }
 
     return (
-      MOCK_CONVERSATION_LIST.find(
-        (conversation) => conversation.id === selectedConversationId
+      conversations.find(
+        (conversation) => conversation.conversationId === selectedConversationId
       )?.title ?? "새 대화"
     );
-  }, [selectedConversationId]);
+  }, [conversations, selectedConversationId]);
 
   const handleNewConversation = () => {
     setSelectedConversationId(null);
     setIsMobileConversationListOpen(false);
   };
 
-  const handleSelectConversation = (conversationId: string) => {
+  const handleSelectConversation = (conversationId: number) => {
     setSelectedConversationId(conversationId);
     setIsMobileConversationListOpen(false);
   };
@@ -84,10 +82,19 @@ const FreeConversationPage = () => {
         ) : null}
 
         <ConversationSidebar
-          conversations={MOCK_CONVERSATION_LIST}
+          conversations={conversations}
           selectedConversationId={selectedConversationId}
           isMobileOpen={isMobileConversationListOpen}
+          isLoading={isConversationListLoading}
+          isError={isConversationListError}
+          errorMessage={
+            conversationListError instanceof Error
+              ? conversationListError.message
+              : "대화 목록을 불러오지 못했어요."
+          }
+          isEmpty={conversations.length === 0}
           onNewConversation={handleNewConversation}
+          onRetry={() => void refetchConversationList()}
           onSelectConversation={handleSelectConversation}
           onEditConversation={() => void 0}
           onDeleteConversation={() => void 0}

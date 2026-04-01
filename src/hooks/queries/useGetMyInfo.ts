@@ -9,8 +9,7 @@ export const useGetMyInfo = () => {
   return useQuery({
     queryKey: [QUERY_KEY.myInfo],
     queryFn: getMyInfo,
-    enabled: false,
-    // enabled: !!accessToken,
-    select: (response) => response.data,
+    enabled: !!accessToken,
+    select: (response) => response.result,
   });
 };
