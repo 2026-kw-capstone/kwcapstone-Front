@@ -2,14 +2,11 @@ import { useQuery } from "@tanstack/react-query";
 import { getConversationList } from "../../apis/conversation";
 import { QUERY_KEY } from "../../constants/key";
 import { useAuth } from "../../contexts/AuthContext";
-import type {
-  ConversationSummary,
-  ConversationSummaryDto,
-} from "../../types/freeConversationType";
+import type { ConversationSummary } from "../../types/freeConversationType";
 import { useGetMyInfo } from "./useGetMyInfo";
 
 const mapConversationSummary = (
-  conversation: ConversationSummaryDto
+  conversation: ConversationSummary
 ): ConversationSummary => ({
   conversationId: conversation.conversationId,
   title: conversation.title.trim() || "Untitled Conversation",

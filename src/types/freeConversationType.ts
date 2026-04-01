@@ -12,14 +12,8 @@ export type ConversationMessage = {
   id: string;
   role: MessageRole;
   content: string;
-  // 추후 API 연동 시 사용자 음성 재생을 위해 서버에서 전달받는 URL
+  // API 연동 후 사용자 음성 재생을 위해 서버에서 전달받는 URL
   voiceUrl?: string;
 };
 
-export type ConversationSummaryDto = {
-  conversationId: number;
-  title: string;
-  lastMessageAt: string;
-};
-
-export type ResponseConversationListDto = ApiResponse<ConversationSummaryDto[]>;
+export type ResponseConversationListDto = ApiResponse<ConversationSummary[]>;
