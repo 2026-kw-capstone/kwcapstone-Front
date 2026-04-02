@@ -1,4 +1,4 @@
-﻿import { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { uploadFreeConversationVoice } from "../apis/voicePlaceholder";
 import ConversationHeader from "../components/free-conversation/ConversationHeader";
@@ -9,6 +9,7 @@ import { getRecordErrorMessage } from "../constants/recordingMessage";
 import { useAuth } from "../contexts/AuthContext";
 import { useRecord } from "../contexts/RecordContext";
 import { useRecordUploadFlow } from "../hooks/audio/useRecordUploadFlow";
+import { usePatchConversationTitle } from "../hooks/mutations/usePatchConversationTitle";
 import { useGetConversationDetail } from "../hooks/queries/useGetConversationDetail";
 import { useGetConversations } from "../hooks/queries/useGetConversations";
 
@@ -23,6 +24,7 @@ const FreeConversationPage = () => {
   );
   const [isMobileConversationListOpen, setIsMobileConversationListOpen] =
     useState(false);
+  const patchConversationTitleMutation = usePatchConversationTitle();
   const {
     data: conversations = [],
     isLoading: isConversationListLoading,
@@ -80,6 +82,16 @@ const FreeConversationPage = () => {
     await toggleRecordAndUpload();
   };
 
+  const handleSubmitEditConversation = async (
+    conversationId: number,
+    title: string
+  ) => {
+    await patchConversationTitleMutation.mutateAsync({
+      conversationId,
+      title,
+    });
+  };
+
   const recordErrorMessage = getRecordErrorMessage(lastError);
 
   const isConversationDetailLoadingState =
@@ -115,7 +127,11 @@ const FreeConversationPage = () => {
           onNewConversation={handleNewConversation}
           onRetry={() => void refetchConversationList()}
           onSelectConversation={handleSelectConversation}
-          onEditConversation={() => void 0}
+          onSubmitEditConversation={handleSubmitEditConversation}
+          isEditSubmitting={patchConversationTitleMutation.isPending}
+          editingSubmitConversationId={
+            patchConversationTitleMutation.variables?.conversationId ?? null
+          }
           onDeleteConversation={() => void 0}
         />
 

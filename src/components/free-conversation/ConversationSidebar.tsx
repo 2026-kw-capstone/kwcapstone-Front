@@ -1,5 +1,7 @@
-﻿import { MessageCircle, Pencil, Plus, Trash2 } from "lucide-react";
+import { Plus } from "lucide-react";
+import { useState } from "react";
 import type { ConversationSummary } from "../../types/freeConversationType";
+import ConversationSidebarItem from "./ConversationSidebarItem";
 
 type ConversationSidebarProps = {
   conversations: ConversationSummary[];
@@ -12,7 +14,9 @@ type ConversationSidebarProps = {
   onNewConversation: () => void;
   onRetry: () => void;
   onSelectConversation: (conversationId: number) => void;
-  onEditConversation: (conversationId: number) => void;
+  onSubmitEditConversation: (conversationId: number, title: string) => Promise<void>;
+  isEditSubmitting: boolean;
+  editingSubmitConversationId: number | null;
   onDeleteConversation: (conversationId: number) => void;
 };
 
@@ -27,9 +31,25 @@ const ConversationSidebar = ({
   onNewConversation,
   onRetry,
   onSelectConversation,
-  onEditConversation,
+  onSubmitEditConversation,
+  isEditSubmitting,
+  editingSubmitConversationId,
   onDeleteConversation,
 }: ConversationSidebarProps) => {
+  const [editingConversationId, setEditingConversationId] = useState<number | null>(null);
+
+  const finishEditing = () => {
+    setEditingConversationId(null);
+  };
+
+  const startEditing = (conversationId: number) => {
+    if (isEditSubmitting) {
+      return;
+    }
+
+    setEditingConversationId(conversationId);
+  };
+
   return (
     <aside
       className={`
@@ -89,49 +109,24 @@ const ConversationSidebar = ({
             {!isLoading &&
               !isError &&
               !isEmpty &&
-              conversations.map((conversation) => {
-                const isSelected =
-                  conversation.conversationId === selectedConversationId;
-
-                return (
-                  <div
-                    key={conversation.conversationId}
-                    className={`flex items-center gap-1.5 rounded-lg px-2.5 py-2 text-[13px] transition ${
-                      isSelected
-                        ? "bg-emerald-50 font-semibold text-emerald-700"
-                        : "text-slate-700 hover:bg-slate-100"
-                    }`}
-                  >
-                    <button
-                      type="button"
-                      onClick={() => onSelectConversation(conversation.conversationId)}
-                      className="flex min-w-0 flex-1 items-center gap-2 text-left"
-                    >
-                      <MessageCircle size={14} className="shrink-0" />
-                      <span className="truncate">{conversation.title}</span>
-                    </button>
-
-                    <span className="ml-1 inline-flex items-center gap-0.5">
-                      <button
-                        type="button"
-                        className="inline-flex h-6 w-6 items-center justify-center rounded-md text-slate-500 transition hover:bg-slate-200 hover:text-slate-700"
-                        aria-label={`${conversation.title} 제목 수정`}
-                        onClick={() => onEditConversation(conversation.conversationId)}
-                      >
-                        <Pencil size={13} />
-                      </button>
-                      <button
-                        type="button"
-                        className="inline-flex h-6 w-6 items-center justify-center rounded-md text-slate-500 transition hover:bg-slate-200 hover:text-rose-600"
-                        aria-label={`${conversation.title} 삭제`}
-                        onClick={() => onDeleteConversation(conversation.conversationId)}
-                      >
-                        <Trash2 size={13} />
-                      </button>
-                    </span>
-                  </div>
-                );
-              })}
+              conversations.map((conversation) => (
+                <ConversationSidebarItem
+                  key={conversation.conversationId}
+                  conversation={conversation}
+                  isSelected={conversation.conversationId === selectedConversationId}
+                  isEditing={conversation.conversationId === editingConversationId}
+                  isSubmittingThisConversation={
+                    isEditSubmitting &&
+                    conversation.conversationId === editingSubmitConversationId
+                  }
+                  isEditSubmitting={isEditSubmitting}
+                  onSelectConversation={onSelectConversation}
+                  onSubmitEditConversation={onSubmitEditConversation}
+                  onStartEditing={startEditing}
+                  onFinishEditing={finishEditing}
+                  onDeleteConversation={onDeleteConversation}
+                />
+              ))}
           </div>
         </div>
       </div>

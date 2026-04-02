@@ -1,4 +1,4 @@
-﻿import type { ApiResponse } from "./authType";
+import type { ApiResponse } from "./authType";
 
 export type ConversationSummary = {
   conversationId: number;
@@ -43,5 +43,16 @@ export type ConversationDetail = {
   messages: ConversationMessageGroup[];
 };
 
+export type RequestPatchConversationTitleDto = {
+  title: string;
+};
+
+export type PatchConversationTitleResult = {
+  conversationId: number;
+  title: string;
+};
+
 export type ResponseConversationListDto = ApiResponse<ConversationSummary[]>;
 export type ResponseConversationDetailDto = ApiResponse<ConversationDetail>;
+export type ResponsePatchConversationTitleDto =
+  ApiResponse<PatchConversationTitleResult>;
