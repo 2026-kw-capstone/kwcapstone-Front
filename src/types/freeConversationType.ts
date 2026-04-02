@@ -1,4 +1,4 @@
-import type { ApiResponse } from "./authType";
+﻿import type { ApiResponse } from "./authType";
 
 export type ConversationSummary = {
   conversationId: number;
@@ -6,14 +6,42 @@ export type ConversationSummary = {
   lastMessageAt: string;
 };
 
-export type MessageRole = "assistant" | "user";
+export type ConversationInputType = "TEXT" | "VOICE";
 
-export type ConversationMessage = {
-  id: string;
-  role: MessageRole;
+export type ConversationUserMessage = {
+  messageId: number;
+  role: "USER";
+  inputType: ConversationInputType;
+  voiceUrl: string | null;
   content: string;
-  // API 연동 후 사용자 음성 재생을 위해 서버에서 전달받는 URL
-  voiceUrl?: string;
+  createdAt: string;
+};
+
+export type ConversationAiMessage = {
+  messageId: number;
+  role: "AI";
+  content: string;
+  createdAt: string;
+};
+
+export type ConversationFeedback = {
+  feedbackId: number;
+  content: string;
+  createdAt: string;
+};
+
+export type ConversationMessageGroup = {
+  clientRequestId: string;
+  userMessage: ConversationUserMessage | null;
+  aiMessage: ConversationAiMessage | null;
+  feedback: ConversationFeedback | null;
+};
+
+export type ConversationDetail = {
+  conversationId: number;
+  title: string;
+  messages: ConversationMessageGroup[];
 };
 
 export type ResponseConversationListDto = ApiResponse<ConversationSummary[]>;
+export type ResponseConversationDetailDto = ApiResponse<ConversationDetail>;

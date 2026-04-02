@@ -1,11 +1,38 @@
 ﻿import { Smile } from "lucide-react";
-import type { ConversationMessage } from "../../types/freeConversationType";
+import type { ConversationMessageGroup } from "../../types/freeConversationType";
+import {
+  ConversationMessagesErrorState,
+  ConversationMessagesLoadingState,
+} from "./ConversationMessagesState";
 
 type ConversationMessagesProps = {
-  messages: ConversationMessage[];
+  messages: ConversationMessageGroup[];
+  isLoading: boolean;
+  isError: boolean;
+  errorMessage?: string;
+  onRetry: () => void;
 };
 
-const ConversationMessages = ({ messages }: ConversationMessagesProps) => {
+const ConversationMessages = ({
+  messages,
+  isLoading,
+  isError,
+  errorMessage,
+  onRetry,
+}: ConversationMessagesProps) => {
+  if (isLoading) {
+    return <ConversationMessagesLoadingState />;
+  }
+
+  if (isError) {
+    return (
+      <ConversationMessagesErrorState
+        errorMessage={errorMessage}
+        onRetry={onRetry}
+      />
+    );
+  }
+
   if (messages.length === 0) {
     return (
       <div className="flex h-full items-center justify-center px-1">
@@ -28,23 +55,50 @@ const ConversationMessages = ({ messages }: ConversationMessagesProps) => {
 
   return (
     <ul className="mx-auto flex w-full flex-col gap-2 py-3">
-      {messages.map((message) => {
-        const isAssistant = message.role === "assistant";
+      {messages.flatMap((group) => {
+        const userMessage = group.userMessage;
+        const aiMessage = group.aiMessage;
+        const feedback = group.feedback;
 
-        return (
-          <li key={message.id} className={`flex ${isAssistant ? "justify-start" : "justify-end"}`}>
-            <div
-              className={`max-w-[85%] rounded-xl px-3 py-2.5 text-[13px] leading-5 ${
-                isAssistant
-                  ? "rounded-bl-md border border-slate-200 bg-white text-slate-700"
-                  : "rounded-br-md bg-emerald-500 text-white shadow-[0_10px_25px_rgba(16,185,129,0.28)]"
-              }`}
-            >
-              {message.content}
-              {/* TODO: API 연동 후 사용자 메시지의 message.voiceUrl로 재생 버튼/플레이어를 여기서 렌더링 */}
-            </div>
-          </li>
-        );
+        return [
+          userMessage ? (
+            <li key={`message-${userMessage.messageId}`} className="flex justify-end">
+              <div className="max-w-[85%] rounded-br-md rounded-xl bg-emerald-500 px-3 py-2.5 text-[13px] leading-5 text-white shadow-[0_10px_25px_rgba(16,185,129,0.28)]">
+                {userMessage.inputType === "TEXT" && userMessage.content ? (
+                  <p>{userMessage.content}</p>
+                ) : null}
+                {userMessage.inputType === "VOICE" && userMessage.voiceUrl ? (
+                  <audio
+                    controls
+                    src={userMessage.voiceUrl}
+                    className="mt-2 h-9 w-full max-w-[260px] rounded-md bg-white/80"
+                  >
+                    브라우저가 음성 재생을 지원하지 않습니다.
+                  </audio>
+                ) : null}
+                {userMessage.inputType === "VOICE" && !userMessage.voiceUrl ? (
+                  <p className="text-xs text-emerald-50/90">
+                    음성 파일을 불러오지 못했어요.
+                  </p>
+                ) : null}
+              </div>
+            </li>
+          ) : null,
+          aiMessage ? (
+            <li key={`message-${aiMessage.messageId}`} className="flex justify-start">
+              <div className="max-w-[85%] rounded-bl-md rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-[13px] leading-5 text-slate-700">
+                {aiMessage.content}
+              </div>
+            </li>
+          ) : null,
+          feedback ? (
+            <li key={`feedback-${feedback.feedbackId}`} className="flex justify-center">
+              <div className="max-w-[92%] rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-[12px] leading-5 text-amber-800">
+                {feedback.content}
+              </div>
+            </li>
+          ) : null,
+        ];
       })}
     </ul>
   );

@@ -1,17 +1,20 @@
 ﻿import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { uploadFreeConversationVoice } from "../apis/voicePlaceholder";
-import { getRecordErrorMessage } from "../constants/recordingMessage";
 import ConversationHeader from "../components/free-conversation/ConversationHeader";
 import ConversationInput from "../components/free-conversation/ConversationInput";
 import ConversationMessages from "../components/free-conversation/ConversationMessages";
 import ConversationSidebar from "../components/free-conversation/ConversationSidebar";
+import { getRecordErrorMessage } from "../constants/recordingMessage";
+import { useAuth } from "../contexts/AuthContext";
 import { useRecord } from "../contexts/RecordContext";
 import { useRecordUploadFlow } from "../hooks/audio/useRecordUploadFlow";
+import { useGetConversationDetail } from "../hooks/queries/useGetConversationDetail";
 import { useGetConversations } from "../hooks/queries/useGetConversations";
 
 const FreeConversationPage = () => {
   const navigate = useNavigate();
+  const { accessToken } = useAuth();
   // 전역 녹음 컨텍스트: 시작/종료와 상태만 담당
   const { isRecording, status, lastError, startRecording, stopRecording } =
     useRecord();
@@ -27,6 +30,14 @@ const FreeConversationPage = () => {
     error: conversationListError,
     refetch: refetchConversationList,
   } = useGetConversations();
+  const {
+    data: selectedConversationDetail,
+    isLoading: isConversationDetailLoading,
+    isFetching: isConversationDetailFetching,
+    isError: isConversationDetailError,
+    error: conversationDetailError,
+    refetch: refetchConversationDetail,
+  } = useGetConversationDetail(selectedConversationId);
 
   // 녹음 종료 시 Blob을 업로드하고, 응답은 추후 사용자 메시지(voiceUrl 포함)로 반영할 예정
   const { isUploading, toggleRecordAndUpload } = useRecordUploadFlow({
@@ -38,11 +49,13 @@ const FreeConversationPage = () => {
     // TODO: API 연동 시 mp3Url/voiceUrl을 사용자 메시지에 저장해 ConversationMessages로 전달
   });
 
-  const selectedMessages = useMemo(() => [], []);
-
   const currentConversationTitle = useMemo(() => {
     if (!selectedConversationId) {
       return "새 대화";
+    }
+
+    if (selectedConversationDetail?.title) {
+      return selectedConversationDetail.title;
     }
 
     return (
@@ -50,7 +63,7 @@ const FreeConversationPage = () => {
         (conversation) => conversation.conversationId === selectedConversationId
       )?.title ?? "새 대화"
     );
-  }, [conversations, selectedConversationId]);
+  }, [conversations, selectedConversationDetail, selectedConversationId]);
 
   const handleNewConversation = () => {
     setSelectedConversationId(null);
@@ -68,6 +81,12 @@ const FreeConversationPage = () => {
   };
 
   const recordErrorMessage = getRecordErrorMessage(lastError);
+
+  const isConversationDetailLoadingState =
+    selectedConversationId !== null &&
+    !!accessToken &&
+    (isConversationDetailLoading ||
+      (isConversationDetailFetching && !selectedConversationDetail));
 
   return (
     <div className="h-full min-h-0 w-full overflow-hidden bg-white">
@@ -113,7 +132,17 @@ const FreeConversationPage = () => {
             <div className="pointer-events-none absolute inset-x-0 bottom-0 h-52 bg-gradient-to-t from-emerald-100/40 to-transparent" />
 
             <div className="relative flex-1 overflow-y-auto pr-1">
-              <ConversationMessages messages={selectedMessages} />
+              <ConversationMessages
+                messages={selectedConversationDetail?.messages ?? []}
+                isLoading={isConversationDetailLoadingState}
+                isError={isConversationDetailError}
+                errorMessage={
+                  conversationDetailError instanceof Error
+                    ? conversationDetailError.message
+                    : "대화 내용을 불러오지 못했어요."
+                }
+                onRetry={() => void refetchConversationDetail()}
+              />
             </div>
 
             {recordErrorMessage ? (
