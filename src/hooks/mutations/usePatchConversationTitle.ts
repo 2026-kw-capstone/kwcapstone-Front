@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+﻿import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { patchConversationTitle } from "../../apis/conversation";
 import { QUERY_KEY } from "../../constants/key";
 import { useGetMyInfo } from "../queries/useGetMyInfo";
@@ -15,7 +15,7 @@ type PatchConversationTitleVariables = {
 export const usePatchConversationTitle = () => {
   const queryClient = useQueryClient();
   const { data: myInfo } = useGetMyInfo();
-  const userId = myInfo?.id;
+  const userId = myInfo?.memberId;
 
   return useMutation({
     mutationFn: ({ conversationId, title }: PatchConversationTitleVariables) =>

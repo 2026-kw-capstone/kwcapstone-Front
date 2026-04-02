@@ -38,9 +38,3 @@ export type ResponseSignoutDto = {
   code: string;
   message: string;
 };
-
-export type ResponseMyInfoDto = ApiResponse<{
-  id: number | string;
-  email: string;
-  name: string;
-}>;

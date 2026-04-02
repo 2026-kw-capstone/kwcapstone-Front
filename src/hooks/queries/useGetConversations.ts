@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+﻿import { useQuery } from "@tanstack/react-query";
 import { getConversationList } from "../../apis/conversation";
 import { QUERY_KEY } from "../../constants/key";
 import { useAuth } from "../../contexts/AuthContext";
@@ -16,7 +16,7 @@ const mapConversationSummary = (
 export const useGetConversations = () => {
   const { accessToken } = useAuth();
   const { data: myInfo } = useGetMyInfo();
-  const userId = myInfo?.id;
+  const userId = myInfo?.memberId;
 
   return useQuery({
     queryKey: [QUERY_KEY.conversations, userId],
