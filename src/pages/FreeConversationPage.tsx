@@ -12,6 +12,7 @@ import { useRecord } from "../contexts/RecordContext";
 import { useRecordUploadFlow } from "../hooks/audio/useRecordUploadFlow";
 import { useDeleteConversation } from "../hooks/mutations/useDeleteConversation";
 import { usePatchConversationTitle } from "../hooks/mutations/usePatchConversationTitle";
+import { usePostTextMessage } from "../hooks/mutations/usePostTextMessage";
 import { useGetConversationDetail } from "../hooks/queries/useGetConversationDetail";
 import { useGetConversations } from "../hooks/queries/useGetConversations";
 
@@ -31,6 +32,22 @@ const getDeleteErrorMessage = (error: unknown) => {
   return "대화 삭제에 실패했습니다.";
 };
 
+const getTextMessageErrorMessage = (error: unknown) => {
+  if (isAxiosError(error)) {
+    const message = error.response?.data?.message;
+
+    if (typeof message === "string" && message.trim()) {
+      return message;
+    }
+  }
+
+  if (error instanceof Error && error.message.trim()) {
+    return error.message;
+  }
+
+  return "메시지 전송에 실패했습니다.";
+};
+
 const FreeConversationPage = () => {
   const navigate = useNavigate();
   const { accessToken } = useAuth();
@@ -43,6 +60,11 @@ const FreeConversationPage = () => {
 
   const patchConversationTitleMutation = usePatchConversationTitle();
   const deleteConversationMutation = useDeleteConversation();
+  const postTextMessageMutation = usePostTextMessage({
+    onConversationCreated: (conversationId) => {
+      setSelectedConversationId(conversationId);
+    },
+  });
 
   const {
     data: conversations = [],
@@ -88,15 +110,29 @@ const FreeConversationPage = () => {
   const handleNewConversation = () => {
     setSelectedConversationId(null);
     setIsMobileConversationListOpen(false);
+    postTextMessageMutation.clearPendingNewConversationMessages();
   };
 
   const handleSelectConversation = (conversationId: number) => {
     setSelectedConversationId(conversationId);
     setIsMobileConversationListOpen(false);
+    postTextMessageMutation.clearPendingNewConversationMessages();
   };
 
   const handleToggleVoiceRecord = async () => {
     await toggleRecordAndUpload();
+  };
+
+  const handleSubmitTextMessage = async (content: string) => {
+    try {
+      await postTextMessageMutation.sendTextMessage({
+        conversationId: selectedConversationId,
+        content,
+      });
+    } catch (error) {
+      alert(getTextMessageErrorMessage(error));
+      throw error;
+    }
   };
 
   const handleSubmitEditConversation = async (
@@ -141,6 +177,11 @@ const FreeConversationPage = () => {
     !!accessToken &&
     (isConversationDetailLoading ||
       (isConversationDetailFetching && !selectedConversationDetail));
+
+  const messages =
+    selectedConversationId !== null
+      ? selectedConversationDetail?.messages ?? []
+      : postTextMessageMutation.pendingNewConversationMessages;
 
   return (
     <div className="h-full min-h-0 w-full overflow-hidden bg-white">
@@ -195,7 +236,8 @@ const FreeConversationPage = () => {
 
             <div className="relative flex-1 overflow-y-auto pr-1">
               <ConversationMessages
-                messages={selectedConversationDetail?.messages ?? []}
+                conversationId={selectedConversationId}
+                messages={messages}
                 isLoading={isConversationDetailLoadingState}
                 isError={isConversationDetailError}
                 errorMessage={
@@ -215,10 +257,12 @@ const FreeConversationPage = () => {
 
             <ConversationInput
               isRecording={isRecording}
+              isTextBusy={postTextMessageMutation.isPending}
               isVoiceBusy={
                 status === "requesting_permission" || status === "stopping" || isUploading
               }
               onToggleVoiceRecord={handleToggleVoiceRecord}
+              onSubmitText={handleSubmitTextMessage}
             />
           </div>
         </section>

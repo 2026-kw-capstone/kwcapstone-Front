@@ -1,4 +1,5 @@
 ﻿import { Smile } from "lucide-react";
+import { useEffect, useRef } from "react";
 import type { ConversationMessageGroup } from "../../types/freeConversationType";
 import {
   ConversationMessagesErrorState,
@@ -6,6 +7,7 @@ import {
 } from "./ConversationMessagesState";
 
 type ConversationMessagesProps = {
+  conversationId: number | null;
   messages: ConversationMessageGroup[];
   isLoading: boolean;
   isError: boolean;
@@ -14,12 +16,33 @@ type ConversationMessagesProps = {
 };
 
 const ConversationMessages = ({
+  conversationId,
   messages,
   isLoading,
   isError,
   errorMessage,
   onRetry,
 }: ConversationMessagesProps) => {
+  const bottomRef = useRef<HTMLLIElement | null>(null);
+  const prevConversationIdRef = useRef<number | null>(conversationId);
+  const shouldScrollOnConversationChangeRef = useRef(false);
+
+  useEffect(() => {
+    if (prevConversationIdRef.current !== conversationId) {
+      prevConversationIdRef.current = conversationId;
+      shouldScrollOnConversationChangeRef.current = true;
+    }
+  }, [conversationId]);
+
+  useEffect(() => {
+    if (!shouldScrollOnConversationChangeRef.current || isLoading) {
+      return;
+    }
+
+    bottomRef.current?.scrollIntoView({ block: "end" });
+    shouldScrollOnConversationChangeRef.current = false;
+  }, [isLoading, messages.length]);
+
   if (isLoading) {
     return <ConversationMessagesLoadingState />;
   }
@@ -90,16 +113,28 @@ const ConversationMessages = ({
                 {aiMessage.content}
               </div>
             </li>
-          ) : null,
+          ) : (
+            <li key={`message-skeleton-${group.clientRequestId}`} className="flex justify-start">
+              <div className="h-11 w-[70%] animate-pulse rounded-bl-md rounded-xl bg-slate-200" />
+            </li>
+          ),
           feedback ? (
             <li key={`feedback-${feedback.feedbackId}`} className="flex justify-center">
               <div className="max-w-[92%] rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-[12px] leading-5 text-amber-800">
                 {feedback.content}
               </div>
             </li>
-          ) : null,
+          ) : (
+            <li
+              key={`feedback-skeleton-${group.clientRequestId}`}
+              className="flex justify-center"
+            >
+              <div className="h-8 w-[82%] animate-pulse rounded-xl bg-amber-100" />
+            </li>
+          ),
         ];
       })}
+      <li ref={bottomRef} aria-hidden="true" />
     </ul>
   );
 };

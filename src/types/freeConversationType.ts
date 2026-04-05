@@ -43,6 +43,19 @@ export type ConversationDetail = {
   messages: ConversationMessageGroup[];
 };
 
+export type RequestPostTextMessageDto = {
+  conversationId: number | null;
+  clientRequestId: string;
+  content: string;
+};
+
+export type PostTextMessageResult = {
+  conversationId: number;
+  userMessage: ConversationUserMessage;
+  aiMessage: ConversationAiMessage;
+  feedback: ConversationFeedback;
+};
+
 export type RequestPatchConversationTitleDto = {
   title: string;
 };
@@ -56,6 +69,9 @@ export type ResponseConversationListDto = ApiResponse<ConversationSummary[]>;
 export type ResponseConversationDetailDto = ApiResponse<ConversationDetail>;
 export type ResponsePatchConversationTitleDto =
   ApiResponse<PatchConversationTitleResult>;
+export type ResponsePostTextMessageDto = ApiResponse<PostTextMessageResult> & {
+  clientRequestId: string;
+};
 
 export type ResponseDeleteConversationDto = {
   isSuccess: boolean;

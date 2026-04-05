@@ -1,9 +1,11 @@
 import { axiosInstance } from "./axios";
 import type {
+  RequestPostTextMessageDto,
   RequestPatchConversationTitleDto,
   ResponseDeleteConversationDto,
   ResponseConversationDetailDto,
   ResponseConversationListDto,
+  ResponsePostTextMessageDto,
   ResponsePatchConversationTitleDto,
 } from "../types/freeConversationType";
 
@@ -29,6 +31,13 @@ export const patchConversationTitle = async (
     payload
   );
 
+  return data;
+};
+
+export const postTextMessage = async (
+  payload: RequestPostTextMessageDto
+): Promise<ResponsePostTextMessageDto> => {
+  const { data } = await axiosInstance.post("/api/messages/text", payload);
   return data;
 };
 
