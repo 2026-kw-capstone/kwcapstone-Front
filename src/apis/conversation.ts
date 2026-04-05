@@ -1,6 +1,7 @@
 import { axiosInstance } from "./axios";
 import type {
   RequestPatchConversationTitleDto,
+  ResponseDeleteConversationDto,
   ResponseConversationDetailDto,
   ResponseConversationListDto,
   ResponsePatchConversationTitleDto,
@@ -28,5 +29,12 @@ export const patchConversationTitle = async (
     payload
   );
 
+  return data;
+};
+
+export const deleteConversation = async (
+  conversationId: number
+): Promise<ResponseDeleteConversationDto> => {
+  const { data } = await axiosInstance.delete(`/api/conversations/${conversationId}`);
   return data;
 };

@@ -56,3 +56,9 @@ export type ResponseConversationListDto = ApiResponse<ConversationSummary[]>;
 export type ResponseConversationDetailDto = ApiResponse<ConversationDetail>;
 export type ResponsePatchConversationTitleDto =
   ApiResponse<PatchConversationTitleResult>;
+
+export type ResponseDeleteConversationDto = {
+  isSuccess: boolean;
+  code: string;
+  message: string;
+};

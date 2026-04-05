@@ -1,3 +1,4 @@
+﻿import { isAxiosError } from "axios";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { uploadFreeConversationVoice } from "../apis/voicePlaceholder";
@@ -9,22 +10,40 @@ import { getRecordErrorMessage } from "../constants/recordingMessage";
 import { useAuth } from "../contexts/AuthContext";
 import { useRecord } from "../contexts/RecordContext";
 import { useRecordUploadFlow } from "../hooks/audio/useRecordUploadFlow";
+import { useDeleteConversation } from "../hooks/mutations/useDeleteConversation";
 import { usePatchConversationTitle } from "../hooks/mutations/usePatchConversationTitle";
 import { useGetConversationDetail } from "../hooks/queries/useGetConversationDetail";
 import { useGetConversations } from "../hooks/queries/useGetConversations";
 
+const getDeleteErrorMessage = (error: unknown) => {
+  if (isAxiosError(error)) {
+    const message = error.response?.data?.message;
+
+    if (typeof message === "string" && message.trim()) {
+      return message;
+    }
+  }
+
+  if (error instanceof Error && error.message.trim()) {
+    return error.message;
+  }
+
+  return "대화 삭제에 실패했습니다.";
+};
+
 const FreeConversationPage = () => {
   const navigate = useNavigate();
   const { accessToken } = useAuth();
-  // 전역 녹음 컨텍스트: 시작/종료와 상태만 담당
-  const { isRecording, status, lastError, startRecording, stopRecording } =
-    useRecord();
+  const { isRecording, status, lastError, startRecording, stopRecording } = useRecord();
   const [selectedConversationId, setSelectedConversationId] = useState<number | null>(
     null
   );
   const [isMobileConversationListOpen, setIsMobileConversationListOpen] =
     useState(false);
+
   const patchConversationTitleMutation = usePatchConversationTitle();
+  const deleteConversationMutation = useDeleteConversation();
+
   const {
     data: conversations = [],
     isLoading: isConversationListLoading,
@@ -32,6 +51,7 @@ const FreeConversationPage = () => {
     error: conversationListError,
     refetch: refetchConversationList,
   } = useGetConversations();
+
   const {
     data: selectedConversationDetail,
     isLoading: isConversationDetailLoading,
@@ -41,14 +61,12 @@ const FreeConversationPage = () => {
     refetch: refetchConversationDetail,
   } = useGetConversationDetail(selectedConversationId);
 
-  // 녹음 종료 시 Blob을 업로드하고, 응답은 추후 사용자 메시지(voiceUrl 포함)로 반영할 예정
   const { isUploading, toggleRecordAndUpload } = useRecordUploadFlow({
     isRecording,
     status,
     startRecording,
     stopRecording,
     uploadFn: uploadFreeConversationVoice,
-    // TODO: API 연동 시 mp3Url/voiceUrl을 사용자 메시지에 저장해 ConversationMessages로 전달
   });
 
   const currentConversationTitle = useMemo(() => {
@@ -78,7 +96,6 @@ const FreeConversationPage = () => {
   };
 
   const handleToggleVoiceRecord = async () => {
-    // 녹음 버튼 재클릭 시 업로드까지 이어지는 공통 흐름
     await toggleRecordAndUpload();
   };
 
@@ -90,6 +107,31 @@ const FreeConversationPage = () => {
       conversationId,
       title,
     });
+  };
+
+  const handleDeleteConversation = async (conversationId: number) => {
+    const currentSelectedConversationId = selectedConversationId;
+    const wasSelectedConversation = currentSelectedConversationId === conversationId;
+
+    if (wasSelectedConversation) {
+      setSelectedConversationId(null);
+    }
+
+    setIsMobileConversationListOpen(false);
+
+    try {
+      await deleteConversationMutation.mutateAsync({
+        conversationId,
+        selectedConversationId: currentSelectedConversationId,
+      });
+    } catch (error) {
+      if (wasSelectedConversation) {
+        setSelectedConversationId(conversationId);
+      }
+
+      alert(getDeleteErrorMessage(error));
+      throw error;
+    }
   };
 
   const recordErrorMessage = getRecordErrorMessage(lastError);
@@ -132,7 +174,11 @@ const FreeConversationPage = () => {
           editingSubmitConversationId={
             patchConversationTitleMutation.variables?.conversationId ?? null
           }
-          onDeleteConversation={() => void 0}
+          onDeleteConversation={handleDeleteConversation}
+          isDeleteSubmitting={deleteConversationMutation.isPending}
+          deletingSubmitConversationId={
+            deleteConversationMutation.variables?.conversationId ?? null
+          }
         />
 
         <section className="relative flex min-h-0 flex-1 flex-col overflow-hidden bg-gradient-to-b from-white via-[#f8fbff] to-[#edf5f3]">
@@ -169,7 +215,6 @@ const FreeConversationPage = () => {
 
             <ConversationInput
               isRecording={isRecording}
-              // 권한 요청/종료/업로드 중에는 중복 입력을 막아 버튼을 잠급니다.
               isVoiceBusy={
                 status === "requesting_permission" || status === "stopping" || isUploading
               }
@@ -183,3 +228,4 @@ const FreeConversationPage = () => {
 };
 
 export default FreeConversationPage;
+
