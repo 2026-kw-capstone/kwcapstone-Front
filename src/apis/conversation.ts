@@ -6,6 +6,7 @@ import type {
   ResponseConversationDetailDto,
   ResponseConversationListDto,
   ResponsePostTextMessageDto,
+  ResponsePostVoiceMessageDto,
   ResponsePatchConversationTitleDto,
 } from "../types/freeConversationType";
 
@@ -38,6 +39,26 @@ export const postTextMessage = async (
   payload: RequestPostTextMessageDto
 ): Promise<ResponsePostTextMessageDto> => {
   const { data } = await axiosInstance.post("/api/messages/text", payload);
+  return data;
+};
+
+export const postVoiceMessage = async ({
+  conversationId,
+  clientRequestId,
+  voiceFile,
+}: {
+  conversationId: number | null;
+  clientRequestId: string;
+  voiceFile: Blob;
+}): Promise<ResponsePostVoiceMessageDto> => {
+  const formData = new FormData();
+  if (conversationId !== null) {
+    formData.append("conversationId", String(conversationId));
+  }
+  formData.append("clientRequestId", clientRequestId);
+  formData.append("voiceFile", voiceFile, "voice-message.webm");
+
+  const { data } = await axiosInstance.post("/api/messages/voice", formData);
   return data;
 };
 

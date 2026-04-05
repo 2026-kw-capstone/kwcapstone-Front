@@ -1,7 +1,6 @@
 ﻿import { isAxiosError } from "axios";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { uploadFreeConversationVoice } from "../apis/voicePlaceholder";
 import ConversationHeader from "../components/free-conversation/ConversationHeader";
 import ConversationInput from "../components/free-conversation/ConversationInput";
 import ConversationMessages from "../components/free-conversation/ConversationMessages";
@@ -13,6 +12,7 @@ import { useRecordUploadFlow } from "../hooks/audio/useRecordUploadFlow";
 import { useDeleteConversation } from "../hooks/mutations/useDeleteConversation";
 import { usePatchConversationTitle } from "../hooks/mutations/usePatchConversationTitle";
 import { usePostTextMessage } from "../hooks/mutations/usePostTextMessage";
+import { usePostVoiceMessage } from "../hooks/mutations/usePostVoiceMessage";
 import { useGetConversationDetail } from "../hooks/queries/useGetConversationDetail";
 import { useGetConversations } from "../hooks/queries/useGetConversations";
 
@@ -48,6 +48,22 @@ const getTextMessageErrorMessage = (error: unknown) => {
   return "메시지 전송에 실패했습니다.";
 };
 
+const getVoiceMessageErrorMessage = (error: unknown) => {
+  if (isAxiosError(error)) {
+    const message = error.response?.data?.message;
+
+    if (typeof message === "string" && message.trim()) {
+      return message;
+    }
+  }
+
+  if (error instanceof Error && error.message.trim()) {
+    return error.message;
+  }
+
+  return "음성 메시지 전송에 실패했습니다.";
+};
+
 const FreeConversationPage = () => {
   const navigate = useNavigate();
   const { accessToken } = useAuth();
@@ -61,6 +77,11 @@ const FreeConversationPage = () => {
   const patchConversationTitleMutation = usePatchConversationTitle();
   const deleteConversationMutation = useDeleteConversation();
   const postTextMessageMutation = usePostTextMessage({
+    onConversationCreated: (conversationId) => {
+      setSelectedConversationId(conversationId);
+    },
+  });
+  const postVoiceMessageMutation = usePostVoiceMessage({
     onConversationCreated: (conversationId) => {
       setSelectedConversationId(conversationId);
     },
@@ -88,7 +109,11 @@ const FreeConversationPage = () => {
     status,
     startRecording,
     stopRecording,
-    uploadFn: uploadFreeConversationVoice,
+    uploadFn: (blob) =>
+      postVoiceMessageMutation.sendVoiceMessage({
+        conversationId: selectedConversationId,
+        voiceFile: blob,
+      }),
   });
 
   const currentConversationTitle = useMemo(() => {
@@ -111,16 +136,22 @@ const FreeConversationPage = () => {
     setSelectedConversationId(null);
     setIsMobileConversationListOpen(false);
     postTextMessageMutation.clearPendingNewConversationMessages();
+    postVoiceMessageMutation.clearPendingNewConversationMessages();
   };
 
   const handleSelectConversation = (conversationId: number) => {
     setSelectedConversationId(conversationId);
     setIsMobileConversationListOpen(false);
     postTextMessageMutation.clearPendingNewConversationMessages();
+    postVoiceMessageMutation.clearPendingNewConversationMessages();
   };
 
   const handleToggleVoiceRecord = async () => {
-    await toggleRecordAndUpload();
+    try {
+      await toggleRecordAndUpload();
+    } catch (error) {
+      alert(getVoiceMessageErrorMessage(error));
+    }
   };
 
   const handleSubmitTextMessage = async (content: string) => {
@@ -181,7 +212,17 @@ const FreeConversationPage = () => {
   const messages =
     selectedConversationId !== null
       ? selectedConversationDetail?.messages ?? []
-      : postTextMessageMutation.pendingNewConversationMessages;
+      : [
+          ...postTextMessageMutation.pendingNewConversationMessages,
+          ...postVoiceMessageMutation.pendingNewConversationMessages,
+        ].sort((a, b) => {
+          const aTime = a.userMessage ? new Date(a.userMessage.createdAt).getTime() : 0;
+          const bTime = b.userMessage ? new Date(b.userMessage.createdAt).getTime() : 0;
+          return aTime - bTime;
+        });
+
+  const isMessageBusy =
+    postTextMessageMutation.isPending || postVoiceMessageMutation.isPending;
 
   return (
     <div className="h-full min-h-0 w-full overflow-hidden bg-white">
@@ -257,7 +298,7 @@ const FreeConversationPage = () => {
 
             <ConversationInput
               isRecording={isRecording}
-              isTextBusy={postTextMessageMutation.isPending}
+              isTextBusy={isMessageBusy}
               isVoiceBusy={
                 status === "requesting_permission" || status === "stopping" || isUploading
               }
@@ -272,4 +313,3 @@ const FreeConversationPage = () => {
 };
 
 export default FreeConversationPage;
-

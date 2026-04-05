@@ -49,7 +49,7 @@ export type RequestPostTextMessageDto = {
   content: string;
 };
 
-export type PostTextMessageResult = {
+export type PostConversationMessageResult = {
   conversationId: number;
   userMessage: ConversationUserMessage;
   aiMessage: ConversationAiMessage;
@@ -69,7 +69,10 @@ export type ResponseConversationListDto = ApiResponse<ConversationSummary[]>;
 export type ResponseConversationDetailDto = ApiResponse<ConversationDetail>;
 export type ResponsePatchConversationTitleDto =
   ApiResponse<PatchConversationTitleResult>;
-export type ResponsePostTextMessageDto = ApiResponse<PostTextMessageResult> & {
+export type ResponsePostTextMessageDto = ApiResponse<PostConversationMessageResult> & {
+  clientRequestId: string;
+};
+export type ResponsePostVoiceMessageDto = ApiResponse<PostConversationMessageResult> & {
   clientRequestId: string;
 };
 
