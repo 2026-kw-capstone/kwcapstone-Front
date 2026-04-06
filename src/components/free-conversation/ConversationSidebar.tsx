@@ -11,7 +11,6 @@ type ConversationSidebarProps = {
   isLoading: boolean;
   isError: boolean;
   errorMessage?: string;
-  isEmpty: boolean;
   onNewConversation: () => void;
   onRetry: () => void;
   onSelectConversation: (conversationId: number) => void;
@@ -30,7 +29,6 @@ const ConversationSidebar = ({
   isLoading,
   isError,
   errorMessage,
-  isEmpty,
   onNewConversation,
   onRetry,
   onSelectConversation,
@@ -44,6 +42,7 @@ const ConversationSidebar = ({
   const [editingConversationId, setEditingConversationId] = useState<number | null>(null);
   const [deleteTargetConversation, setDeleteTargetConversation] =
     useState<ConversationSummary | null>(null);
+  const isEmpty = conversations.length === 0;
 
   const finishEditing = () => {
     setEditingConversationId(null);
