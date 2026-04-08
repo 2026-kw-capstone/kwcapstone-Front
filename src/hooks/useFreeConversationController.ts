@@ -86,7 +86,7 @@ export const useFreeConversationController = () => {
 
   const currentConversationTitle = useMemo(() => {
     if (!selectedConversationId) {
-      return "New conversation";
+      return "새 대화";
     }
 
     if (selectedConversationDetail?.title) {

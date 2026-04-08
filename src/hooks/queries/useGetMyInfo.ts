@@ -10,6 +10,5 @@ export const useGetMyInfo = () => {
     queryKey: [QUERY_KEY.myInfo],
     queryFn: getMyInfo,
     enabled: !!accessToken,
-    select: (response) => response.result,
   });
 };

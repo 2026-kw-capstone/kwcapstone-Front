@@ -99,6 +99,12 @@ const ConversationMessages = ({
                     브라우저가 음성 재생을 지원하지 않습니다.
                   </audio>
                 ) : null}
+                {userMessage.inputType === "VOICE" &&
+                (!userMessage.content || !userMessage.content.trim()) ? (
+                  <p className="mt-2 text-xs text-emerald-50/90">
+                    녹음본을 생성 중입니다.
+                  </p>
+                ) : null}
                 {userMessage.inputType === "VOICE" && !userMessage.voiceUrl ? (
                   <p className="text-xs text-emerald-50/90">
                     음성 파일을 불러오지 못했어요.
@@ -119,17 +125,17 @@ const ConversationMessages = ({
             </li>
           ),
           feedback ? (
-            <li key={`feedback-${feedback.feedbackId}`} className="flex justify-center">
-              <div className="max-w-[92%] rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-[12px] leading-5 text-amber-800">
+            <li key={`feedback-${feedback.feedbackId}`} className="flex justify-start">
+              <div className="max-w-[85%] rounded-bl-md rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-[13px] leading-5 text-slate-700">
                 {feedback.content}
               </div>
             </li>
           ) : (
             <li
               key={`feedback-skeleton-${group.clientRequestId}`}
-              className="flex justify-center"
+              className="flex justify-start"
             >
-              <div className="h-8 w-[82%] animate-pulse rounded-xl bg-amber-100" />
+              <div className="h-11 w-[70%] animate-pulse rounded-bl-md rounded-xl bg-slate-200" />
             </li>
           ),
         ];

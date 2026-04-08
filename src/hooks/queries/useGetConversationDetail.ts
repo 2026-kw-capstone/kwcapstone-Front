@@ -1,8 +1,7 @@
-﻿import { useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { getConversationDetail } from "../../apis/conversation";
 import { QUERY_KEY } from "../../constants/key";
 import { useAuth } from "../../contexts/AuthContext";
-import type { ConversationDetail } from "../../types/freeConversationType";
 
 export const useGetConversationDetail = (
   conversationId: number | null
@@ -17,6 +16,5 @@ export const useGetConversationDetail = (
     refetchOnWindowFocus: false,
     retry: 1,
     placeholderData: undefined,
-    select: (response): ConversationDetail => response.result,
   });
 };

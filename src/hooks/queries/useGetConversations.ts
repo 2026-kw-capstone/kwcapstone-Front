@@ -1,4 +1,4 @@
-﻿import { useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { getConversationList } from "../../apis/conversation";
 import { QUERY_KEY } from "../../constants/key";
 import { useAuth } from "../../contexts/AuthContext";
@@ -20,18 +20,20 @@ export const useGetConversations = () => {
 
   return useQuery({
     queryKey: [QUERY_KEY.conversations, userId],
-    queryFn: getConversationList,
-    enabled: !!accessToken && userId !== null && userId !== undefined,
-    staleTime: 60 * 1000,
-    refetchOnWindowFocus: false,
-    retry: 1,
-    select: (response) =>
-      response.result
+    queryFn: async () => {
+      const conversations = await getConversationList();
+
+      return conversations
         .map(mapConversationSummary)
         .sort(
           (a, b) =>
             new Date(b.lastMessageAt).getTime() -
             new Date(a.lastMessageAt).getTime()
-        ),
+        );
+    },
+    enabled: !!accessToken && userId !== null && userId !== undefined,
+    staleTime: 60 * 1000,
+    refetchOnWindowFocus: false,
+    retry: 1,
   });
 };

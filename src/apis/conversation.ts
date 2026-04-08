@@ -1,26 +1,25 @@
 import { axiosInstance } from "./axios";
 import type {
+  ConversationDetail,
+  ConversationSummary,
   RequestPostTextMessageDto,
   RequestPatchConversationTitleDto,
   ResponseDeleteConversationDto,
-  ResponseConversationDetailDto,
-  ResponseConversationListDto,
   ResponsePostTextMessageDto,
   ResponsePostVoiceMessageDto,
   ResponsePatchConversationTitleDto,
 } from "../types/freeConversationType";
 
-export const getConversationList =
-  async (): Promise<ResponseConversationListDto> => {
-    const { data } = await axiosInstance.get("/api/conversations");
-    return data;
-  };
+export const getConversationList = async (): Promise<ConversationSummary[]> => {
+  const { data } = await axiosInstance.get("/api/conversations");
+  return data.result;
+};
 
 export const getConversationDetail = async (
   conversationId: number
-): Promise<ResponseConversationDetailDto> => {
+): Promise<ConversationDetail> => {
   const { data } = await axiosInstance.get(`/api/conversations/${conversationId}`);
-  return data;
+  return data.result;
 };
 
 export const patchConversationTitle = async (
