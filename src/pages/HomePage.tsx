@@ -7,7 +7,7 @@ import { useGetMyInfo } from "../hooks/queries/useGetMyInfo";
 const HomePage = () => {
   const { data: myInfo } = useGetMyInfo();
 
-  const userName = myInfo?.name ?? "사용자";
+  const userName = myInfo?.nickname ?? "사용자";
 
   return (
     <div className="mx-auto flex w-full max-w-md flex-col gap-5">

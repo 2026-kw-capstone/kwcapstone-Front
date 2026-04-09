@@ -1,4 +1,6 @@
-﻿import {
+﻿/* eslint-disable react-refresh/only-export-components */
+import { useQueryClient } from "@tanstack/react-query";
+import {
   createContext,
   useContext,
   useEffect,
@@ -25,6 +27,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: PropsWithChildren) => {
+  const queryClient = useQueryClient();
   const [accessTokenState, setAccessTokenState] = useState<string | null>(
     getStoredAccessToken()
   );
@@ -51,6 +54,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
   };
 
   const logout = () => {
+    queryClient.clear();
     setAccessToken(null);
     // setRefreshToken(null);
   };
@@ -93,3 +97,5 @@ export const useAuth = () => {
 
   return context;
 };
+
+

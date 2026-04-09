@@ -9,7 +9,7 @@ const Header = () => {
   const { mutate: signout, isPending: isSignoutPending } = usePostSignout();
   const { data: myInfo } = useGetMyInfo();
 
-  const userName = myInfo?.name ?? "사용자";
+  const userName = myInfo?.nickname ?? "사용자";
 
   return (
     <header className="fixed left-1/2 top-0 z-50 h-16 w-full max-w-[430px] -translate-x-1/2 border-b border-slate-200 bg-white/95 backdrop-blur-sm">

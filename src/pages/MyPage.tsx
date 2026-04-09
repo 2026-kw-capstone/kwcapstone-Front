@@ -13,7 +13,7 @@ const MyPage = () => {
   const { data: myInfo } = useGetMyInfo();
   const { mutate: signout, isPending: isSignoutPending } = usePostSignout();
 
-  const initialNickname = useMemo(() => myInfo?.name ?? "홍길동", [myInfo?.name]);
+  const initialNickname = useMemo(() => myInfo?.nickname ?? "홍길동", [myInfo?.nickname]);
   const email = myInfo?.email ?? "name@email.com";
 
   const [nickname, setNickname] = useState(initialNickname);
