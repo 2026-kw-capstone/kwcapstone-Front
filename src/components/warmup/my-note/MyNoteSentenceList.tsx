@@ -20,6 +20,7 @@ const MyNoteSentenceList = ({
   onDeleteSentence,
 }: MyNoteSentenceListProps) => {
   const [inputValue, setInputValue] = useState("");
+  const canSubmit = !!inputValue.trim() && !isAdding;
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -32,24 +33,28 @@ const MyNoteSentenceList = ({
   };
 
   return (
-    <section className="rounded-[24px] border border-slate-200 bg-white p-4 shadow-sm">
+    <section>
       <div className="mb-4 flex flex-col gap-3">
-        <h2 className="text-lg font-bold text-slate-900">문장 목록</h2>
+        <h2 className="ml-1 font-bold text-slate-900">저장된 문장</h2>
 
-        <form onSubmit={handleSubmit} className="flex w-full flex-col gap-2">
+        <form onSubmit={handleSubmit} className="flex w-full items-center gap-2">
           <input
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
-            placeholder="연습할 문장을 입력해주세요"
+            placeholder="연습할 새 문장을 입력해주세요"
             className="min-h-12 w-full flex-1 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-emerald-400"
           />
           <button
             type="submit"
-            disabled={!inputValue.trim() || isAdding}
-            className="inline-flex min-h-12 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-2xl bg-emerald-500 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:bg-slate-300"
+            disabled={!canSubmit}
+            className={`inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl transition ${
+              canSubmit
+                ? "cursor-pointer bg-emerald-500 text-white shadow-sm hover:bg-emerald-600"
+                : "cursor-not-allowed bg-slate-200 text-slate-400"
+            }`}
+            aria-label={isAdding ? "문장 추가 중" : "문장 추가"}
           >
             <Plus size={18} />
-            {isAdding ? "추가 중..." : "추가"}
           </button>
         </form>
       </div>
@@ -98,12 +103,6 @@ const MyNoteSentenceList = ({
             );
           })
         )}
-      </div>
-
-      <div className="mt-5 rounded-2xl bg-emerald-50/70 px-4 py-4 text-sm leading-6 text-slate-600">
-        이전에 추가한 문장도 다시 연습할 수 있어요.
-        <br />
-        문장을 클릭하면 학습 영역으로 불러오고, 오른쪽 버튼으로 바로 삭제할 수 있습니다.
       </div>
     </section>
   );
