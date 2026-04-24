@@ -7,7 +7,6 @@ import BasicSpeakResultCard from "../../components/warmup/basic-speak/BasicSpeak
 import BasicSpeakStudyCard from "../../components/warmup/basic-speak/BasicSpeakStudyCard";
 import { getBasicSpeakCardById } from "../../constants/basicSpeak";
 import { useRecord } from "../../contexts/RecordContext";
-import { useAudioPlayer } from "../../hooks/audio/useAudioPlayer";
 import { useRecordUploadFlow } from "../../hooks/audio/useRecordUploadFlow";
 
 type PracticeResult = {
@@ -20,10 +19,8 @@ const BasicSpeakPracticePage = () => {
   const { cardId } = useParams<{ cardId: string }>();
   const { isRecording, status, lastError, startRecording, stopRecording } =
     useRecord();
-  const { setAudioUrl, clearAudioUrl } = useAudioPlayer();
   const card = useMemo(() => getBasicSpeakCardById(cardId), [cardId]);
 
-  const [hasRecordedAudio, setHasRecordedAudio] = useState(false);
   const [result, setResult] = useState<PracticeResult | null>(null);
 
   const { isUploading, toggleRecordAndUpload } = useRecordUploadFlow({
@@ -34,12 +31,8 @@ const BasicSpeakPracticePage = () => {
     uploadFn: uploadBasicSpeakVoice,
     onBeforeStart: () => {
       setResult(null);
-      setHasRecordedAudio(false);
-      clearAudioUrl();
     },
-    onUploadSuccess: ({ analysis, mp3Url }, blob) => {
-      setAudioUrl(mp3Url || URL.createObjectURL(blob));
-      setHasRecordedAudio(true);
+    onUploadSuccess: ({ analysis }) => {
       setResult({
         pronunciationScore: analysis.pronunciationScore,
         stabilityScore: analysis.stabilityScore,
@@ -76,7 +69,7 @@ const BasicSpeakPracticePage = () => {
       <section className="grid grid-cols-1 gap-4">
         <BasicSpeakStudyCard
           card={card}
-          hasRecordedAudio={hasRecordedAudio}
+          hasResult={!!result}
           isRecording={isRecording}
           isInteractionLocked={isUploading}
           onRecord={handleRecord}

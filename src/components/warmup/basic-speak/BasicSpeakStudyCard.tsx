@@ -3,7 +3,7 @@ import type { BasicSpeakCardItem } from "../../../types/basicSpeakType";
 
 interface BasicSpeakStudyCardProps {
   card: BasicSpeakCardItem;
-  hasRecordedAudio: boolean;
+  hasResult: boolean;
   isRecording?: boolean;
   isInteractionLocked?: boolean;
   onRecord: () => void;
@@ -11,7 +11,7 @@ interface BasicSpeakStudyCardProps {
 
 const BasicSpeakStudyCard = ({
   card,
-  hasRecordedAudio,
+  hasResult,
   isRecording = false,
   isInteractionLocked = false,
   onRecord,
@@ -38,7 +38,7 @@ const BasicSpeakStudyCard = ({
           onClick={onRecord}
           disabled={isInteractionLocked}
           className="mt-8 inline-flex h-20 w-20 cursor-pointer items-center justify-center rounded-full bg-emerald-500 text-white shadow-lg shadow-emerald-200 transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
-          aria-label={isRecording ? "녹음 중" : hasRecordedAudio ? "다시 녹음" : "녹음 시작"}
+          aria-label={isRecording ? "녹음 중" : hasResult ? "다시 녹음" : "녹음 시작"}
         >
           <Mic size={30} strokeWidth={2.2} />
         </button>
@@ -46,7 +46,7 @@ const BasicSpeakStudyCard = ({
         <p className="mt-4 text-sm font-semibold text-slate-400">
           {isRecording
             ? "녹음 중..."
-            : hasRecordedAudio
+            : hasResult
               ? "다시 녹음하려면 버튼을 누르세요"
               : "마이크를 눌러 시작"}
         </p>
