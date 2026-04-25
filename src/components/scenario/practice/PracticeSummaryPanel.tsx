@@ -1,60 +1,46 @@
-﻿import { Check } from "lucide-react";
-import BackLinkButton from "../../BackLinkButton";
+﻿import { Trophy } from "lucide-react";
 
 interface PracticeSummaryPanelProps {
   averageAccuracy: number;
   averageFluency: number;
-  onRestart: () => void;
   onBackToLevel: () => void;
 }
 
 const PracticeSummaryPanel = ({
   averageAccuracy,
   averageFluency,
-  onRestart,
   onBackToLevel,
 }: PracticeSummaryPanelProps) => {
   return (
-    <section className="rounded-3xl border border-emerald-200 bg-white p-6 shadow-sm">
-      <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-emerald-100 px-3 py-1 text-sm font-bold text-emerald-700">
-        <Check size={16} />
-        3단계 연습 완료
-      </div>
-
-      <h2 className="text-[30px] font-extrabold tracking-tight text-slate-900">최종 분석 결과</h2>
-      <p className="mt-2 text-sm text-slate-500">이번 연습의 전체 결과와 종합 피드백입니다.</p>
-
-      <div className="mt-5 grid grid-cols-1 gap-3">
-        <div className="rounded-2xl bg-slate-50 p-5">
-          <p className="text-sm font-semibold text-slate-500">평균 정확도</p>
-          <p className="mt-1 text-5xl font-extrabold text-blue-500">{averageAccuracy}%</p>
+    <section className="w-full max-w-[340px]">
+      <div className="flex flex-col items-center text-center">
+        <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
+          <Trophy size={28} />
         </div>
-        <div className="rounded-2xl bg-slate-50 p-5">
-          <p className="text-sm font-semibold text-slate-500">평균 유창성</p>
-          <p className="mt-1 text-5xl font-extrabold text-amber-500">{averageFluency}%</p>
+
+        <h2 className="mt-4 text-xl font-extrabold leading-tight tracking-tight text-slate-900">
+          모든 단계를 완료했어요!
+        </h2>
+      </div>
+
+      <div className="mt-5 grid grid-cols-2 gap-2.5">
+        <div className="rounded-2xl bg-gray-100 p-4 text-center">
+          <p className="text-xs font-semibold text-slate-500">평균 정확도</p>
+          <p className="mt-1.5 text-2xl font-extrabold text-emerald-600">{averageAccuracy}%</p>
+        </div>
+        <div className="rounded-2xl bg-gray-100 p-4 text-center">
+          <p className="text-xs font-semibold text-slate-500">평균 유창성</p>
+          <p className="mt-1.5 text-2xl font-extrabold text-teal-600">{averageFluency}%</p>
         </div>
       </div>
 
-      <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-        <p className="text-sm font-semibold text-slate-700">종합 피드백</p>
-        <p className="mt-2 text-sm leading-6 text-slate-600">
-          {averageAccuracy >= 90
-            ? "발음 정확도가 매우 좋습니다. 질문 문장의 억양을 조금 더 자연스럽게 주면 실전 전달력이 더 좋아질 수 있어요."
-            : "전달 의도는 좋습니다. 문장 첫 음절을 조금 더 또렷하게 발화해보세요."}
-        </p>
-      </div>
-
-      <div className="mt-6 flex flex-col gap-2">
-        <button
-          type="button"
-          onClick={onRestart}
-          className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
-        >
-          같은 단계 다시 연습
-        </button>
-
-        <BackLinkButton onClick={onBackToLevel} label="레벨 선택으로" />
-      </div>
+      <button
+        type="button"
+        onClick={onBackToLevel}
+        className="mt-5 w-full rounded-xl bg-emerald-500 px-4 py-3 text-sm font-bold text-white shadow-md shadow-emerald-100 transition hover:brightness-105"
+      >
+        종료하기
+      </button>
     </section>
   );
 };

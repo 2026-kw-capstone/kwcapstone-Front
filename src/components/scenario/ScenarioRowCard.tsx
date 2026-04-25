@@ -23,8 +23,8 @@ const ScenarioRowCard = ({ scenario, onClick, onDelete }: ScenarioRowCardProps) 
       </div>
 
       <div className="min-w-0 flex-1">
-        <p className="truncate text-lg font-bold text-slate-900">{scenario.title}</p>
-        <p className="mt-1 truncate text-sm text-slate-500">{scenario.description}</p>
+        <p className="truncate text-[15px] font-bold text-slate-900">{scenario.title}</p>
+        <p className="mt-1 truncate text-[13px] text-slate-500">{scenario.description}</p>
       </div>
 
       {onDelete && (

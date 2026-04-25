@@ -1,62 +1,40 @@
 ﻿import BackLinkButton from "../../BackLinkButton";
-import type { PracticeStep, StepResult } from "../../../types/scenarioPracticeType";
+import type { PracticeStep } from "../../../types/scenarioPracticeType";
 
 interface PracticeHeaderProps {
   scenarioName: string;
   levelLabel: string;
-  isSummaryMode: boolean;
   currentStepIndex: number;
+  currentStep: PracticeStep;
   steps: PracticeStep[];
-  resultsByStep: Array<StepResult | null>;
   onBack: () => void;
 }
 
 const PracticeHeader = ({
   scenarioName,
   levelLabel,
-  isSummaryMode,
   currentStepIndex,
+  currentStep,
   steps,
-  resultsByStep,
   onBack,
 }: PracticeHeaderProps) => {
+  const stepText = `Step ${currentStepIndex + 1}/${steps.length}`;
+  const levelText = levelLabel.replace("Level", "Lv.");
+
   return (
-    <header className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+    <header className="flex justify-between items-center px-3">
+      <div className="flex items-center gap-2">
         <BackLinkButton onClick={onBack} label="레벨 선택으로" />
-
-        <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5">
-          <p className="text-sm font-extrabold text-emerald-700">
-            {scenarioName}: {levelLabel}
-          </p>
-        </div>
-      </div>
-
-      {!isSummaryMode && (
-        <div className="mt-4">
-          <div className="grid grid-cols-3 gap-2">
-            {steps.map((step, index) => {
-              const isActive = index === currentStepIndex;
-              const isComplete = !!resultsByStep[index];
-
-              return (
-                <div
-                  key={step.step}
-                  className={`rounded-xl px-3 py-2 text-center text-sm font-bold transition ${
-                    isActive
-                      ? "bg-emerald-500 text-white"
-                      : isComplete
-                        ? "bg-emerald-50 text-emerald-700"
-                        : "bg-slate-100 text-slate-400"
-                  }`}
-                >
-                  Step {step.step}
-                </div>
-              );
-            })}
+          <div className="flex gap-2">
+            <span className="shrink-0 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-bold text-emerald-700">
+              {stepText}
+            </span>
+            <p className="truncate text-sm font-extrabold text-slate-900">{currentStep.title}</p>
           </div>
-        </div>
-      )}
+      </div>
+      <p className="text-center text-xs font-semibold text-slate-500">
+        {scenarioName} · {levelText}
+      </p>
     </header>
   );
 };
