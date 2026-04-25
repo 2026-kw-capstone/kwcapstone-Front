@@ -1,22 +1,26 @@
 ﻿import { ShieldAlert, X } from "lucide-react";
-import type { FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import ModalBackdrop from "../ModalBackdrop";
 
 interface WithdrawModalProps {
-  confirmText: string;
-  isSubmitDisabled: boolean;
   onClose: () => void;
-  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
-  onConfirmTextChange: (value: string) => void;
+  onSubmit: () => void;
 }
 
-const WithdrawModal = ({
-  confirmText,
-  isSubmitDisabled,
-  onClose,
-  onSubmit,
-  onConfirmTextChange,
-}: WithdrawModalProps) => {
+const WithdrawModal = ({ onClose, onSubmit }: WithdrawModalProps) => {
+  const [confirmText, setConfirmText] = useState("");
+  const isSubmitDisabled = confirmText !== "탈퇴";
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (isSubmitDisabled) {
+      return;
+    }
+
+    onSubmit();
+  };
+
   return (
     <ModalBackdrop onClose={onClose}>
       <div className="flex items-start justify-between gap-3">
@@ -38,14 +42,14 @@ const WithdrawModal = ({
         탈퇴 시 계정 정보와 학습 기록이 삭제되며 복구할 수 없습니다.
       </p>
 
-      <form className="mt-4 space-y-3" onSubmit={onSubmit}>
+      <form className="mt-4 space-y-3" onSubmit={handleSubmit}>
         <label className="block text-sm">
           <span className="mb-1.5 block font-semibold text-slate-700">
             확인을 위해 아래 입력창에 "탈퇴"를 입력해주세요.
           </span>
           <input
             value={confirmText}
-            onChange={(event) => onConfirmTextChange(event.target.value)}
+            onChange={(event) => setConfirmText(event.target.value)}
             placeholder="탈퇴"
             className="h-11 w-full rounded-xl border border-slate-300 px-3 text-slate-900 outline-none transition focus:border-red-400"
           />
@@ -73,4 +77,3 @@ const WithdrawModal = ({
 };
 
 export default WithdrawModal;
-

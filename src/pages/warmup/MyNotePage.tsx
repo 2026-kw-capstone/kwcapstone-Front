@@ -159,13 +159,10 @@ const MyNotePage = () => {
       <section className="flex flex-col gap-1">
         <div className="flex flex-wrap items-center gap-2">
           <BackLinkButton to="/warmup" label="워밍업으로" />
-          <h1 className="text-[24px] font-extrabold leading-tight tracking-tight text-slate-900 min-[380px]:text-[28px]">
+          <h1 className="text-[18px] font-extrabold leading-tight tracking-tight text-slate-900 min-[380px]:text-[22px]">
             나만의 문장 노트
           </h1>
         </div>
-        <p className="text-sm leading-6 text-slate-500">
-          자주 쓰는 문장을 저장하고 듣고 말하고 결과까지 확인해보세요.
-        </p>
         {recordErrorMessage ? (
           <p className="text-xs font-semibold text-rose-500">{recordErrorMessage}</p>
         ) : null}
@@ -184,11 +181,13 @@ const MyNotePage = () => {
           onPlayRecordedAudio={handlePlayRecordedAudio}
         />
 
-        <MyNoteResultCard
-          result={result}
-          isSavingReport={isSavingReport || isUploading}
-          onSaveReport={handleSaveReport}
-        />
+        {result ? (
+          <MyNoteResultCard
+            result={result}
+            isSavingReport={isSavingReport || isUploading}
+            onSaveReport={handleSaveReport}
+          />
+        ) : null}
       </section>
 
       <MyNoteSentenceList

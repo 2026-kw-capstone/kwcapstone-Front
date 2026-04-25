@@ -20,11 +20,11 @@ const MyPageActionRow = ({
     <button
       type="button"
       onClick={onClick}
-      className="flex w-full items-center justify-between gap-3 border-b border-slate-200 px-4 py-4 text-left transition hover:bg-slate-50 last:border-b-0"
+      className="flex min-h-14 w-full items-center justify-between gap-3 border-b border-slate-100 px-4 py-4 text-left transition hover:bg-emerald-50/40 last:border-b-0"
     >
       <div className="flex items-center gap-3">
         <span
-          className={`inline-flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-slate-600 ${iconClassName ?? ""}`}
+          className={`inline-flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700 ${iconClassName ?? ""}`}
         >
           {icon}
         </span>

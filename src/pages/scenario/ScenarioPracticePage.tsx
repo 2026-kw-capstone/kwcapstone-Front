@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+﻿import { useEffect, useMemo, useRef, useState } from "react";
 import {
   useBeforeUnload,
   useBlocker,
@@ -26,23 +26,24 @@ const ScenarioPracticePage = () => {
   const { scenarioId, level } = useParams<{ scenarioId: string; level: string }>();
   const navigate = useNavigate();
   const { myScenarios } = useOutletContext<ScenarioOutletContext>();
-  // 전역 녹음 컨텍스트: 시작/종료와 상태만 담당
   const { isRecording, status, lastError, startRecording, stopRecording } =
     useRecord();
-  // 단계별 저장된 mp3Url 재생 상태를 관리
   const { isPlaying, playAudio } = useAudioPlayer();
+
+  const createInitialResults = (): Array<StepResult | null> =>
+    Array.from({ length: PRACTICE_STEPS.length }, () => null);
+  const createInitialMp3Urls = (): Array<string | null> =>
+    Array.from({ length: PRACTICE_STEPS.length }, () => null);
 
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [isSummaryMode, setIsSummaryMode] = useState(false);
-  const [resultsByStep, setResultsByStep] = useState<Array<StepResult | null>>([
-    null,
-    null,
-    null,
-  ]);
+  const [resultsByStep, setResultsByStep] = useState<Array<StepResult | null>>(
+    createInitialResults
+  );
   const [recordedMp3UrlByStep, setRecordedMp3UrlByStep] = useState<
     Array<string | null>
-  >([null, null, null]);
-  const recordedMp3UrlByStepRef = useRef<Array<string | null>>([null, null, null]);
+  >(createInitialMp3Urls);
+  const recordedMp3UrlByStepRef = useRef<Array<string | null>>(createInitialMp3Urls());
 
   const currentStep = PRACTICE_STEPS[currentStepIndex];
   const currentResult = resultsByStep[currentStepIndex];
@@ -95,6 +96,7 @@ const ScenarioPracticePage = () => {
     status === "stopping";
   const canGoPrev = currentStepIndex > 0 && !isNavigationLocked;
   const canGoNext = !!currentResult && !isNavigationLocked;
+  const progressPercent = ((currentStepIndex + 1) / PRACTICE_STEPS.length) * 100;
 
   const averageAccuracy = useMemo(() => {
     const completeResults = resultsByStep.filter(
@@ -151,7 +153,6 @@ const ScenarioPracticePage = () => {
   });
 
   const handleRecord = async () => {
-    // 현재 단계의 녹음을 시작/종료하고, 종료 시 업로드를 수행
     await toggleRecordAndUpload();
   };
 
@@ -179,7 +180,6 @@ const ScenarioPracticePage = () => {
 
   const handlePlayRecordedAudio = async () => {
     if (!currentMp3Url) return;
-    // 현재 단계에 저장된 mp3Url을 재생
     await playAudio(currentMp3Url);
   };
 
@@ -203,25 +203,35 @@ const ScenarioPracticePage = () => {
     navigate(`/ai-practice/scenario/${scenarioId}`);
   };
 
-  const handleRestartPractice = () => {
-    recordedMp3UrlByStep.forEach((url) => revokeObjectUrlIfNeeded(url));
-    setCurrentStepIndex(0);
-    setIsSummaryMode(false);
-    setResultsByStep([null, null, null]);
-    setRecordedMp3UrlByStep([null, null, null]);
-  };
-
   const recordErrorMessage = getRecordErrorMessage(lastError);
+
+  if (isSummaryMode) {
+    return (
+      <div className="fixed inset-x-0 top-16 bottom-[72px] left-1/2 z-40 flex w-full max-w-[430px] -translate-x-1/2 items-center justify-center px-4 py-4">
+        <PracticeSummaryPanel
+          averageAccuracy={averageAccuracy}
+          averageFluency={averageFluency}
+          onBackToLevel={handleBackToLevel}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto flex w-full max-w-md flex-col gap-4 pb-2">
+      <div className="h-1 w-full rounded-full bg-slate-200">
+        <div
+          className="h-full rounded-full bg-emerald-500 transition-all duration-300"
+          style={{ width: `${progressPercent}%` }}
+        />
+      </div>
+
       <PracticeHeader
         scenarioName={scenarioName}
         levelLabel={levelLabel}
-        isSummaryMode={isSummaryMode}
         currentStepIndex={currentStepIndex}
+        currentStep={currentStep}
         steps={PRACTICE_STEPS}
-        resultsByStep={resultsByStep}
         onBack={handleBackToLevel}
       />
 
@@ -229,32 +239,23 @@ const ScenarioPracticePage = () => {
         <p className="text-xs font-semibold text-rose-500">{recordErrorMessage}</p>
       ) : null}
 
-      {!isSummaryMode ? (
-        <PracticeStepPanel
-          currentStep={currentStep}
-          currentStepIndex={currentStepIndex}
-          totalSteps={PRACTICE_STEPS.length}
-          currentResult={currentResult}
-          isRecording={isRecording}
-          isAnalyzing={isAnalyzing}
-          canGoPrev={canGoPrev}
-          canGoNext={canGoNext}
-          hasRecordedAudio={!!currentMp3Url}
-          isPlayingUserAudio={isPlaying}
-          onRecord={handleRecord}
-          onReRecord={handleReRecord}
-          onPlayRecordedAudio={handlePlayRecordedAudio}
-          onPrev={handlePrevStep}
-          onNext={handleNextStep}
-        />
-      ) : (
-        <PracticeSummaryPanel
-          averageAccuracy={averageAccuracy}
-          averageFluency={averageFluency}
-          onRestart={handleRestartPractice}
-          onBackToLevel={handleBackToLevel}
-        />
-      )}
+      <PracticeStepPanel
+        currentStep={currentStep}
+        currentStepIndex={currentStepIndex}
+        totalSteps={PRACTICE_STEPS.length}
+        currentResult={currentResult}
+        isRecording={isRecording}
+        isAnalyzing={isAnalyzing}
+        canGoPrev={canGoPrev}
+        canGoNext={canGoNext}
+        hasRecordedAudio={!!currentMp3Url}
+        isPlayingUserAudio={isPlaying}
+        onRecord={handleRecord}
+        onReRecord={handleReRecord}
+        onPlayRecordedAudio={handlePlayRecordedAudio}
+        onPrev={handlePrevStep}
+        onNext={handleNextStep}
+      />
     </div>
   );
 };

@@ -22,8 +22,8 @@ const ScenarioLevelCard = ({ item, onClick }: ScenarioLevelCardProps) => {
       </div>
 
       <div className="min-w-0 flex-1">
-        <p className="text-lg font-bold text-slate-900">{item.title}</p>
-        <p className="mt-1 text-sm text-slate-500">{item.description}</p>
+        <p className="text-md font-bold text-slate-900">{item.title}</p>
+        <p className="mt-1 text-xs text-slate-500">{item.description}</p>
       </div>
 
       <ChevronRight className="shrink-0 text-slate-300 transition group-hover:text-slate-500" />

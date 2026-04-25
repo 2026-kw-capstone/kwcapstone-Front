@@ -13,11 +13,6 @@ const delay = (ms: number) =>
     setTimeout(resolve, ms);
   });
 
-export const getMyScenariosRequest = async (): Promise<ScenarioItem[]> => {
-  await delay(200);
-  return [...mockMyScenarios];
-};
-
 export const getMyScenariosSnapshot = (): ScenarioItem[] => {
   return [...mockMyScenarios];
 };
