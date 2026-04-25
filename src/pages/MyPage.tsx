@@ -1,5 +1,5 @@
 ﻿import { useEffect, useMemo, useState, type FormEvent } from "react";
-import { KeyRound, LogOut, UserRound, UserX } from "lucide-react";
+import { KeyRound, LogOut, UserX } from "lucide-react";
 import MyPageActionRow from "../components/mypage/MyPageActionRow";
 import PasswordChangeModal from "../components/mypage/PasswordChangeModal";
 import UserProfileSection from "../components/mypage/UserProfileSection";
@@ -15,6 +15,8 @@ const MyPage = () => {
 
   const initialNickname = useMemo(() => myInfo?.nickname ?? "홍길동", [myInfo?.nickname]);
   const email = myInfo?.email ?? "name@email.com";
+  const streakDays = 5;
+  const averageAccuracy = 92;
 
   const [nickname, setNickname] = useState(initialNickname);
   const [nicknameDraft, setNicknameDraft] = useState(initialNickname);
@@ -87,56 +89,53 @@ const MyPage = () => {
   const isWithdrawFormInvalid = withdrawConfirmText !== "탈퇴";
 
   return (
-    <div className="mx-auto w-full max-w-md pb-6">
-      <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-        <header className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
-              <UserRound size={18} />
-            </div>
-            <h1 className="text-xl font-extrabold tracking-tight text-slate-900">
-              마이페이지
-            </h1>
-          </div>
-        </header>
-
-        <div className="relative bg-gradient-to-br from-white via-slate-50 to-sky-50/70 px-5 py-6">
+    <section className="mx-auto w-full max-w-md">
+        <div className="relative">
+          <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 ml-2 mb-2">
+            마이페이지
+          </h1>
           <UserProfileSection
             nickname={nickname}
             email={email}
             nicknameDraft={nicknameDraft}
             isEditingNickname={isEditingNickname}
+            streakDays={streakDays}
+            averageAccuracy={averageAccuracy}
             onNicknameDraftChange={setNicknameDraft}
             onStartEdit={handleStartEditNickname}
             onCancelEdit={handleCancelEditNickname}
             onSaveEdit={handleSaveNickname}
           />
 
-          <section className="mt-4 overflow-hidden rounded-2xl border border-slate-200 bg-white/90 backdrop-blur">
-            <MyPageActionRow
-              icon={<KeyRound size={18} />}
-              title="비밀번호 변경"
-              onClick={() => openModal("password")}
-            />
-            <MyPageActionRow
-              icon={<LogOut size={18} />}
-              title="로그아웃"
-              onClick={() => {
-                if (!isSignoutPending) {
-                  signout();
-                }
-              }}
-            />
-            <MyPageActionRow
-              icon={<UserX size={18} />}
-              title="회원 탈퇴"
-              titleClassName="text-red-500"
-              iconClassName="text-red-500"
-              onClick={() => openModal("withdraw")}
-            />
+          <section className="mt-5">
+            <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white">
+              <h2 className="mt-4 ml-4 px-1 text-sm font-extrabold tracking-[0.08em] text-emerald-700">
+                ACCOUNT
+              </h2>
+              <MyPageActionRow
+                icon={<KeyRound size={18} />}
+                title="비밀번호 변경"
+                onClick={() => openModal("password")}
+              />
+              <MyPageActionRow
+                icon={<LogOut size={18} />}
+                title="로그아웃"
+                onClick={() => {
+                  if (!isSignoutPending) {
+                    signout();
+                  }
+                }}
+              />
+              <MyPageActionRow
+                icon={<UserX size={18} />}
+                title="회원 탈퇴"
+                titleClassName="text-red-500"
+                iconClassName="text-red-500"
+                onClick={() => openModal("withdraw")}
+              />
+            </div>
           </section>
         </div>
-      </section>
 
       {openedModal === "password" && (
         <PasswordChangeModal
@@ -161,7 +160,7 @@ const MyPage = () => {
           onConfirmTextChange={setWithdrawConfirmText}
         />
       )}
-    </div>
+    </section>
   );
 };
 
