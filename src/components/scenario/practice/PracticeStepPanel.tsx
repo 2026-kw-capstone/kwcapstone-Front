@@ -14,7 +14,6 @@ interface PracticeStepPanelProps {
   currentStep: PracticeStep;
   currentStepIndex: number;
   totalSteps: number;
-  levelLabel: string;
   currentResult: StepResult | null;
   isRecording: boolean;
   isAnalyzing: boolean;

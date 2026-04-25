@@ -30,17 +30,20 @@ const ScenarioPracticePage = () => {
     useRecord();
   const { isPlaying, playAudio } = useAudioPlayer();
 
+  const createInitialResults = (): Array<StepResult | null> =>
+    Array.from({ length: PRACTICE_STEPS.length }, () => null);
+  const createInitialMp3Urls = (): Array<string | null> =>
+    Array.from({ length: PRACTICE_STEPS.length }, () => null);
+
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [isSummaryMode, setIsSummaryMode] = useState(false);
-  const [resultsByStep, setResultsByStep] = useState<Array<StepResult | null>>([
-    null,
-    null,
-    null,
-  ]);
+  const [resultsByStep, setResultsByStep] = useState<Array<StepResult | null>>(
+    createInitialResults
+  );
   const [recordedMp3UrlByStep, setRecordedMp3UrlByStep] = useState<
     Array<string | null>
-  >([null, null, null]);
-  const recordedMp3UrlByStepRef = useRef<Array<string | null>>([null, null, null]);
+  >(createInitialMp3Urls);
+  const recordedMp3UrlByStepRef = useRef<Array<string | null>>(createInitialMp3Urls());
 
   const currentStep = PRACTICE_STEPS[currentStepIndex];
   const currentResult = resultsByStep[currentStepIndex];
@@ -240,7 +243,6 @@ const ScenarioPracticePage = () => {
         currentStep={currentStep}
         currentStepIndex={currentStepIndex}
         totalSteps={PRACTICE_STEPS.length}
-        levelLabel={levelLabel}
         currentResult={currentResult}
         isRecording={isRecording}
         isAnalyzing={isAnalyzing}
