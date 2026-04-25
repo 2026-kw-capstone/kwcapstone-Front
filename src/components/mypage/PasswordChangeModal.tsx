@@ -1,30 +1,33 @@
 ﻿import { X } from "lucide-react";
-import type { FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import ModalBackdrop from "../ModalBackdrop";
 
 interface PasswordChangeModalProps {
-  currentPassword: string;
-  newPassword: string;
-  confirmPassword: string;
-  isSubmitDisabled: boolean;
   onClose: () => void;
-  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
-  onCurrentPasswordChange: (value: string) => void;
-  onNewPasswordChange: (value: string) => void;
-  onConfirmPasswordChange: (value: string) => void;
+  onSubmit: () => void;
 }
 
-const PasswordChangeModal = ({
-  currentPassword,
-  newPassword,
-  confirmPassword,
-  isSubmitDisabled,
-  onClose,
-  onSubmit,
-  onCurrentPasswordChange,
-  onNewPasswordChange,
-  onConfirmPasswordChange,
-}: PasswordChangeModalProps) => {
+const PasswordChangeModal = ({ onClose, onSubmit }: PasswordChangeModalProps) => {
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  const isSubmitDisabled =
+    !currentPassword.trim() ||
+    !newPassword.trim() ||
+    !confirmPassword.trim() ||
+    newPassword !== confirmPassword;
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (isSubmitDisabled) {
+      return;
+    }
+
+    onSubmit();
+  };
+
   return (
     <ModalBackdrop onClose={onClose}>
       <div className="flex items-start justify-between gap-3">
@@ -44,25 +47,25 @@ const PasswordChangeModal = ({
         </button>
       </div>
 
-      <form className="mt-5 space-y-3" onSubmit={onSubmit}>
+      <form className="mt-5 space-y-3" onSubmit={handleSubmit}>
         <ModalInput
           label="현재 비밀번호"
           value={currentPassword}
-          onChange={onCurrentPasswordChange}
+          onChange={setCurrentPassword}
           placeholder="현재 비밀번호 입력"
           type="password"
         />
         <ModalInput
           label="새 비밀번호"
           value={newPassword}
-          onChange={onNewPasswordChange}
+          onChange={setNewPassword}
           placeholder="새 비밀번호 입력"
           type="password"
         />
         <ModalInput
           label="새 비밀번호 확인"
           value={confirmPassword}
-          onChange={onConfirmPasswordChange}
+          onChange={setConfirmPassword}
           placeholder="새 비밀번호 재입력"
           type="password"
         />
@@ -124,4 +127,3 @@ const ModalInput = ({
 };
 
 export default PasswordChangeModal;
-

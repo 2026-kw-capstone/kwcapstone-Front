@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState, type FormEvent } from "react";
+﻿import { useEffect, useMemo, useState } from "react";
 import { KeyRound, LogOut, UserX } from "lucide-react";
 import MyPageActionRow from "../components/mypage/MyPageActionRow";
 import PasswordChangeModal from "../components/mypage/PasswordChangeModal";
@@ -22,11 +22,6 @@ const MyPage = () => {
   const [nicknameDraft, setNicknameDraft] = useState(initialNickname);
   const [isEditingNickname, setIsEditingNickname] = useState(false);
   const [openedModal, setOpenedModal] = useState<ModalType>(null);
-
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [withdrawConfirmText, setWithdrawConfirmText] = useState("");
 
   useEffect(() => {
     setNickname(initialNickname);
@@ -62,103 +57,71 @@ const MyPage = () => {
     setIsEditingNickname(false);
   };
 
-  const handlePasswordSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
+  const handlePasswordSubmit = () => {
     // TODO: API 연동 시 비밀번호 변경 로직 연결
-    setCurrentPassword("");
-    setNewPassword("");
-    setConfirmPassword("");
     closeModal();
   };
 
-  const handleWithdrawSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
+  const handleWithdrawSubmit = () => {
     // TODO: API 연동 시 회원 탈퇴 로직 연결
-    setWithdrawConfirmText("");
     closeModal();
   };
-
-  const isPasswordFormInvalid =
-    !currentPassword.trim() ||
-    !newPassword.trim() ||
-    !confirmPassword.trim() ||
-    newPassword !== confirmPassword;
-
-  const isWithdrawFormInvalid = withdrawConfirmText !== "탈퇴";
 
   return (
     <section className="mx-auto w-full max-w-md">
-        <div className="relative">
-          <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 ml-2 mb-2">
-            마이페이지
-          </h1>
-          <UserProfileSection
-            nickname={nickname}
-            email={email}
-            nicknameDraft={nicknameDraft}
-            isEditingNickname={isEditingNickname}
-            streakDays={streakDays}
-            averageAccuracy={averageAccuracy}
-            onNicknameDraftChange={setNicknameDraft}
-            onStartEdit={handleStartEditNickname}
-            onCancelEdit={handleCancelEditNickname}
-            onSaveEdit={handleSaveNickname}
-          />
+      <div className="relative">
+        <h1 className="mb-2 ml-2 text-2xl font-extrabold tracking-tight text-slate-900">
+          마이페이지
+        </h1>
+        <UserProfileSection
+          nickname={nickname}
+          email={email}
+          nicknameDraft={nicknameDraft}
+          isEditingNickname={isEditingNickname}
+          streakDays={streakDays}
+          averageAccuracy={averageAccuracy}
+          onNicknameDraftChange={setNicknameDraft}
+          onStartEdit={handleStartEditNickname}
+          onCancelEdit={handleCancelEditNickname}
+          onSaveEdit={handleSaveNickname}
+        />
 
-          <section className="mt-5">
-            <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white">
-              <h2 className="mt-4 ml-4 px-1 text-sm font-extrabold tracking-[0.08em] text-emerald-700">
-                ACCOUNT
-              </h2>
-              <MyPageActionRow
-                icon={<KeyRound size={18} />}
-                title="비밀번호 변경"
-                onClick={() => openModal("password")}
-              />
-              <MyPageActionRow
-                icon={<LogOut size={18} />}
-                title="로그아웃"
-                onClick={() => {
-                  if (!isSignoutPending) {
-                    signout();
-                  }
-                }}
-              />
-              <MyPageActionRow
-                icon={<UserX size={18} />}
-                title="회원 탈퇴"
-                titleClassName="text-red-500"
-                iconClassName="text-red-500"
-                onClick={() => openModal("withdraw")}
-              />
-            </div>
-          </section>
-        </div>
+        <section className="mt-5">
+          <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white">
+            <h2 className="mt-4 ml-4 px-1 text-sm font-extrabold tracking-[0.08em] text-emerald-700">
+              ACCOUNT
+            </h2>
+            <MyPageActionRow
+              icon={<KeyRound size={18} />}
+              title="비밀번호 변경"
+              onClick={() => openModal("password")}
+            />
+            <MyPageActionRow
+              icon={<LogOut size={18} />}
+              title="로그아웃"
+              onClick={() => {
+                if (!isSignoutPending) {
+                  signout();
+                }
+              }}
+            />
+            <MyPageActionRow
+              icon={<UserX size={18} />}
+              title="회원 탈퇴"
+              titleClassName="text-red-500"
+              iconClassName="text-red-500"
+              onClick={() => openModal("withdraw")}
+            />
+          </div>
+        </section>
+      </div>
 
       {openedModal === "password" && (
-        <PasswordChangeModal
-          currentPassword={currentPassword}
-          newPassword={newPassword}
-          confirmPassword={confirmPassword}
-          isSubmitDisabled={isPasswordFormInvalid}
-          onClose={closeModal}
-          onSubmit={handlePasswordSubmit}
-          onCurrentPasswordChange={setCurrentPassword}
-          onNewPasswordChange={setNewPassword}
-          onConfirmPasswordChange={setConfirmPassword}
-        />
+        <PasswordChangeModal onClose={closeModal} onSubmit={handlePasswordSubmit} />
       )}
 
       {openedModal === "withdraw" && (
-        <WithdrawModal
-          confirmText={withdrawConfirmText}
-          isSubmitDisabled={isWithdrawFormInvalid}
-          onClose={closeModal}
-          onSubmit={handleWithdrawSubmit}
-          onConfirmTextChange={setWithdrawConfirmText}
-        />
+        <WithdrawModal onClose={closeModal} onSubmit={handleWithdrawSubmit} />
       )}
     </section>
   );
