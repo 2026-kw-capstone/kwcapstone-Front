@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { ChevronRight } from "lucide-react";
 import type { MenuItem } from "../types/menuItem";
 
 interface MenuSelectCardProps {
@@ -12,24 +13,28 @@ const MenuSelectCard = ({ item }: MenuSelectCardProps) => {
     <Link
       to={to}
       className="
-        group rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm
+        group rounded-[24px] border border-slate-200 bg-white p-4 shadow-sm
         transition-all duration-200
-        hover:-translate-y-1 hover:border-slate-300 hover:shadow-md
+        hover:border-slate-300 hover:shadow-md
         focus:outline-none focus:ring-2 focus:ring-slate-200
       "
     >
-      <div className="mb-4 flex items-center gap-3">
-        <div className={`flex h-14 w-14 items-center justify-center rounded-2xl ${iconClassName}`}>
-          <Icon size={28} strokeWidth={2.2} />
+      <div className="flex p-1 items-center justify-between gap-3">
+        <div className="flex min-w-0 flex-1 items-center gap-3">
+          <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${iconClassName}`}>
+            <Icon size={24} strokeWidth={2.2} />
+          </div>
+          <div className="min-w-0">
+            <h2 className="truncate text-md font-extrabold tracking-tight text-slate-900">{title}</h2>
+            <p className="mt-1 truncate text-xs leading-5 text-slate-500">{description}</p>
+          </div>
         </div>
-        <h2 className="text-xl font-extrabold tracking-tight text-slate-900">
-          {title}
-        </h2>
-      </div>
 
-      <p className="mt-3 text-sm leading-6 text-slate-500">
-        {description}
-      </p>
+        <ChevronRight
+          size={18}
+          className="shrink-0 text-slate-300 transition group-hover:translate-x-0.5 group-hover:text-slate-400"
+        />
+      </div>
     </Link>
   );
 };

@@ -1,11 +1,61 @@
 ﻿import { Smile } from "lucide-react";
-import type { ConversationMessage } from "../../types/freeConversationType";
+import { useEffect, useRef } from "react";
+import type { ConversationMessageGroup } from "../../types/freeConversationType";
+import {
+  ConversationMessagesErrorState,
+  ConversationMessagesLoadingState,
+} from "./ConversationMessagesState";
 
 type ConversationMessagesProps = {
-  messages: ConversationMessage[];
+  conversationId: number | null;
+  messages: ConversationMessageGroup[];
+  isLoading: boolean;
+  isError: boolean;
+  errorMessage?: string;
+  onRetry: () => void;
 };
 
-const ConversationMessages = ({ messages }: ConversationMessagesProps) => {
+const ConversationMessages = ({
+  conversationId,
+  messages,
+  isLoading,
+  isError,
+  errorMessage,
+  onRetry,
+}: ConversationMessagesProps) => {
+  const bottomRef = useRef<HTMLLIElement | null>(null);
+  const prevConversationIdRef = useRef<number | null>(conversationId);
+  const shouldScrollOnConversationChangeRef = useRef(false);
+
+  useEffect(() => {
+    if (prevConversationIdRef.current !== conversationId) {
+      prevConversationIdRef.current = conversationId;
+      shouldScrollOnConversationChangeRef.current = true;
+    }
+  }, [conversationId]);
+
+  useEffect(() => {
+    if (!shouldScrollOnConversationChangeRef.current || isLoading) {
+      return;
+    }
+
+    bottomRef.current?.scrollIntoView({ block: "end" });
+    shouldScrollOnConversationChangeRef.current = false;
+  }, [isLoading, messages.length]);
+
+  if (isLoading) {
+    return <ConversationMessagesLoadingState />;
+  }
+
+  if (isError) {
+    return (
+      <ConversationMessagesErrorState
+        errorMessage={errorMessage}
+        onRetry={onRetry}
+      />
+    );
+  }
+
   if (messages.length === 0) {
     return (
       <div className="flex h-full items-center justify-center px-1">
@@ -28,24 +78,69 @@ const ConversationMessages = ({ messages }: ConversationMessagesProps) => {
 
   return (
     <ul className="mx-auto flex w-full flex-col gap-2 py-3">
-      {messages.map((message) => {
-        const isAssistant = message.role === "assistant";
+      {messages.flatMap((group) => {
+        const userMessage = group.userMessage;
+        const aiMessage = group.aiMessage;
+        const feedback = group.feedback;
 
-        return (
-          <li key={message.id} className={`flex ${isAssistant ? "justify-start" : "justify-end"}`}>
-            <div
-              className={`max-w-[85%] rounded-xl px-3 py-2.5 text-[13px] leading-5 ${
-                isAssistant
-                  ? "rounded-bl-md border border-slate-200 bg-white text-slate-700"
-                  : "rounded-br-md bg-emerald-500 text-white shadow-[0_10px_25px_rgba(16,185,129,0.28)]"
-              }`}
+        return [
+          userMessage ? (
+            <li key={`message-${userMessage.messageId}`} className="flex justify-end">
+              <div className="max-w-[85%] rounded-br-md rounded-xl bg-emerald-500 px-3 py-2.5 text-[13px] leading-5 text-white shadow-[0_10px_25px_rgba(16,185,129,0.28)]">
+                {userMessage.inputType === "TEXT" && userMessage.content ? (
+                  <p>{userMessage.content}</p>
+                ) : null}
+                {userMessage.inputType === "VOICE" && userMessage.voiceUrl ? (
+                  <audio
+                    controls
+                    src={userMessage.voiceUrl}
+                    className="mt-2 h-9 w-full max-w-[260px] rounded-md bg-white/80"
+                  >
+                    브라우저가 음성 재생을 지원하지 않습니다.
+                  </audio>
+                ) : null}
+                {userMessage.inputType === "VOICE" &&
+                (!userMessage.content || !userMessage.content.trim()) ? (
+                  <p className="mt-2 text-xs text-emerald-50/90">
+                    녹음본을 생성 중입니다.
+                  </p>
+                ) : null}
+                {userMessage.inputType === "VOICE" && !userMessage.voiceUrl ? (
+                  <p className="text-xs text-emerald-50/90">
+                    음성 파일을 불러오지 못했어요.
+                  </p>
+                ) : null}
+              </div>
+            </li>
+          ) : null,
+          aiMessage ? (
+            <li key={`message-${aiMessage.messageId}`} className="flex justify-start">
+              <div className="max-w-[85%] rounded-bl-md rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-[13px] leading-5 text-slate-700">
+                {aiMessage.content}
+              </div>
+            </li>
+          ) : (
+            <li key={`message-skeleton-${group.clientRequestId}`} className="flex justify-start">
+              <div className="h-11 w-[70%] animate-pulse rounded-bl-md rounded-xl bg-slate-200" />
+            </li>
+          ),
+          feedback ? (
+            <li key={`feedback-${feedback.feedbackId}`} className="flex justify-start">
+              <div className="max-w-[85%] rounded-bl-md rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-[13px] leading-5 text-slate-700">
+                {feedback.content}
+              </div>
+            </li>
+          ) : (
+            <li
+              key={`feedback-skeleton-${group.clientRequestId}`}
+              className="flex justify-start"
             >
-              {message.content}
-              {/* TODO: API 연동 후 사용자 메시지의 message.voiceUrl로 재생 버튼/플레이어를 여기서 렌더링 */}
-            </div>
-          </li>
-        );
+              <div className="h-11 w-[70%] animate-pulse rounded-bl-md rounded-xl bg-slate-200" />
+            </li>
+          ),
+        ];
       })}
+      <li ref={bottomRef} aria-hidden="true" />
     </ul>
   );
 };

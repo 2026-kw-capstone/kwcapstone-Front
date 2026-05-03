@@ -3,7 +3,7 @@ import type { BasicSpeakCardItem } from "../types/basicSpeakType";
 export const BASIC_SPEAK_CARDS: BasicSpeakCardItem[] = [
   {
     id: "vowel-a",
-    title: "사",
+    title: "아",
     subtitle: "아",
     category: "모음",
     description: "기초 모음 '아' 소리를 또렷하게 시작하는 연습",

@@ -1,75 +1,27 @@
-﻿import { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { uploadFreeConversationVoice } from "../apis/voicePlaceholder";
-import { getRecordErrorMessage } from "../constants/recordingMessage";
+﻿import { useNavigate } from "react-router-dom";
 import ConversationHeader from "../components/free-conversation/ConversationHeader";
 import ConversationInput from "../components/free-conversation/ConversationInput";
 import ConversationMessages from "../components/free-conversation/ConversationMessages";
 import ConversationSidebar from "../components/free-conversation/ConversationSidebar";
-import {
-  MOCK_CONVERSATION_LIST,
-  MOCK_MESSAGES_BY_CONVERSATION,
-} from "../constants/freeConversation";
-import { useRecord } from "../contexts/RecordContext";
-import { useRecordUploadFlow } from "../hooks/audio/useRecordUploadFlow";
+import { useFreeConversationController } from "../hooks/useFreeConversationController";
 
 const FreeConversationPage = () => {
   const navigate = useNavigate();
-  // 전역 녹음 컨텍스트: 시작/종료와 상태만 담당
-  const { isRecording, status, lastError, startRecording, stopRecording } =
-    useRecord();
-  const [selectedConversationId, setSelectedConversationId] = useState<string | null>(
-    null
-  );
-  const [isMobileConversationListOpen, setIsMobileConversationListOpen] =
-    useState(false);
-
-  // 녹음 종료 시 Blob을 업로드하고, 응답은 추후 사용자 메시지(voiceUrl 포함)로 반영할 예정
-  const { isUploading, toggleRecordAndUpload } = useRecordUploadFlow({
+  const {
+    selectedConversationId,
+    isMobileConversationListOpen,
+    setIsMobileConversationListOpen,
+    currentConversationTitle,
+    messages,
+    recordErrorMessage,
+    isMessageBusy,
+    isVoiceBusy,
     isRecording,
-    status,
-    startRecording,
-    stopRecording,
-    uploadFn: uploadFreeConversationVoice,
-    // TODO: API 연동 시 mp3Url/voiceUrl을 사용자 메시지에 저장해 ConversationMessages로 전달
-  });
-
-  const selectedMessages = useMemo(() => {
-    if (!selectedConversationId) {
-      return [];
-    }
-
-    return MOCK_MESSAGES_BY_CONVERSATION[selectedConversationId] ?? [];
-  }, [selectedConversationId]);
-
-  const currentConversationTitle = useMemo(() => {
-    if (!selectedConversationId) {
-      return "새 대화";
-    }
-
-    return (
-      MOCK_CONVERSATION_LIST.find(
-        (conversation) => conversation.id === selectedConversationId
-      )?.title ?? "새 대화"
-    );
-  }, [selectedConversationId]);
-
-  const handleNewConversation = () => {
-    setSelectedConversationId(null);
-    setIsMobileConversationListOpen(false);
-  };
-
-  const handleSelectConversation = (conversationId: string) => {
-    setSelectedConversationId(conversationId);
-    setIsMobileConversationListOpen(false);
-  };
-
-  const handleToggleVoiceRecord = async () => {
-    // 녹음 버튼 재클릭 시 업로드까지 이어지는 공통 흐름
-    await toggleRecordAndUpload();
-  };
-
-  const recordErrorMessage = getRecordErrorMessage(lastError);
+    listState,
+    detailState,
+    sidebarMutationState,
+    actions,
+  } = useFreeConversationController();
 
   return (
     <div className="h-full min-h-0 w-full overflow-hidden bg-white">
@@ -84,13 +36,25 @@ const FreeConversationPage = () => {
         ) : null}
 
         <ConversationSidebar
-          conversations={MOCK_CONVERSATION_LIST}
+          conversations={listState.conversations}
           selectedConversationId={selectedConversationId}
           isMobileOpen={isMobileConversationListOpen}
-          onNewConversation={handleNewConversation}
-          onSelectConversation={handleSelectConversation}
-          onEditConversation={() => void 0}
-          onDeleteConversation={() => void 0}
+          isLoading={listState.isLoading}
+          isError={listState.isError}
+          errorMessage={listState.errorMessage}
+          onNewConversation={actions.handleNewConversation}
+          onRetry={listState.onRetry}
+          onSelectConversation={actions.handleSelectConversation}
+          onSubmitEditConversation={actions.handleSubmitEditConversation}
+          isEditSubmitting={sidebarMutationState.isEditSubmitting}
+          editingSubmitConversationId={
+            sidebarMutationState.editingSubmitConversationId
+          }
+          onDeleteConversation={actions.handleDeleteConversation}
+          isDeleteSubmitting={sidebarMutationState.isDeleteSubmitting}
+          deletingSubmitConversationId={
+            sidebarMutationState.deletingSubmitConversationId
+          }
         />
 
         <section className="relative flex min-h-0 flex-1 flex-col overflow-hidden bg-gradient-to-b from-white via-[#f8fbff] to-[#edf5f3]">
@@ -106,7 +70,14 @@ const FreeConversationPage = () => {
             <div className="pointer-events-none absolute inset-x-0 bottom-0 h-52 bg-gradient-to-t from-emerald-100/40 to-transparent" />
 
             <div className="relative flex-1 overflow-y-auto pr-1">
-              <ConversationMessages messages={selectedMessages} />
+              <ConversationMessages
+                conversationId={selectedConversationId}
+                messages={messages}
+                isLoading={detailState.isLoading}
+                isError={detailState.isError}
+                errorMessage={detailState.errorMessage}
+                onRetry={detailState.onRetry}
+              />
             </div>
 
             {recordErrorMessage ? (
@@ -117,11 +88,10 @@ const FreeConversationPage = () => {
 
             <ConversationInput
               isRecording={isRecording}
-              // 권한 요청/종료/업로드 중에는 중복 입력을 막아 버튼을 잠급니다.
-              isVoiceBusy={
-                status === "requesting_permission" || status === "stopping" || isUploading
-              }
-              onToggleVoiceRecord={handleToggleVoiceRecord}
+              isTextBusy={isMessageBusy}
+              isVoiceBusy={isVoiceBusy}
+              onToggleVoiceRecord={actions.handleToggleVoiceRecord}
+              onSubmitText={actions.handleSubmitTextMessage}
             />
           </div>
         </section>

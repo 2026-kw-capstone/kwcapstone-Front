@@ -4,7 +4,7 @@ import { AI_PRACTICE_MENU_ITEMS } from "../constants/aiPractice";
 const PracticeSelectPage = () => {
   return (
     <div className="mx-auto flex w-full max-w-md flex-col">
-      <section className="mb-8">
+      <section className="mb-4">
         <h1 className="text-[28px] font-extrabold tracking-tight text-slate-900">
           AI 실전대화연습
         </h1>

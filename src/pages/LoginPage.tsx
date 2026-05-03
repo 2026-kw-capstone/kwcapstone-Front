@@ -21,12 +21,12 @@ const extractSigninErrorMessage = (error: unknown): string => {
   const status = error.response?.status;
   const data = error.response?.data;
 
-  if (typeof data?.message === "string" && data.message.trim().length > 0) {
-    return data.message;
+  if (status === 401) {
+    return "회원가입이 확인되지 않습니다.";
   }
 
-  if (status === 401) {
-    return "인증되지 않은 요청입니다.";
+  if (typeof data?.message === "string" && data.message.trim().length > 0) {
+    return data.message;
   }
 
   return "로그인에 실패했습니다.";

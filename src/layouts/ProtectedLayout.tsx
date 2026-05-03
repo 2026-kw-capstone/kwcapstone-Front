@@ -6,6 +6,8 @@ const ProtectedLayout = () => {
   const { pathname } = useLocation();
   const isFreeConversationPage = pathname.startsWith("/ai-practice/free-conversation");
 
+  // 액세스토큰이 있는 경우에만 접근할 수 있는 로직 추가
+
   return (
     <div className="min-h-screen min-h-[100dvh] bg-[#E9EBEF]">
       <div className="relative mx-auto h-screen h-[100dvh] w-full max-w-[430px] overflow-hidden bg-[#F8FAFB] text-slate-900">
