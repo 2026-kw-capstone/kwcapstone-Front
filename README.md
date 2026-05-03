@@ -87,7 +87,7 @@ frontend/
 프로젝트 루트에 `.env` 파일을 생성하고 아래 값을 설정합니다.
 
 ```env
-VITE_API_BASE_URL=http://localhost:8000
+VITE_SERVER_API_URL=http://localhost:8000
 ```
 
 필요 시 인증 토큰, S3 URL, 기타 설정 값을 추가할 수 있습니다.
