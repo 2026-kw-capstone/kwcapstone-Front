@@ -29,6 +29,7 @@ const routes: RouteObject[] = [
     errorElement: <NotFound />,
     children: [
       {index: true, element: <HomePage />},
+      { path: "mypage", element: <MyPage /> },
     ]
   },
 ];
@@ -80,7 +81,6 @@ const protectedRoutes: RouteObject[] = [
         ],
       },
       { path: "report", element: <ReportPage /> },
-      { path: "mypage", element: <MyPage /> },
     ],
   },
 ];
