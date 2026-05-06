@@ -87,7 +87,7 @@ const PasswordChangeModal = ({ onClose, onSubmit }: PasswordChangeModalProps) =>
           <button
             type="submit"
             disabled={isSubmitDisabled}
-            className="rounded-xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:bg-emerald-300"
+            className="rounded-xl bg-[#278DFD] px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-600 disabled:cursor-not-allowed disabled:bg-blue-300"
           >
             변경하기
           </button>
@@ -120,7 +120,7 @@ const ModalInput = ({
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
         type={type}
-        className="h-11 w-full rounded-xl border border-slate-300 px-3 text-slate-900 outline-none transition focus:border-emerald-400"
+        className="h-11 w-full rounded-xl border border-slate-300 px-3 text-slate-900 outline-none transition focus:border-[#278DFD]"
       />
     </label>
   );

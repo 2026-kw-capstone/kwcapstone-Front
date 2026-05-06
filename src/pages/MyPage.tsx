@@ -1,118 +1,141 @@
-﻿import { useEffect, useMemo, useState } from "react";
-import { KeyRound, LogOut, UserX } from "lucide-react";
-import MyPageActionRow from "../components/mypage/MyPageActionRow";
+import {
+  ChevronRight,
+  Key,
+  LogIn,
+  LogOut,
+  User,
+  UserMinus,
+  UserPlus,
+  type LucideIcon,
+} from "lucide-react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import PasswordChangeModal from "../components/mypage/PasswordChangeModal";
-import UserProfileSection from "../components/mypage/UserProfileSection";
 import WithdrawModal from "../components/mypage/WithdrawModal";
-import { useGetMyInfo } from "../hooks/queries/useGetMyInfo";
+import { useAuth } from "../contexts/AuthContext";
 import { usePostSignout } from "../hooks/mutations/usePostSignout";
+import { useGetMyInfo } from "../hooks/queries/useGetMyInfo";
 
 type ModalType = "password" | "withdraw" | null;
 
+type MenuListItemProps = {
+  icon: LucideIcon;
+  label: string;
+  textClassName?: string;
+  iconClassName?: string;
+  disabled?: boolean;
+  onClick: () => void;
+};
+
+const MenuListItem = ({
+  icon: Icon,
+  label,
+  textClassName = "text-slate-800",
+  iconClassName = "text-slate-400",
+  disabled = false,
+  onClick,
+}: MenuListItemProps) => (
+  <button
+    type="button"
+    onClick={onClick}
+    disabled={disabled}
+    className="flex w-full items-center gap-4 rounded-[16px] px-4 py-4 transition-colors hover:bg-slate-50 active:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
+  >
+    <Icon size={20} className={iconClassName} />
+    <span className={`flex-1 text-left text-[16px] font-extrabold ${textClassName}`}>
+      {label}
+    </span>
+    <ChevronRight size={18} className="text-slate-300" />
+  </button>
+);
+
 const MyPage = () => {
+  const navigate = useNavigate();
+  const { isLoggedIn } = useAuth();
   const { data: myInfo } = useGetMyInfo();
   const { mutate: signout, isPending: isSignoutPending } = usePostSignout();
-
-  const initialNickname = useMemo(() => myInfo?.nickname ?? "홍길동", [myInfo?.nickname]);
-  const email = myInfo?.email ?? "name@email.com";
-  const streakDays = 5;
-  const averageAccuracy = 92;
-
-  const [nickname, setNickname] = useState(initialNickname);
-  const [nicknameDraft, setNicknameDraft] = useState(initialNickname);
-  const [isEditingNickname, setIsEditingNickname] = useState(false);
   const [openedModal, setOpenedModal] = useState<ModalType>(null);
 
-  useEffect(() => {
-    setNickname(initialNickname);
-    setNicknameDraft(initialNickname);
-  }, [initialNickname]);
-
-  const openModal = (type: Exclude<ModalType, null>) => {
-    setOpenedModal(type);
-  };
+  const displayName = isLoggedIn ? myInfo?.nickname ?? "-" : "-";
+  const displayEmail = isLoggedIn ? myInfo?.email ?? "-" : "-";
 
   const closeModal = () => {
     setOpenedModal(null);
   };
 
-  const handleStartEditNickname = () => {
-    setNicknameDraft(nickname);
-    setIsEditingNickname(true);
-  };
-
-  const handleSaveNickname = () => {
-    const trimmed = nicknameDraft.trim();
-
-    if (!trimmed) {
-      return;
-    }
-
-    setNickname(trimmed);
-    setIsEditingNickname(false);
-  };
-
-  const handleCancelEditNickname = () => {
-    setNicknameDraft(nickname);
-    setIsEditingNickname(false);
-  };
-
   const handlePasswordSubmit = () => {
-    // TODO: API 연동 시 비밀번호 변경 로직 연결
     closeModal();
   };
 
   const handleWithdrawSubmit = () => {
-    // TODO: API 연동 시 회원 탈퇴 로직 연결
     closeModal();
   };
 
   return (
-    <section className="mx-auto w-full max-w-md">
-      <div className="relative">
-        <h1 className="mb-2 ml-2 text-2xl font-extrabold tracking-tight text-slate-900">
-          마이페이지
-        </h1>
-        <UserProfileSection
-          nickname={nickname}
-          email={email}
-          nicknameDraft={nicknameDraft}
-          isEditingNickname={isEditingNickname}
-          streakDays={streakDays}
-          averageAccuracy={averageAccuracy}
-          onNicknameDraftChange={setNicknameDraft}
-          onStartEdit={handleStartEditNickname}
-          onCancelEdit={handleCancelEditNickname}
-          onSaveEdit={handleSaveNickname}
-        />
-
-        <section className="mt-5">
-          <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white">
-            <h2 className="mt-4 ml-4 px-1 text-sm font-extrabold tracking-[0.08em] text-emerald-700">
-              ACCOUNT
-            </h2>
-            <MyPageActionRow
-              icon={<KeyRound size={18} />}
-              title="비밀번호 변경"
-              onClick={() => openModal("password")}
-            />
-            <MyPageActionRow
-              icon={<LogOut size={18} />}
-              title="로그아웃"
-              onClick={() => {
-                if (!isSignoutPending) {
-                  signout();
-                }
-              }}
-            />
-            <MyPageActionRow
-              icon={<UserX size={18} />}
-              title="회원 탈퇴"
-              titleClassName="text-red-500"
-              iconClassName="text-red-500"
-              onClick={() => openModal("withdraw")}
-            />
+    <div className="flex min-h-full flex-col bg-[#F4F6F8] pb-24 animate-fade-in">
+      <div className="relative z-10 mb-6 rounded-b-[40px] bg-white px-6 pb-8 pt-10 shadow-[0_4px_24px_rgba(0,0,0,0.03)]">
+        <div className="flex items-center gap-5">
+          <div className="flex h-[72px] w-[72px] shrink-0 items-center justify-center rounded-[24px] bg-gradient-to-br from-[#278DFD] to-blue-300 text-white shadow-lg shadow-blue-200">
+            <User size={36} strokeWidth={2.5} />
           </div>
+          <div className="min-w-0">
+            <h2 className="mb-1 truncate text-[22px] font-black text-slate-900">
+              {displayName}
+            </h2>
+            <p className="truncate text-[14px] font-medium text-slate-500">
+              {displayEmail}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-5 px-5">
+        <section className="rounded-[24px] bg-white p-2.5 shadow-[0_4px_16px_rgba(0,0,0,0.02)]">
+          <h3 className="px-4 py-3 pb-2 text-[12px] font-black uppercase tracking-widest text-[#278DFD]">
+            Account
+          </h3>
+
+          {isLoggedIn ? (
+            <>
+              <MenuListItem
+                icon={Key}
+                label="비밀번호 변경"
+                onClick={() => setOpenedModal("password")}
+              />
+              <MenuListItem
+                icon={LogOut}
+                label={isSignoutPending ? "로그아웃 중" : "로그아웃"}
+                disabled={isSignoutPending}
+                onClick={() => {
+                  if (!isSignoutPending) {
+                    signout();
+                  }
+                }}
+              />
+              <MenuListItem
+                icon={UserMinus}
+                label="회원탈퇴"
+                textClassName="text-rose-500"
+                iconClassName="text-rose-400"
+                onClick={() => setOpenedModal("withdraw")}
+              />
+            </>
+          ) : (
+            <>
+              <MenuListItem
+                icon={LogIn}
+                label="로그인"
+                iconClassName="text-[#278DFD]"
+                onClick={() => navigate("/login")}
+              />
+              <MenuListItem
+                icon={UserPlus}
+                label="회원가입"
+                iconClassName="text-[#278DFD]"
+                onClick={() => navigate("/signup")}
+              />
+            </>
+          )}
         </section>
       </div>
 
@@ -123,7 +146,7 @@ const MyPage = () => {
       {openedModal === "withdraw" && (
         <WithdrawModal onClose={closeModal} onSubmit={handleWithdrawSubmit} />
       )}
-    </section>
+    </div>
   );
 };
 
