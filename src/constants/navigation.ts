@@ -34,7 +34,7 @@ export const bottomNavigationItems: BottomNavigationItem[] = [
     match: (pathname) => pathname.startsWith("/ai-practice"),
   },
   {
-    label: "리포트",
+    label: "레포트",
     path: "/report",
     icon: BarChart2,
     match: (pathname) => pathname.startsWith("/report"),
@@ -86,8 +86,8 @@ export const getPageTitle = (pathname: string) => {
   }
   if (pathname.includes("/ai-practice/scenario/")) return "레벨 선택";
   if (pathname === "/ai-practice/free-conversation") return "AI 자유 대화";
-  if (pathname.startsWith("/ai-practice/free-conversation/chat/")) return "AI 자유 대화";
-  if (pathname === "/report") return "학습 리포트";
+  if (pathname.startsWith("/ai-practice/free-conversation/chat/")) return "자유 대화";
+  if (pathname === "/report") return "학습 레포트";
   if (pathname === "/mypage") return "마이페이지";
   if (pathname === "/login") return "로그인";
   if (pathname === "/signup") return "회원가입";

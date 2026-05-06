@@ -9,11 +9,10 @@ const ProtectedLayout = () => {
   const isFreeConversationChatPage = pathname.startsWith(
     "/ai-practice/free-conversation/chat/"
   );
+  const isReportPage = pathname === "/report";
   const isScenarioPracticePage =
     pathname.startsWith("/ai-practice/scenario/") && pathname.includes("/level/");
   const hasBottomNavigation = isRootTabPath(pathname);
-
-  // 액세스토큰이 있는 경우에만 접근할 수 있는 로직 추가
 
   return (
     <div className="flex min-h-screen min-h-[100dvh] w-full items-center justify-center bg-slate-900">
@@ -31,11 +30,11 @@ const ProtectedLayout = () => {
             className={
               isFreeConversationChatPage
                 ? "h-full min-h-0"
-                : isFreeConversationPage
+                : isFreeConversationPage || isReportPage
                   ? "min-h-full"
-                : isScenarioPracticePage
-                  ? "h-full min-h-0 px-5 pt-5 pb-0"
-                  : `min-h-full px-5 py-5 ${hasBottomNavigation ? "pb-24" : "pb-6"}`
+                  : isScenarioPracticePage
+                    ? "h-full min-h-0 px-5 pt-5 pb-0"
+                    : `min-h-full px-5 py-5 ${hasBottomNavigation ? "pb-24" : "pb-6"}`
             }
           >
             <Outlet />
