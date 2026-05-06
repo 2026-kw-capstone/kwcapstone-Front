@@ -1,4 +1,4 @@
-﻿import { Mic, MicOff, Send } from "lucide-react";
+import { Mic, MicOff, Send } from "lucide-react";
 import { useState, type FormEvent } from "react";
 
 interface ConversationInputProps {
@@ -32,38 +32,41 @@ const ConversationInput = ({
   };
 
   return (
-    <form className="relative z-10 mt-3" onSubmit={handleSubmit}>
-      <div className="mx-auto flex w-full items-center gap-1.5 rounded-xl border border-slate-200 bg-white/95 px-1.5 py-1.5 shadow-[0_8px_25px_rgba(15,23,42,0.08)] backdrop-blur-sm">
+    <form
+      className="shrink-0 border-t border-slate-100 bg-white/95 px-4 py-3 backdrop-blur-xl"
+      onSubmit={handleSubmit}
+    >
+      <div className="flex min-h-12 w-full items-center gap-2 rounded-[24px] border border-transparent bg-[#F8F9FD] px-2 py-2 transition focus-within:border-blue-200 focus-within:bg-white">
         <button
           type="button"
-          className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition ${
+          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition ${
             isRecording
-              ? "bg-rose-100 text-rose-600 hover:bg-rose-200"
-              : "bg-emerald-100 text-emerald-600 hover:bg-emerald-200"
+              ? "bg-rose-100 text-rose-500 shadow-[0_0_0_6px_rgba(244,63,94,0.08)]"
+              : "bg-white text-slate-500 shadow-sm hover:text-blue-500"
           }`}
           aria-label="음성 입력"
           onClick={onToggleVoiceRecord}
           disabled={isVoiceBusy || isTextBusy}
         >
-          {isRecording ? <MicOff size={17} /> : <Mic size={17} />}
+          {isRecording ? <MicOff size={19} /> : <Mic size={19} />}
         </button>
 
         <input
           type="text"
           value={text}
           onChange={(event) => setText(event.target.value)}
-          placeholder="메시지를 입력하세요..."
+          placeholder={isRecording ? "듣고 있어요..." : "메시지 입력..."}
           disabled={isTextBusy}
-          className="h-9 min-w-0 flex-1 border-none bg-transparent px-1 text-sm text-slate-700 outline-none placeholder:text-slate-400"
+          className="h-10 min-w-0 flex-1 border-none bg-transparent px-1 text-sm font-semibold text-slate-800 outline-none placeholder:text-slate-400"
         />
 
         <button
           type="submit"
-          className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-500 text-white shadow-[0_8px_20px_rgba(16,185,129,0.34)] transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-70"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#278DFD] text-white shadow-[0_10px_20px_rgba(39,141,253,0.24)] transition hover:bg-blue-600 disabled:cursor-not-allowed disabled:bg-slate-300"
           aria-label="메시지 전송"
-          disabled={isTextBusy}
+          disabled={isTextBusy || !text.trim()}
         >
-          <Send size={16} />
+          <Send size={17} />
         </button>
       </div>
     </form>

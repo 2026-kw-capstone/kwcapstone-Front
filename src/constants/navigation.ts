@@ -62,7 +62,7 @@ export const getParentPath = (pathname: string) => {
   if (pathname.startsWith("/ai-practice/scenario/")) return "/ai-practice/scenario";
   if (pathname === "/ai-practice/scenario") return "/ai-practice";
 
-  if (pathname.includes("/ai-practice/free-conversation/")) {
+  if (pathname.startsWith("/ai-practice/free-conversation/chat/")) {
     return "/ai-practice/free-conversation";
   }
   if (pathname === "/ai-practice/free-conversation") return "/ai-practice";
@@ -81,12 +81,12 @@ export const getPageTitle = (pathname: string) => {
   if (pathname.startsWith("/warmup/basic-speak/")) return "기초 발성 연습";
   if (pathname === "/ai-practice") return "AI 실전 연습";
   if (pathname === "/ai-practice/scenario") return "시나리오 연습";
-  if (pathname === "/ai-practice/free-conversation") return "AI 자유 대화";
-  if (pathname.includes("/ai-practice/free-conversation/")) return "자유 대화";
   if (pathname.includes("/ai-practice/scenario/") && pathname.includes("/level/")) {
     return "대화 진행중";
   }
   if (pathname.includes("/ai-practice/scenario/")) return "레벨 선택";
+  if (pathname === "/ai-practice/free-conversation") return "AI 자유 대화";
+  if (pathname.startsWith("/ai-practice/free-conversation/chat/")) return "AI 자유 대화";
   if (pathname === "/report") return "학습 리포트";
   if (pathname === "/mypage") return "마이페이지";
   if (pathname === "/login") return "로그인";

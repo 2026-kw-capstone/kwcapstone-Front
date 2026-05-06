@@ -9,7 +9,8 @@ import MyNotePage from './pages/warmup/MyNotePage';
 import BasicSpeakPracticePage from './pages/warmup/BasicSpeakPracticePage';
 import BasicSpeakPage from './pages/warmup/BasicSpeakPage';
 import ScenarioPage from './pages/scenario/ScenarioPage';
-import FreeConversationPage from './pages/FreeConversationPage';
+import FreeConversationListPage from './pages/free-conversation/FreeConversationListPage';
+import FreeConversationChatPage from './pages/free-conversation/FreeConversationChatPage';
 import ReportPage from './pages/ReportPage';
 import MyPage from './pages/MyPage';
 import ScenarioLevelSelectPage from './pages/scenario/ScenarioLevelSelectPage';
@@ -76,7 +77,11 @@ const protectedRoutes: RouteObject[] = [
           },
           {
             path: "free-conversation",
-            element: <FreeConversationPage />,
+            children: [
+              { index: true, element: <FreeConversationListPage /> },
+              { path: "chat/new", element: <FreeConversationChatPage /> },
+              { path: "chat/:conversationId", element: <FreeConversationChatPage /> },
+            ],
           },
         ],
       },

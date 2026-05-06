@@ -6,6 +6,9 @@ import { isRootTabPath } from "../constants/navigation";
 const ProtectedLayout = () => {
   const { pathname } = useLocation();
   const isFreeConversationPage = pathname.startsWith("/ai-practice/free-conversation");
+  const isFreeConversationChatPage = pathname.startsWith(
+    "/ai-practice/free-conversation/chat/"
+  );
   const isScenarioPracticePage =
     pathname.startsWith("/ai-practice/scenario/") && pathname.includes("/level/");
   const hasBottomNavigation = isRootTabPath(pathname);
@@ -19,13 +22,17 @@ const ProtectedLayout = () => {
 
         <main
           className={`relative flex-1 overflow-x-hidden bg-[#F4F6F8] ${
-            isFreeConversationPage || isScenarioPracticePage ? "overflow-hidden" : "overflow-y-auto"
+            isFreeConversationChatPage || isScenarioPracticePage
+              ? "overflow-hidden"
+              : "overflow-y-auto"
           }`}
         >
           <div
             className={
-              isFreeConversationPage
+              isFreeConversationChatPage
                 ? "h-full min-h-0"
+                : isFreeConversationPage
+                  ? "min-h-full"
                 : isScenarioPracticePage
                   ? "h-full min-h-0 px-5 pt-5 pb-0"
                   : `min-h-full px-5 py-5 ${hasBottomNavigation ? "pb-24" : "pb-6"}`
