@@ -1,88 +1,65 @@
-import { Mic, Play, RotateCcw, Volume2 } from "lucide-react";
+import { Mic, MicOff, NotebookPen } from "lucide-react";
 
 interface MyNoteStudyCardProps {
   selectedSentence: string | null;
-  hasRecordedAudio: boolean;
   isRecording?: boolean;
-  isPlayingTts?: boolean;
-  isPlayingUserAudio?: boolean;
   isInteractionLocked?: boolean;
-  onPlayTts: () => void;
   onRecord: () => void;
-  onPlayRecordedAudio: () => void;
 }
 
 const MyNoteStudyCard = ({
   selectedSentence,
-  hasRecordedAudio,
   isRecording = false,
-  isPlayingTts = false,
-  isPlayingUserAudio = false,
   isInteractionLocked = false,
-  onPlayTts,
   onRecord,
-  onPlayRecordedAudio,
 }: MyNoteStudyCardProps) => {
   const isSentenceSelected = !!selectedSentence;
 
   return (
-    <section className="rounded-[24px] border border-slate-200 bg-white p-4 shadow-sm">
+    <section className="rounded-[24px] border border-slate-100 bg-white p-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)]">
       <div className="mb-4 flex items-center gap-2">
-        <div className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-50 text-emerald-500">
-          <Mic size={16} />
+        <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-blue-50 text-[#278DFD]">
+          <NotebookPen size={16} />
         </div>
-        <h2 className="font-bold text-slate-900">학습</h2>
+        <h2 className="text-[16px] font-extrabold text-slate-800">
+          학습 문장
+        </h2>
       </div>
 
       <div className="flex flex-col gap-4">
-        <div className="flex min-h-[96px] items-center justify-center rounded-2xl bg-slate-100 px-4 text-center">
+        <div className="flex min-h-[110px] items-center justify-center rounded-[18px] border border-slate-100 bg-[#F8F9FD] p-6 text-center">
           <p
-            className={`text-pretty leading-8 ${
+            className={`break-keep text-[18px] leading-relaxed transition-colors duration-300 ${
               isSentenceSelected
-                ? "font-bold text-slate-800"
-                : "font-semibold leading-6 text-slate-400"
+                ? "font-extrabold text-slate-800"
+                : "font-bold text-slate-400"
             }`}
           >
-            {selectedSentence ?? "아래 목록에서 문장을 선택해 주세요."}
+            {selectedSentence ?? "아래 목록에서 문장을 선택해주세요."}
           </p>
-        </div>
-
-        <div className="grid gap-3 sm:grid-cols-2">
-          <button
-            type="button"
-            onClick={onPlayTts}
-            disabled={!isSentenceSelected || isInteractionLocked}
-            className={`inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-slate-200 px-4 py-3 text-sm font-semibold transition disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-400 ${
-              hasRecordedAudio
-                ? "bg-white text-slate-700 hover:border-emerald-300 hover:bg-emerald-50"
-                : "bg-slate-100 text-slate-700 hover:border-emerald-300 hover:bg-emerald-50 sm:col-span-2"
-            }`}
-          >
-            <Volume2 size={18} />
-            {isPlayingTts ? "재생 중..." : "AI 음성 듣기"}
-          </button>
-
-          {hasRecordedAudio ? (
-            <button
-              type="button"
-              onClick={onPlayRecordedAudio}
-              disabled={isInteractionLocked}
-              className="inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700 transition hover:border-emerald-200 hover:bg-emerald-100 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-400"
-            >
-              <Play size={18} />
-              {isPlayingUserAudio ? "재생 중..." : "내 음성 듣기"}
-            </button>
-          ) : null}
         </div>
 
         <button
           type="button"
           onClick={onRecord}
           disabled={!isSentenceSelected || isInteractionLocked}
-          className="inline-flex min-h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-emerald-500 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:bg-slate-300"
+          className={`flex h-[54px] w-full items-center justify-center gap-2 rounded-[16px] text-[16px] font-bold text-white shadow-lg transition-all duration-300 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none ${
+            isRecording
+              ? "animate-pulse bg-rose-500 shadow-rose-200/50"
+              : "bg-[#278DFD] shadow-blue-300/50 active:scale-[0.98]"
+          }`}
         >
-          {hasRecordedAudio ? <RotateCcw size={18} /> : <Mic size={18} />}
-          {isRecording ? "녹음 중..." : hasRecordedAudio ? "다시 녹음하기" : "녹음하기"}
+          {isRecording ? (
+            <>
+              <MicOff size={20} />
+              듣고 있어요...
+            </>
+          ) : (
+            <>
+              <Mic size={20} />
+              발음 녹음하기
+            </>
+          )}
         </button>
       </div>
     </section>

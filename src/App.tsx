@@ -1,26 +1,39 @@
+import { lazy, Suspense } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { createBrowserRouter, RouterProvider, type RouteObject } from 'react-router-dom'
-import HomePage from './pages/HomePage';
 import RootLayout from './layouts/RootLayout';
 import ProtectedLayout from './layouts/ProtectedLayout';
-import WarmupPage from './pages/warmup/WarmupPage';
-import MyNotePage from './pages/warmup/MyNotePage';
-import BasicSpeakPracticePage from './pages/warmup/BasicSpeakPracticePage';
-import BasicSpeakPage from './pages/warmup/BasicSpeakPage';
-import ScenarioPage from './pages/scenario/ScenarioPage';
-import FreeConversationPage from './pages/FreeConversationPage';
-import ReportPage from './pages/ReportPage';
-import MyPage from './pages/MyPage';
-import ScenarioLevelSelectPage from './pages/scenario/ScenarioLevelSelectPage';
-import ScenarioPracticePage from './pages/scenario/ScenarioPracticePage';
 import AuthLayout from './layouts/AuthLayout';
-import LoginPage from './pages/LoginPage';
-import SignupPage from './pages/SignupPage';
-import PracticeSelectPage from './pages/PracticeSelectPage';
 import { AuthProvider } from './contexts/AuthContext';
 import { RecordProvider } from './contexts/RecordContext';
 import NotFound from './pages/NotFound';
+
+const HomePage = lazy(() => import('./pages/HomePage'));
+const MyPage = lazy(() => import('./pages/MyPage'));
+const WarmupPage = lazy(() => import('./pages/warmup/WarmupPage'));
+const MyNotePage = lazy(() => import('./pages/warmup/MyNotePage'));
+const BasicSpeakPage = lazy(() => import('./pages/warmup/BasicSpeakPage'));
+const BasicSpeakPracticePage = lazy(
+  () => import('./pages/warmup/BasicSpeakPracticePage')
+);
+const PracticeSelectPage = lazy(() => import('./pages/PracticeSelectPage'));
+const ScenarioPage = lazy(() => import('./pages/scenario/ScenarioPage'));
+const ScenarioLevelSelectPage = lazy(
+  () => import('./pages/scenario/ScenarioLevelSelectPage')
+);
+const ScenarioPracticePage = lazy(
+  () => import('./pages/scenario/ScenarioPracticePage')
+);
+const FreeConversationListPage = lazy(
+  () => import('./pages/free-conversation/FreeConversationListPage')
+);
+const FreeConversationChatPage = lazy(
+  () => import('./pages/free-conversation/FreeConversationChatPage')
+);
+const ReportPage = lazy(() => import('./pages/ReportPage'));
+const LoginPage = lazy(() => import('./pages/LoginPage'));
+const SignupPage = lazy(() => import('./pages/SignupPage'));
 
 const routes: RouteObject[] = [
   {
@@ -29,6 +42,7 @@ const routes: RouteObject[] = [
     errorElement: <NotFound />,
     children: [
       {index: true, element: <HomePage />},
+      { path: "mypage", element: <MyPage /> },
     ]
   },
 ];
@@ -75,12 +89,15 @@ const protectedRoutes: RouteObject[] = [
           },
           {
             path: "free-conversation",
-            element: <FreeConversationPage />,
+            children: [
+              { index: true, element: <FreeConversationListPage /> },
+              { path: "chat/new", element: <FreeConversationChatPage /> },
+              { path: "chat/:conversationId", element: <FreeConversationChatPage /> },
+            ],
           },
         ],
       },
       { path: "report", element: <ReportPage /> },
-      { path: "mypage", element: <MyPage /> },
     ],
   },
 ];
@@ -110,7 +127,9 @@ const App = () => {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <RecordProvider>
-          <RouterProvider router={router} />
+          <Suspense fallback={null}>
+            <RouterProvider router={router} />
+          </Suspense>
         </RecordProvider>
       </AuthProvider>
       {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}

@@ -1,4 +1,5 @@
-﻿import { ChevronRight, Trash2 } from "lucide-react";
+import { ChevronRight, Trash2 } from "lucide-react";
+import type { MouseEvent } from "react";
 import type { ScenarioItem } from "../../types/scenarioType";
 
 interface ScenarioRowCardProps {
@@ -10,38 +11,46 @@ interface ScenarioRowCardProps {
 const ScenarioRowCard = ({ scenario, onClick, onDelete }: ScenarioRowCardProps) => {
   const Icon = scenario.icon;
 
+  const handleDelete = (event: MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation();
+    onDelete?.();
+  };
+
   return (
-    <div className="group relative">
-      <button
-        type="button"
-        onClick={onClick}
-        className="flex w-full items-center gap-3 rounded-[22px] border border-slate-200 bg-white px-4 py-4 text-left shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow"
+    <button
+      type="button"
+      onClick={onClick}
+      className="group flex w-full items-center gap-4 rounded-[24px] border border-slate-50 bg-white p-5 text-left shadow-[0_4px_16px_rgba(0,0,0,0.03)] transition-all hover:border-slate-200 active:scale-[0.98]"
+    >
+      <div
+        className={`flex h-[56px] w-[56px] shrink-0 items-center justify-center rounded-[18px] ${scenario.iconClassName}`}
       >
-        <div
-          className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${scenario.iconClassName}`}
-        >
-          <Icon size={22} />
-        </div>
+        <Icon size={26} />
+      </div>
 
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-[15px] font-bold text-slate-900">{scenario.title}</p>
-          <p className="mt-1 truncate text-[13px] text-slate-500">{scenario.description}</p>
-        </div>
+      <div className="min-w-0 flex-1">
+        <p className="mb-1 truncate text-[16px] font-extrabold text-slate-900">
+          {scenario.title}
+        </p>
+        <p className="truncate text-[13px] font-medium text-slate-500">
+          {scenario.description}
+        </p>
+      </div>
 
-        <ChevronRight className="shrink-0 text-slate-300 transition group-hover:text-slate-500" />
-      </button>
-
-      {onDelete && (
-        <button
-          type="button"
-          onClick={onDelete}
-          className="absolute right-9 top-1/2 inline-flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-xl text-slate-400 transition hover:bg-slate-100 hover:text-rose-500"
-          aria-label="시나리오 삭제"
-        >
-          <Trash2 size={17} />
-        </button>
-      )}
-    </div>
+      <div className="flex shrink-0 items-center gap-1">
+        {onDelete ? (
+          <button
+            type="button"
+            onClick={handleDelete}
+            className="flex h-11 w-11 items-center justify-center rounded-[16px] text-slate-300 transition hover:bg-rose-50 hover:text-rose-500 active:scale-95"
+            aria-label="시나리오 삭제"
+          >
+            <Trash2 size={20} />
+          </button>
+        ) : null}
+        <ChevronRight className="text-slate-300 transition group-hover:text-slate-500" size={20} />
+      </div>
+    </button>
   );
 };
 
