@@ -51,6 +51,28 @@ export const ROOT_TAB_PATHS = ["/", "/warmup", "/ai-practice", "/report", "/mypa
 
 export const isRootTabPath = (pathname: string) => ROOT_TAB_PATHS.includes(pathname);
 
+export const getParentPath = (pathname: string) => {
+  if (pathname.startsWith("/warmup/basic-speak/")) return "/warmup/basic-speak";
+  if (pathname === "/warmup/basic-speak") return "/warmup";
+  if (pathname === "/warmup/my-note") return "/warmup";
+
+  if (pathname.includes("/ai-practice/scenario/") && pathname.includes("/level/")) {
+    return pathname.split("/level/")[0];
+  }
+  if (pathname.startsWith("/ai-practice/scenario/")) return "/ai-practice/scenario";
+  if (pathname === "/ai-practice/scenario") return "/ai-practice";
+
+  if (pathname.includes("/ai-practice/free-conversation/")) {
+    return "/ai-practice/free-conversation";
+  }
+  if (pathname === "/ai-practice/free-conversation") return "/ai-practice";
+
+  const segments = pathname.split("/").filter(Boolean);
+  if (segments.length <= 1) return "/";
+
+  return `/${segments.slice(0, -1).join("/")}`;
+};
+
 export const getPageTitle = (pathname: string) => {
   if (pathname === "/") return "이음";
   if (pathname === "/warmup") return "워밍업";

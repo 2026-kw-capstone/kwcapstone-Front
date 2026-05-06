@@ -1,6 +1,6 @@
 import { ChevronLeft } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { getPageTitle, isRootTabPath } from "../constants/navigation";
+import { getPageTitle, getParentPath, isRootTabPath } from "../constants/navigation";
 
 const Header = () => {
   const { pathname } = useLocation();
@@ -14,7 +14,7 @@ const Header = () => {
         {!isRootTab && (
           <button
             type="button"
-            onClick={() => navigate(-1)}
+            onClick={() => navigate(getParentPath(pathname))}
             aria-label="이전 페이지로 이동"
             className="-ml-1.5 rounded-full p-1.5 text-slate-800 transition-colors hover:bg-slate-100 active:scale-95"
           >
