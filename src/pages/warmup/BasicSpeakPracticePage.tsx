@@ -1,27 +1,28 @@
-﻿import { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Navigate, useParams } from "react-router-dom";
 import { uploadBasicSpeakVoice } from "../../apis/voicePlaceholder";
-import { getRecordErrorMessage } from "../../constants/recordingMessage";
-import BackLinkButton from "../../components/BackLinkButton";
 import BasicSpeakResultCard from "../../components/warmup/basic-speak/BasicSpeakResultCard";
 import BasicSpeakStudyCard from "../../components/warmup/basic-speak/BasicSpeakStudyCard";
 import { getBasicSpeakCardById } from "../../constants/basicSpeak";
+import { getRecordErrorMessage } from "../../constants/recordingMessage";
 import { useRecord } from "../../contexts/RecordContext";
+import { useAudioPlayer } from "../../hooks/audio/useAudioPlayer";
 import { useRecordUploadFlow } from "../../hooks/audio/useRecordUploadFlow";
 
 type PracticeResult = {
   pronunciationScore: number;
-  stabilityScore: number;
-  deliveryScore: number;
 };
 
 const BasicSpeakPracticePage = () => {
   const { cardId } = useParams<{ cardId: string }>();
   const { isRecording, status, lastError, startRecording, stopRecording } =
     useRecord();
+  const { audioUrl, isPlaying, setAudioUrl, clearAudioUrl, playAudio } =
+    useAudioPlayer();
   const card = useMemo(() => getBasicSpeakCardById(cardId), [cardId]);
 
   const [result, setResult] = useState<PracticeResult | null>(null);
+  const [isPlayingModelAudio, setIsPlayingModelAudio] = useState(false);
 
   const { isUploading, toggleRecordAndUpload } = useRecordUploadFlow({
     isRecording,
@@ -31,12 +32,12 @@ const BasicSpeakPracticePage = () => {
     uploadFn: uploadBasicSpeakVoice,
     onBeforeStart: () => {
       setResult(null);
+      clearAudioUrl();
     },
-    onUploadSuccess: ({ analysis }) => {
+    onUploadSuccess: ({ analysis, mp3Url }, blob) => {
+      setAudioUrl(mp3Url || URL.createObjectURL(blob));
       setResult({
         pronunciationScore: analysis.pronunciationScore,
-        stabilityScore: analysis.stabilityScore,
-        deliveryScore: analysis.deliveryScore,
       });
     },
   });
@@ -49,34 +50,46 @@ const BasicSpeakPracticePage = () => {
     await toggleRecordAndUpload();
   };
 
+  const handlePlayRecordedAudio = async () => {
+    if (!audioUrl) return;
+    await playAudio();
+  };
+
+  const handlePlayModelAudio = () => {
+    setIsPlayingModelAudio(true);
+    window.setTimeout(() => {
+      setIsPlayingModelAudio(false);
+    }, 900);
+  };
+
   const recordErrorMessage = getRecordErrorMessage(lastError);
 
   return (
-    <div className="mx-auto flex w-full max-w-md flex-col gap-5">
-      <section className="flex flex-col gap-2">
-        <div className="flex flex-wrap items-center gap-2">
-          <BackLinkButton to="/warmup/basic-speak" label="기초 발성 목록으로" />
-          <h1 className="text-[18px] font-extrabold leading-tight tracking-tight text-slate-900 min-[380px]:text-[22px]">
-            기초 발성 연습
-          </h1>
-        </div>
+    <div className="mx-auto flex w-full max-w-md flex-col gap-5 animate-fade-in">
+      {recordErrorMessage ? (
+        <p className="rounded-2xl bg-rose-50 px-4 py-3 text-xs font-semibold text-rose-500">
+          {recordErrorMessage}
+        </p>
+      ) : null}
 
-        {recordErrorMessage ? (
-          <p className="text-xs font-semibold text-rose-500">{recordErrorMessage}</p>
-        ) : null}
-      </section>
+      <BasicSpeakStudyCard
+        card={card}
+        hasResult={!!result}
+        isRecording={isRecording}
+        isInteractionLocked={isUploading}
+        onRecord={handleRecord}
+      />
 
-      <section className="grid grid-cols-1 gap-4">
-        <BasicSpeakStudyCard
-          card={card}
-          hasResult={!!result}
-          isRecording={isRecording}
+      {result ? (
+        <BasicSpeakResultCard
+          result={result}
+          isPlayingModelAudio={isPlayingModelAudio}
+          isPlayingUserAudio={isPlaying}
           isInteractionLocked={isUploading}
-          onRecord={handleRecord}
+          onPlayModelAudio={handlePlayModelAudio}
+          onPlayRecordedAudio={handlePlayRecordedAudio}
         />
-
-        {result ? <BasicSpeakResultCard result={result} /> : null}
-      </section>
+      ) : null}
     </div>
   );
 };

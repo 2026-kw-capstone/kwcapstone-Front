@@ -55,7 +55,7 @@ export const getPageTitle = (pathname: string) => {
   if (pathname === "/") return "이음";
   if (pathname === "/warmup") return "워밍업";
   if (pathname === "/warmup/my-note") return "나만의 문장 노트";
-  if (pathname === "/warmup/basic-speak") return "기초 발성";
+  if (pathname === "/warmup/basic-speak") return "기초 발성 연습";
   if (pathname.startsWith("/warmup/basic-speak/")) return "기초 발성 연습";
   if (pathname === "/ai-practice") return "AI 실전 연습";
   if (pathname === "/ai-practice/scenario") return "시나리오 연습";
