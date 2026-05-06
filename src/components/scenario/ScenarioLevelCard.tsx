@@ -13,20 +13,24 @@ const ScenarioLevelCard = ({ item, onClick }: ScenarioLevelCardProps) => {
     <button
       type="button"
       onClick={onClick}
-      className="group flex w-full items-center gap-4 rounded-[22px] border border-slate-200 bg-white px-4 py-4 text-left shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow"
+      className="group flex w-full items-center gap-4 rounded-[24px] border border-slate-50 bg-white p-5 text-left shadow-[0_4px_16px_rgba(0,0,0,0.03)] transition-all hover:border-slate-200 active:scale-[0.98]"
     >
       <div
-        className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${item.iconClassName}`}
+        className={`flex h-[56px] w-[56px] shrink-0 items-center justify-center rounded-[20px] ${item.iconClassName}`}
       >
-        <Icon size={22} />
+        <Icon size={26} />
       </div>
 
       <div className="min-w-0 flex-1">
-        <p className="text-md font-bold text-slate-900">{item.title}</p>
-        <p className="mt-1 text-xs text-slate-500">{item.description}</p>
+        <p className="mb-1 text-[17px] font-black leading-snug text-slate-900 break-keep">
+          {item.title}
+        </p>
+        <p className="text-[13px] font-medium leading-relaxed text-slate-500 break-keep">
+          {item.description}
+        </p>
       </div>
 
-      <ChevronRight className="shrink-0 text-slate-300 transition group-hover:text-slate-500" />
+      <ChevronRight className="shrink-0 text-slate-300 transition group-hover:text-slate-500" size={20} />
     </button>
   );
 };

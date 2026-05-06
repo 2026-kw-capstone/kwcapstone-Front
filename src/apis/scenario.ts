@@ -1,4 +1,4 @@
-﻿import { UserRoundPlus } from "lucide-react";
+import { Target } from "lucide-react";
 import type {
   CreateScenarioPayload,
   ScenarioItem,
@@ -17,6 +17,11 @@ export const getMyScenariosSnapshot = (): ScenarioItem[] => {
   return [...mockMyScenarios];
 };
 
+export const getMyScenariosRequest = async (): Promise<ScenarioItem[]> => {
+  await delay(200);
+  return getMyScenariosSnapshot();
+};
+
 export const createScenarioRequest = async (
   payload: CreateScenarioPayload
 ): Promise<ScenarioItem> => {
@@ -27,8 +32,8 @@ export const createScenarioRequest = async (
     title: payload.title,
     description:
       payload.description.trim() || "내가 직접 만든 맞춤 시나리오입니다.",
-    icon: UserRoundPlus,
-    iconClassName: "bg-emerald-50 text-emerald-600",
+    icon: Target,
+    iconClassName: "bg-emerald-50 text-emerald-500",
   };
 
   mockMyScenarios = [createdScenario, ...mockMyScenarios];

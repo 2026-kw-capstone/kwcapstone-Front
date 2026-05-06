@@ -1,15 +1,15 @@
-﻿import { useState, type FormEvent } from "react";
-import { Plus, Sparkles, UserRoundPlus } from "lucide-react";
+import { useEffect, useState, type FormEvent } from "react";
+import { Plus } from "lucide-react";
 import { useNavigate, useOutlet } from "react-router-dom";
-import BackLinkButton from "../../components/BackLinkButton";
 import {
   createScenarioRequest,
   deleteMyScenarioRequest,
+  getMyScenariosRequest,
   getMyScenariosSnapshot,
 } from "../../apis/scenario";
 import ScenarioCreateModal from "../../components/scenario/ScenarioCreateModal";
+import ScenarioOnboarding from "../../components/scenario/ScenarioOnboarding";
 import ScenarioRowCard from "../../components/scenario/ScenarioRowCard";
-import { RECOMMENDED_SCENARIOS } from "../../constants/scenario";
 import type { ScenarioItem, ScenarioOutletContext } from "../../types/scenarioType";
 
 const ScenarioPage = () => {
@@ -18,7 +18,7 @@ const ScenarioPage = () => {
   const [myScenarios, setMyScenarios] = useState<ScenarioItem[]>(
     getMyScenariosSnapshot()
   );
-
+  const [isLoading, setIsLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [titleInput, setTitleInput] = useState("");
@@ -26,6 +26,20 @@ const ScenarioPage = () => {
 
   const scenarioOutletContext: ScenarioOutletContext = { myScenarios };
   const outlet = useOutlet(scenarioOutletContext);
+
+  const refreshScenarios = async () => {
+    setIsLoading(true);
+    try {
+      const nextScenarios = await getMyScenariosRequest();
+      setMyScenarios(nextScenarios);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    void refreshScenarios();
+  }, []);
 
   if (outlet) {
     return outlet;
@@ -35,27 +49,32 @@ const ScenarioPage = () => {
     navigate(`/ai-practice/scenario/${scenarioId}`);
   };
 
-  const closeModal = () => {
-    setIsModalOpen(false);
+  const resetForm = () => {
     setTitleInput("");
     setDescriptionInput("");
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    resetForm();
   };
 
   const handleCreateScenario = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     const trimmedTitle = titleInput.trim();
-    if (!trimmedTitle) {
+    const trimmedDescription = descriptionInput.trim();
+    if (!trimmedTitle || !trimmedDescription) {
       return;
     }
 
     setIsCreating(true);
     try {
-      const createdScenario = await createScenarioRequest({
+      await createScenarioRequest({
         title: trimmedTitle,
-        description: descriptionInput,
+        description: trimmedDescription,
       });
-      setMyScenarios((prev) => [createdScenario, ...prev]);
+      await refreshScenarios();
       closeModal();
     } finally {
       setIsCreating(false);
@@ -64,87 +83,56 @@ const ScenarioPage = () => {
 
   const handleDeleteScenario = async (scenarioId: string) => {
     await deleteMyScenarioRequest(scenarioId);
-    setMyScenarios((prev) => prev.filter((scenario) => scenario.id !== scenarioId));
+    await refreshScenarios();
   };
+
+  if (!isLoading && myScenarios.length === 0) {
+    return (
+      <ScenarioOnboarding
+        title={titleInput}
+        description={descriptionInput}
+        isCreating={isCreating}
+        onSubmit={handleCreateScenario}
+        onTitleChange={setTitleInput}
+        onDescriptionChange={setDescriptionInput}
+      />
+    );
+  }
 
   return (
     <>
-      <div className="mx-auto flex w-full max-w-md flex-col gap-5 pb-1">
-        <section className="flex justify-between">
-          <div className="flex flex-wrap items-center gap-2">
-            <BackLinkButton to="/ai-practice" label="실전대화연습으로" />
-            <h1 className="text-[18px] font-extrabold leading-tight tracking-tight text-slate-900 min-[380px]:text-[22px]">
-              시나리오 대화 연습
+      <div className="mx-auto flex w-full max-w-md flex-col gap-6 animate-fade-in">
+        <section className="mb-1 flex items-center justify-between gap-4 px-1">
+          <div>
+            <h1 className="mb-1 text-[24px] font-black leading-tight text-slate-900">
+              시나리오 목록
             </h1>
-            <p className="mt-1 text-[13px] leading-5 text-slate-500">
-            연습하고 싶은 시나리오를 선택하세요.
+            <p className="text-[14px] font-medium text-slate-500">
+              내가 만든 맞춤 상황으로 연습해요.
             </p>
           </div>
+
           <button
             type="button"
             onClick={() => setIsModalOpen(true)}
-            className="inline-flex shrink-0 items-center justify-center gap-1.5 self-start rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 p-3 text-xs font-bold text-white shadow-md shadow-emerald-100 transition hover:brightness-105"
+            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#278DFD] text-white shadow-[0_8px_16px_rgba(39,141,253,0.3)] transition-all hover:scale-105 active:scale-95"
+            aria-label="시나리오 추가"
           >
-            <Plus size={15} />
-            시나리오 추가
+            <Plus size={26} />
           </button>
         </section>
 
-        <section>
-          <div className="mb-3 flex items-center gap-2">
-            <UserRoundPlus size={18} className="text-emerald-500" />
-            <h2 className="text-[15px] font-extrabold tracking-tight text-slate-900 min-[380px]:text-[17px]">
-              나만의 시나리오
-            </h2>
-            <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-emerald-100 px-2 text-xs font-bold text-emerald-700">
-              {myScenarios.length}
-            </span>
-          </div>
-
-          {myScenarios.length === 0 ? (
-            <div className="flex min-h-[210px] flex-col items-center justify-center rounded-[28px] border border-dashed border-slate-300 bg-slate-50 px-4 text-center">
-              <div className="mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-400">
-                <Plus size={24} />
-              </div>
-              <p className="mt-1 text-[13px] text-slate-400">
-                상단의 시나리오 추가 버튼을 눌러
-                <br />
-                나만의 상황을 만들어보세요.
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {myScenarios.map((scenario) => (
-                <ScenarioRowCard
-                  key={scenario.id}
-                  scenario={scenario}
-                  onClick={() => moveToLevelSelect(scenario.id)}
-                  onDelete={() => {
-                    void handleDeleteScenario(scenario.id);
-                  }}
-                />
-              ))}
-            </div>
-          )}
-        </section>
-
-        <section>
-          <div className="mb-3 flex items-center gap-2">
-            <Sparkles size={18} className="text-blue-500" />
-            <h2 className="text-[15px] font-extrabold tracking-tight text-slate-900 min-[380px]:text-[17px]">
-              추천 시나리오
-            </h2>
-          </div>
-
-          <div className="space-y-3">
-            {RECOMMENDED_SCENARIOS.map((scenario) => (
-              <ScenarioRowCard
-                key={scenario.id}
-                scenario={scenario}
-                onClick={() => moveToLevelSelect(scenario.id)}
-              />
-            ))}
-          </div>
+        <section className="flex flex-col gap-3">
+          {myScenarios.map((scenario) => (
+            <ScenarioRowCard
+              key={scenario.id}
+              scenario={scenario}
+              onClick={() => moveToLevelSelect(scenario.id)}
+              onDelete={() => {
+                void handleDeleteScenario(scenario.id);
+              }}
+            />
+          ))}
         </section>
       </div>
 
