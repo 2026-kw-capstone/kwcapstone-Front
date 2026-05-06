@@ -3,19 +3,19 @@ import { AI_PRACTICE_MENU_ITEMS } from "../constants/aiPractice";
 
 const PracticeSelectPage = () => {
   return (
-    <div className="mx-auto flex w-full max-w-md flex-col">
-      <section className="mb-4">
-        <h1 className="text-[28px] font-extrabold tracking-tight text-slate-900">
-          AI 실전대화연습
-        </h1>
-        <p className="mt-2 text-sm leading-6 text-slate-500">
-          원하는 연습 모드를 선택해서 바로 시작해보세요.
-          <br />
-          상황형 대화와 자유 대화를 모두 연습할 수 있어요.
+    <div className="mx-auto flex w-full max-w-md flex-col animate-fade-in">
+      <section className="relative mb-6 pt-2">
+        <p className="mb-1.5 px-1 text-[14px] font-black uppercase tracking-wider text-emerald-500">
+          AI Practice
         </p>
+        <h1 className="relative z-10 px-1 text-[26px] font-black leading-tight text-slate-900">
+          상황에 맞는
+          <br />
+          대화를 연습해요
+        </h1>
       </section>
 
-      <section className="grid grid-cols-1 gap-3">
+      <section className="relative z-10 flex flex-col gap-4">
         {AI_PRACTICE_MENU_ITEMS.map((item) => (
           <MenuSelectCard key={item.to} item={item} />
         ))}
