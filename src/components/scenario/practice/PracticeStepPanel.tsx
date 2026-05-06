@@ -1,5 +1,6 @@
-﻿import {
+import {
   Lightbulb,
+  MessageSquare,
   Mic,
   MicOff,
   Play,
@@ -8,7 +9,11 @@
   StepBack,
   StepForward,
 } from "lucide-react";
-import type { PracticeStep, StepResult } from "../../../types/scenarioPracticeType";
+import type {
+  PracticeStep,
+  ScenarioSyllableStatus,
+  StepResult,
+} from "../../../types/scenarioPracticeType";
 
 interface PracticeStepPanelProps {
   currentStep: PracticeStep;
@@ -28,6 +33,46 @@ interface PracticeStepPanelProps {
   onNext: () => void;
 }
 
+const syllableStatusClassName: Record<ScenarioSyllableStatus, string> = {
+  good: "border-emerald-100 bg-emerald-50 text-emerald-600",
+  warning: "border-amber-100 bg-amber-50 text-amber-600",
+  bad: "border-rose-100 bg-rose-50 text-rose-600",
+};
+
+const MetricBlock = ({
+  label,
+  value,
+  unit,
+  colorClassName,
+  highlight = false,
+}: {
+  label: string;
+  value: number;
+  unit: string;
+  colorClassName: string;
+  highlight?: boolean;
+}) => {
+  return (
+    <div
+      className={`rounded-[16px] border p-3 text-center ${
+        highlight ? "border-blue-100 bg-blue-50" : "border-slate-100 bg-[#F8F9FD]"
+      }`}
+    >
+      <p
+        className={`mb-1 text-[11px] font-semibold ${
+          highlight ? "text-blue-500" : "text-slate-500"
+        }`}
+      >
+        {label}
+      </p>
+      <p className={`text-[18px] font-black ${colorClassName}`}>
+        {value}
+        <span className="ml-0.5 text-[12px] font-bold">{unit}</span>
+      </p>
+    </div>
+  );
+};
+
 const PracticeStepPanel = ({
   currentStep,
   currentStepIndex,
@@ -45,127 +90,158 @@ const PracticeStepPanel = ({
   onPrev,
   onNext,
 }: PracticeStepPanelProps) => {
-
   return (
-    <>
-      <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-        <span className="inline-flex rounded-xl bg-slate-900 px-3 py-1 text-xs font-bold text-white">
-          AI
-        </span>
-        <p className="mt-3 text-lg font-extrabold leading-tight text-slate-900">
-          "{currentStep.prompt}"
-        </p>
-
-        <div className="mt-4 rounded-2xl bg-slate-100 p-4">
-          <p className="text-xs font-bold text-emerald-600">연습 포인트</p>
-          <p className="mt-1 text-xs leading-6 text-slate-700">{currentStep.hint}</p>
-        </div>
-      </section>
-
-      <section className="rounded-3xl border border-transparent bg-transparent px-4 py-8 text-center">
-        <button
-          type="button"
-          onClick={onRecord}
-          disabled={isAnalyzing}
-          className={`mx-auto inline-flex h-22 w-22 items-center justify-center rounded-full text-white shadow-lg shadow-emerald-100 transition ${
-            isRecording ? "bg-rose-500" : "bg-emerald-500 enabled:hover:brightness-105"
-          } disabled:cursor-not-allowed disabled:opacity-60`}
-        >
-          {isRecording ? <MicOff size={40} /> : <Mic size={40} />}
-        </button>
-
-        <p className="mt-5 text-xs font-semibold text-slate-400">
-          {isRecording
-            ? "녹음 중입니다... 버튼을 다시 누르면 종료됩니다."
-            : isAnalyzing
-              ? "분석 중입니다..."
-              : "버튼을 눌러 대답하세요"}
-        </p>
-
-        {currentResult && !isRecording && !isAnalyzing && (
-          <div className="mt-4 flex items-center justify-center gap-2">
-            <button
-              type="button"
-              onClick={onReRecord}
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-50"
-            >
-              <RotateCcw size={14} />
-              재녹음
-            </button>
-
-            <button
-              type="button"
-              onClick={onPlayRecordedAudio}
-              disabled={!hasRecordedAudio}
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-300"
-            >
-              <Play size={14} />
-              {isPlayingUserAudio ? "재생 중..." : "내 음성 듣기"}
-            </button>
-          </div>
-        )}
-      </section>
-
-      {currentResult && (
-        <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-          <div className="flex items-center gap-2">
-            <Signal className="text-emerald-500" size={18} />
-            <h3 className="font-extrabold text-slate-900">발음 분석 결과</h3>
-          </div>
-
-          <div className="mt-4 flex flex-wrap gap-2">
-            {currentResult.transcript.split("").map((char, index) => (
-              <span
-                key={`${char}-${index}`}
-                className="inline-flex h-10 min-w-11 items-center justify-center rounded-xl border border-emerald-200 bg-emerald-50 px-2 text-lg font-bold text-emerald-700"
-              >
-                {char}
-              </span>
-            ))}
-          </div>
-
-          <div className="mt-5 grid grid-cols-2 gap-3">
-            <div className="rounded-2xl bg-slate-50 p-4 text-center">
-              <p className="text-sm font-semibold text-slate-500">정확도</p>
-              <p className="mt-1 text-2xl font-extrabold text-emerald-600">{currentResult.accuracy}%</p>
+    <div className="flex min-h-0 flex-1 flex-col">
+      <div className="-mx-5 min-h-0 flex-1 overflow-y-auto px-5 pb-4 pt-4 hide-scrollbar">
+        <div className="flex min-h-full flex-col gap-4">
+          <section className="relative shrink-0 rounded-[24px] border border-slate-100 bg-white p-6 shadow-[0_4px_16px_rgba(0,0,0,0.03)]">
+            <div className="absolute -top-3.5 left-5 rounded-lg bg-slate-800 px-2.5 py-1 text-[10px] font-black uppercase tracking-widest text-white shadow-md">
+              AI 대화
             </div>
-            <div className="rounded-2xl bg-slate-50 p-4 text-center">
-              <p className="text-sm font-semibold text-slate-500">유창성</p>
-              <p className="mt-1 text-2xl font-extrabold text-teal-600">{currentResult.fluency}%</p>
-            </div>
-          </div>
-
-          <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-            <p className="inline-flex items-center gap-1 text-sm font-bold text-emerald-600">
-              <Lightbulb size={14} />
-              AI 맞춤 피드백
+            <p className="mt-3 mb-4 text-[18px] font-extrabold leading-relaxed text-slate-800 break-keep">
+              "{currentStep.prompt}"
             </p>
-            <p className="mt-2 text-sm font-medium text-slate-700">{currentResult.feedback}</p>
-          </div>
-        </section>
-      )}
+            <div className="rounded-[16px] border border-slate-100 bg-[#F8F9FD] p-4">
+              <p className="mb-1.5 flex items-center gap-1.5 text-[12px] font-black text-slate-500">
+                <Lightbulb size={14} />
+                힌트
+              </p>
+              <p className="text-[13.5px] font-medium leading-relaxed text-slate-700 break-keep">
+                {currentStep.hint}
+              </p>
+            </div>
+          </section>
 
-      <footer className="grid grid-cols-[56px_1fr] gap-3 pt-1">
+          <section className="flex min-h-[200px] flex-1 flex-col items-center justify-center">
+            {!currentResult ? (
+              <div className="flex flex-col items-center animate-fade-in">
+                <button
+                  type="button"
+                  onClick={onRecord}
+                  disabled={isAnalyzing}
+                  className={`flex h-[88px] w-[88px] items-center justify-center rounded-full text-white shadow-xl transition-all disabled:cursor-not-allowed disabled:opacity-60 ${
+                    isRecording
+                      ? "scale-110 animate-pulse bg-rose-500 shadow-[0_0_30px_rgba(244,63,94,0.4)]"
+                      : "bg-[#278DFD] shadow-[0_8px_20px_rgba(39,141,253,0.3)] hover:scale-105 active:scale-[0.9]"
+                  }`}
+                >
+                  {isRecording ? <MicOff size={36} /> : <Mic size={36} />}
+                </button>
+                <p className="mt-6 text-[15px] font-extrabold text-slate-400">
+                  {isRecording
+                    ? "듣고 있습니다..."
+                    : isAnalyzing
+                      ? "분석 중입니다..."
+                      : "버튼을 눌러 대답하세요"}
+                </p>
+              </div>
+            ) : (
+              <div className="w-full animate-slide-up rounded-[24px] border border-blue-50 bg-white p-5 shadow-[0_4px_20px_rgba(0,0,0,0.04)]">
+                <h3 className="mb-5 flex items-center gap-2 text-[15px] font-black text-slate-900">
+                  <Signal className="text-[#278DFD]" size={20} />
+                  분석 결과
+                </h3>
+
+                <div className="mb-6 grid grid-cols-2 gap-2">
+                  <MetricBlock
+                    label="발음 정확도"
+                    value={currentResult.accuracy}
+                    unit="%"
+                    colorClassName="text-[#278DFD]"
+                    highlight
+                  />
+                  <MetricBlock
+                    label="의미 전달률"
+                    value={currentResult.semanticRate}
+                    unit="%"
+                    colorClassName="text-emerald-500"
+                  />
+                  <MetricBlock
+                    label="발화 속도"
+                    value={currentResult.speed}
+                    unit=""
+                    colorClassName="text-slate-700"
+                  />
+                  <MetricBlock
+                    label="침묵 비율"
+                    value={currentResult.silenceRatio}
+                    unit="%"
+                    colorClassName="text-slate-700"
+                  />
+                </div>
+
+                <div className="mb-6 grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={onReRecord}
+                    className="flex h-12 items-center justify-center gap-2 rounded-xl border border-transparent bg-slate-50 text-[14px] font-bold text-slate-700 transition-colors hover:bg-slate-100"
+                  >
+                    <RotateCcw size={16} />
+                    재녹음
+                  </button>
+                  <button
+                    type="button"
+                    onClick={onPlayRecordedAudio}
+                    disabled={!hasRecordedAudio}
+                    className="flex h-12 items-center justify-center gap-2 rounded-xl border border-transparent bg-blue-50 text-[14px] font-bold text-[#278DFD] transition-colors hover:bg-blue-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
+                  >
+                    <Play size={16} fill="currentColor" />
+                    {isPlayingUserAudio ? "재생 중..." : "내 녹음 듣기"}
+                  </button>
+                </div>
+
+                <p className="mb-2.5 text-[13px] font-black text-slate-500">
+                  발음 음절 피드백
+                </p>
+                <div className="mb-6 flex gap-1.5 overflow-x-auto pb-2 hide-scrollbar">
+                  {currentResult.syllables.map((syllable, index) => (
+                    <span
+                      key={`${syllable.text}-${index}`}
+                      className={`flex h-[42px] min-w-[38px] shrink-0 items-center justify-center rounded-[12px] border text-[16px] font-extrabold shadow-sm ${
+                        syllableStatusClassName[syllable.status]
+                      }`}
+                    >
+                      {syllable.text}
+                    </span>
+                  ))}
+                </div>
+
+                <div className="relative rounded-[18px] border border-slate-100 bg-[#F8F9FD] p-4">
+                  <div className="absolute left-4 top-0 flex -translate-y-1/2 items-center gap-1 rounded-full bg-blue-100 px-2.5 py-0.5 text-[11px] font-extrabold text-[#278DFD] shadow-sm">
+                    <MessageSquare size={12} />
+                    AI 코멘트
+                  </div>
+                  <p className="mt-2 text-[14px] font-medium leading-relaxed text-slate-700 break-keep">
+                    {currentResult.feedback}
+                  </p>
+                </div>
+              </div>
+            )}
+          </section>
+        </div>
+      </div>
+
+      <footer className="z-20 -mx-5 grid grid-cols-[56px_1fr] gap-3 border-t border-slate-100 bg-white p-4 shadow-[0_-4px_16px_rgba(0,0,0,0.02)]">
         <button
           type="button"
           onClick={onPrev}
           disabled={!canGoPrev}
-          className="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-300"
+          className="flex h-[56px] items-center justify-center rounded-[18px] bg-[#F8F9FD] text-slate-400 transition-colors active:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-30"
         >
-          <StepBack size={20} />
+          <StepBack size={22} />
         </button>
 
         <button
           type="button"
           onClick={onNext}
           disabled={!canGoNext}
-          className="inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-500 px-3 py-3 font-bold text-white shadow-lg shadow-emerald-100 transition enabled:hover:brightness-105 disabled:cursor-not-allowed disabled:bg-emerald-300"
+          className="flex h-[56px] items-center justify-center gap-2 rounded-[18px] bg-slate-800 text-[16px] font-bold text-white shadow-lg transition-all active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-30 disabled:shadow-none"
         >
-          {currentStepIndex === totalSteps - 1 ? "최종 결과 보기" : "다음 단계"}
+          {currentStepIndex === totalSteps - 1 ? "종료 및 결과보기" : "다음 단계로"}
           <StepForward size={20} />
         </button>
       </footer>
-    </>
+    </div>
   );
 };
 

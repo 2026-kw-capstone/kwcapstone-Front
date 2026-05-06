@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
 import { uploadMyNoteVoice } from "../../apis/voicePlaceholder";
 import { getRecordErrorMessage } from "../../constants/recordingMessage";
-import BackLinkButton from "../../components/BackLinkButton";
 import MyNoteResultCard from "../../components/warmup/my-note/MyNoteResultCard";
 import MyNoteSentenceList from "../../components/warmup/my-note/MyNoteSentenceList";
 import MyNoteStudyCard from "../../components/warmup/my-note/MyNoteStudyCard";
@@ -11,26 +10,44 @@ import { useRecordUploadFlow } from "../../hooks/audio/useRecordUploadFlow";
 import type {
   MyNoteAnalysisResult,
   MyNoteSentenceItem,
+  MyNoteSyllableFeedback,
+  MyNoteSyllableStatus,
 } from "../../types/myNoteType";
 
 const INITIAL_SENTENCES: MyNoteSentenceItem[] = [
   {
     id: 1,
-    text: "아이스 아메리카노 한 잔 주세요",
+    text: "아이스 아메리카노 한 잔 주세요.",
     createdAt: new Date().toISOString(),
   },
   {
     id: 2,
-    text: "병원 예약을 다음 주 월요일로 변경하고 싶어요",
+    text: "병원 예약을 다음 주 화요일로 변경하고 싶어요.",
     createdAt: new Date(Date.now() - 1000 * 60).toISOString(),
   },
 ];
 
+const SYLLABLE_STATUS_PATTERN: MyNoteSyllableStatus[] = [
+  "good",
+  "good",
+  "warning",
+  "good",
+  "bad",
+  "good",
+];
+
+const createSyllableFeedback = (text: string): MyNoteSyllableFeedback[] => {
+  const syllables = Array.from(text).filter((char) => /[가-힣A-Za-z0-9]/.test(char));
+
+  return syllables.map((char, index) => ({
+    text: char,
+    status: SYLLABLE_STATUS_PATTERN[index % SYLLABLE_STATUS_PATTERN.length],
+  }));
+};
+
 const MyNotePage = () => {
-  // 전역 녹음 컨텍스트: 시작/종료와 상태만 담당
   const { isRecording, status, lastError, startRecording, stopRecording } =
     useRecord();
-  // 페이지 재생 상태: 업로드 응답 mp3Url(또는 로컬 blob URL) 재생 담당
   const { audioUrl, isPlaying, setAudioUrl, clearAudioUrl, playAudio } =
     useAudioPlayer();
 
@@ -46,7 +63,6 @@ const MyNotePage = () => {
   const [result, setResult] = useState<MyNoteAnalysisResult | null>(null);
   const [isPlayingTts, setIsPlayingTts] = useState(false);
   const [isAddingSentence, setIsAddingSentence] = useState(false);
-  const [isSavingReport, setIsSavingReport] = useState(false);
 
   const selectedSentence = useMemo(() => {
     return sentences.find((sentence) => sentence.id === selectedSentenceId) ?? null;
@@ -59,8 +75,6 @@ const MyNotePage = () => {
     setResult(null);
   };
 
-  // 녹음 버튼 1회 클릭: 녹음 시작
-  // 녹음 버튼 2회 클릭: 녹음 종료 -> 업로드 -> 응답(mp3Url/분석 결과) 저장
   const { isUploading, toggleRecordAndUpload } = useRecordUploadFlow({
     isRecording,
     status,
@@ -79,7 +93,10 @@ const MyNotePage = () => {
         pronunciationScore: analysis.pronunciationScore,
         stabilityScore: analysis.stabilityScore,
         deliveryScore: analysis.deliveryScore,
-        feedback: analysis.feedback ?? "",
+        feedback:
+          analysis.feedback ??
+          "전체적으로 안정적인 발화입니다. 첫 음절을 조금 더 또렷하게 시작하면 전달력이 좋아집니다.",
+        syllables: createSyllableFeedback(selectedSentence?.text ?? ""),
       });
     },
   });
@@ -100,24 +117,12 @@ const MyNotePage = () => {
 
   const handleRecord = async () => {
     if (!selectedSentence) return;
-    // 녹음 토글 + 업로드까지 한 번에 실행
     await toggleRecordAndUpload();
   };
 
   const handlePlayRecordedAudio = async () => {
     if (!hasRecordedAudio || !audioUrl) return;
-    // 현재 저장된 음성 URL을 재생
     await playAudio();
-  };
-
-  const handleSaveReport = async () => {
-    if (!result || !selectedSentence) return;
-
-    setIsSavingReport(true);
-    window.setTimeout(() => {
-      setIsSavingReport(false);
-      alert("레포트에 저장되었습니다.");
-    }, 800);
   };
 
   const handleAddSentence = async (text: string) => {
@@ -155,37 +160,29 @@ const MyNotePage = () => {
   const recordErrorMessage = getRecordErrorMessage(lastError);
 
   return (
-    <div className="mx-auto flex w-full max-w-md flex-col gap-5">
-      <section className="flex flex-col gap-1">
-        <div className="flex flex-wrap items-center gap-2">
-          <BackLinkButton to="/warmup" label="워밍업으로" />
-          <h1 className="text-[18px] font-extrabold leading-tight tracking-tight text-slate-900 min-[380px]:text-[22px]">
-            나만의 문장 노트
-          </h1>
-        </div>
-        {recordErrorMessage ? (
-          <p className="text-xs font-semibold text-rose-500">{recordErrorMessage}</p>
-        ) : null}
-      </section>
+    <div className="mx-auto flex w-full max-w-md flex-col gap-5 animate-fade-in">
+      {recordErrorMessage ? (
+        <p className="rounded-[14px] bg-rose-50 px-4 py-3 text-[13px] font-bold text-rose-500">
+          {recordErrorMessage}
+        </p>
+      ) : null}
 
       <section className="grid grid-cols-1 gap-4">
         <MyNoteStudyCard
           selectedSentence={selectedSentence?.text ?? null}
-          hasRecordedAudio={hasRecordedAudio}
           isRecording={isRecording}
-          isPlayingTts={isPlayingTts}
-          isPlayingUserAudio={isPlaying}
           isInteractionLocked={isUploading}
-          onPlayTts={handlePlayTts}
           onRecord={handleRecord}
-          onPlayRecordedAudio={handlePlayRecordedAudio}
         />
 
         {result ? (
           <MyNoteResultCard
             result={result}
-            isSavingReport={isSavingReport || isUploading}
-            onSaveReport={handleSaveReport}
+            isPlayingTts={isPlayingTts}
+            isPlayingUserAudio={isPlaying}
+            isInteractionLocked={isUploading}
+            onPlayTts={handlePlayTts}
+            onPlayRecordedAudio={handlePlayRecordedAudio}
           />
         ) : null}
       </section>

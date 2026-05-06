@@ -1,28 +1,47 @@
-﻿import { Outlet, useLocation } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import Header from "../components/Header";
-import Sidebar from "../components/sidebar/Sidebar";
+import BottomNavigation from "../components/BottomNavigation";
+import { isRootTabPath } from "../constants/navigation";
 
 const ProtectedLayout = () => {
   const { pathname } = useLocation();
   const isFreeConversationPage = pathname.startsWith("/ai-practice/free-conversation");
-
-  // 액세스토큰이 있는 경우에만 접근할 수 있는 로직 추가
+  const isFreeConversationChatPage = pathname.startsWith(
+    "/ai-practice/free-conversation/chat/"
+  );
+  const isReportPage = pathname === "/report";
+  const isScenarioPracticePage =
+    pathname.startsWith("/ai-practice/scenario/") && pathname.includes("/level/");
+  const hasBottomNavigation = isRootTabPath(pathname);
 
   return (
-    <div className="min-h-screen min-h-[100dvh] bg-[#E9EBEF]">
-      <div className="relative mx-auto h-screen h-[100dvh] w-full max-w-[430px] overflow-hidden bg-[#F8FAFB] text-slate-900">
+    <div className="flex min-h-screen min-h-[100dvh] w-full items-center justify-center bg-slate-900">
+      <div className="relative flex h-[100dvh] w-full max-w-[430px] flex-col overflow-hidden bg-white text-slate-900 shadow-2xl sm:h-[850px] sm:max-h-[100dvh] sm:rounded-[48px] sm:border-[12px] sm:border-slate-800">
         <Header />
-        <Sidebar />
 
         <main
-          className={`mt-16 h-[calc(100vh-64px-72px)] h-[calc(100dvh-64px-72px)] ${
-            isFreeConversationPage ? "pb-0" : "pb-6"
-          } ${isFreeConversationPage ? "overflow-hidden" : "overflow-y-auto"}`}
+          className={`relative flex-1 overflow-x-hidden bg-[#F4F6F8] ${
+            isFreeConversationChatPage || isScenarioPracticePage
+              ? "overflow-hidden"
+              : "overflow-y-auto"
+          }`}
         >
-          <div className={isFreeConversationPage ? "h-full min-h-0" : "min-h-full px-4 py-4"}>
+          <div
+            className={
+              isFreeConversationChatPage
+                ? "h-full min-h-0"
+                : isFreeConversationPage || isReportPage
+                  ? "min-h-full"
+                  : isScenarioPracticePage
+                    ? "h-full min-h-0 px-5 pt-5 pb-0"
+                    : `min-h-full px-5 py-5 ${hasBottomNavigation ? "pb-24" : "pb-6"}`
+            }
+          >
             <Outlet />
           </div>
         </main>
+
+        {hasBottomNavigation && <BottomNavigation />}
       </div>
     </div>
   );

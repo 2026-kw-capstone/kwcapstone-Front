@@ -1,5 +1,5 @@
 import { isAxiosError } from "axios";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { getRecordErrorMessage } from "../constants/recordingMessage";
 import { useAuth } from "../contexts/AuthContext";
 import { useRecord } from "../contexts/RecordContext";
@@ -28,13 +28,21 @@ const getApiErrorMessage = (error: unknown, fallbackMessage: string) => {
   return fallbackMessage;
 };
 
-export const useFreeConversationController = () => {
+type UseFreeConversationControllerOptions = {
+  initialConversationId?: number | null;
+  onConversationCreated?: (conversationId: number) => void;
+};
+
+export const useFreeConversationController = ({
+  initialConversationId = null,
+  onConversationCreated,
+}: UseFreeConversationControllerOptions = {}) => {
   // 인증/녹음 관련 전역 상태
   const { accessToken } = useAuth();
   const { isRecording, status, lastError, startRecording, stopRecording } = useRecord();
   // 현재 선택된 대화와 모바일 사이드바 열림 여부
   const [selectedConversationId, setSelectedConversationId] = useState<number | null>(
-    null
+    initialConversationId
   );
   const [isMobileConversationListOpen, setIsMobileConversationListOpen] =
     useState(false);
@@ -45,11 +53,13 @@ export const useFreeConversationController = () => {
   const postTextMessageMutation = usePostTextMessage({
     onConversationCreated: (conversationId) => {
       setSelectedConversationId(conversationId);
+      onConversationCreated?.(conversationId);
     },
   });
   const postVoiceMessageMutation = usePostVoiceMessage({
     onConversationCreated: (conversationId) => {
       setSelectedConversationId(conversationId);
+      onConversationCreated?.(conversationId);
     },
   });
 
@@ -105,6 +115,11 @@ export const useFreeConversationController = () => {
     postTextMessageMutation.clearPendingNewConversationMessages();
     postVoiceMessageMutation.clearPendingNewConversationMessages();
   };
+
+  useEffect(() => {
+    setSelectedConversationId(initialConversationId);
+    clearPendingNewConversationMessages();
+  }, [initialConversationId]);
 
   // 새 대화 버튼: 선택 해제 + 임시 메시지 정리
   const handleNewConversation = () => {

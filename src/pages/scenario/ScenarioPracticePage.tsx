@@ -1,5 +1,6 @@
-﻿import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
+  Navigate,
   useBeforeUnload,
   useBlocker,
   useNavigate,
@@ -7,11 +8,10 @@ import {
   useParams,
 } from "react-router-dom";
 import { uploadScenarioVoice } from "../../apis/voicePlaceholder";
-import { getRecordErrorMessage } from "../../constants/recordingMessage";
 import PracticeHeader from "../../components/scenario/practice/PracticeHeader";
 import PracticeStepPanel from "../../components/scenario/practice/PracticeStepPanel";
 import PracticeSummaryPanel from "../../components/scenario/practice/PracticeSummaryPanel";
-import { RECOMMENDED_SCENARIOS } from "../../constants/scenario";
+import { getRecordErrorMessage } from "../../constants/recordingMessage";
 import { PRACTICE_STEPS, buildMockResult } from "../../constants/scenarioPractice";
 import { useRecord } from "../../contexts/RecordContext";
 import {
@@ -45,6 +45,7 @@ const ScenarioPracticePage = () => {
   >(createInitialMp3Urls);
   const recordedMp3UrlByStepRef = useRef<Array<string | null>>(createInitialMp3Urls());
 
+  const scenario = myScenarios.find((item) => item.id === (scenarioId ?? ""));
   const currentStep = PRACTICE_STEPS[currentStepIndex];
   const currentResult = resultsByStep[currentStepIndex];
   const currentMp3Url = recordedMp3UrlByStep[currentStepIndex];
@@ -66,7 +67,6 @@ const ScenarioPracticePage = () => {
         next[currentStepIndex] = {
           ...mockResult,
           accuracy: analysis.pronunciationScore,
-          fluency: analysis.stabilityScore,
         };
         return next;
       });
@@ -83,12 +83,7 @@ const ScenarioPracticePage = () => {
   const hasAnyProgress = resultsByStep.some(Boolean) || isRecording || isAnalyzing;
   const shouldBlockNavigation = hasAnyProgress && !isSummaryMode;
 
-  const scenarioName =
-    [...RECOMMENDED_SCENARIOS, ...myScenarios].find(
-      (scenario) => scenario.id === (scenarioId ?? "")
-    )?.title ?? "나만의 시나리오";
   const levelLabel = level ? `Level ${level}` : "Level 1";
-
   const isNavigationLocked =
     isRecording ||
     isAnalyzing ||
@@ -109,13 +104,13 @@ const ScenarioPracticePage = () => {
     );
   }, [resultsByStep]);
 
-  const averageFluency = useMemo(() => {
+  const averageSemanticRate = useMemo(() => {
     const completeResults = resultsByStep.filter(
       (result): result is StepResult => result !== null
     );
     if (completeResults.length === 0) return 0;
     return Math.round(
-      completeResults.reduce((acc, result) => acc + result.fluency, 0) /
+      completeResults.reduce((acc, result) => acc + result.semanticRate, 0) /
         completeResults.length
     );
   }, [resultsByStep]);
@@ -151,6 +146,10 @@ const ScenarioPracticePage = () => {
     event.preventDefault();
     event.returnValue = "";
   });
+
+  if (!scenario) {
+    return <Navigate to="/ai-practice/scenario" replace />;
+  }
 
   const handleRecord = async () => {
     await toggleRecordAndUpload();
@@ -199,44 +198,44 @@ const ScenarioPracticePage = () => {
     setCurrentStepIndex((prev) => prev + 1);
   };
 
-  const handleBackToLevel = () => {
-    navigate(`/ai-practice/scenario/${scenarioId}`);
+  const handleBackToList = () => {
+    navigate("/ai-practice/scenario");
   };
 
   const recordErrorMessage = getRecordErrorMessage(lastError);
 
   if (isSummaryMode) {
     return (
-      <div className="fixed inset-x-0 top-16 bottom-[72px] left-1/2 z-40 flex w-full max-w-[430px] -translate-x-1/2 items-center justify-center px-4 py-4">
+      <div className="mx-auto flex min-h-full w-full max-w-md">
         <PracticeSummaryPanel
           averageAccuracy={averageAccuracy}
-          averageFluency={averageFluency}
-          onBackToLevel={handleBackToLevel}
+          averageSemanticRate={averageSemanticRate}
+          onBackToList={handleBackToList}
         />
       </div>
     );
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-md flex-col gap-4 pb-2">
-      <div className="h-1 w-full rounded-full bg-slate-200">
+    <div className="mx-auto flex h-full min-h-0 w-full max-w-md flex-col gap-4 animate-fade-in">
+      <div className="h-1.5 w-full rounded-full bg-slate-200">
         <div
-          className="h-full rounded-full bg-emerald-500 transition-all duration-300"
+          className="h-full rounded-full bg-[#278DFD] transition-all duration-500 ease-out"
           style={{ width: `${progressPercent}%` }}
         />
       </div>
 
       <PracticeHeader
-        scenarioName={scenarioName}
         levelLabel={levelLabel}
         currentStepIndex={currentStepIndex}
         currentStep={currentStep}
         steps={PRACTICE_STEPS}
-        onBack={handleBackToLevel}
       />
 
       {recordErrorMessage ? (
-        <p className="text-xs font-semibold text-rose-500">{recordErrorMessage}</p>
+        <p className="rounded-2xl bg-rose-50 px-4 py-3 text-xs font-semibold text-rose-500">
+          {recordErrorMessage}
+        </p>
       ) : null}
 
       <PracticeStepPanel

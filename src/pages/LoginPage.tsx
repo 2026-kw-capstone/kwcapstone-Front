@@ -1,10 +1,9 @@
-﻿import axios from "axios";
-import { Link } from "react-router-dom";
-import { MessageCircle } from "lucide-react";
-import z from "zod";
+import axios from "axios";
 import { useMemo, useState } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
+import { Link } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
+import z from "zod";
 import { usePostSignin } from "../hooks/mutations/usePostSignin";
 
 type SigninErrorResponse = {
@@ -77,25 +76,11 @@ const Login = () => {
   };
 
   return (
-    <div className="w-full rounded-[20px] border border-slate-200 bg-white p-4 shadow-sm">
-      <div className="mb-6 flex flex-col gap-4">
-        <div className="flex justify-center">
-          <Link
-            to="/"
-            className="inline-flex w-fit items-center gap-3 rounded-2xl transition hover:opacity-90"
-          >
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-500 shadow-md shadow-emerald-200">
-              <MessageCircle className="fill-white text-white" size={28} />
-            </div>
-            <span className="text-2xl font-extrabold tracking-tight text-slate-900">
-              이음
-            </span>
-          </Link>
-        </div>
-
-        <div className="flex items-center justify-center">
-          <h1 className="text-xl font-bold text-slate-900">로그인</h1>
-        </div>
+    <div className="w-full rounded-[24px] border border-slate-100 bg-white p-6 shadow-[0_8px_24px_rgba(15,23,42,0.04)]">
+      <div className="mb-7 flex items-center justify-center">
+        <h1 className="text-[24px] font-black tracking-tight text-slate-900">
+          로그인
+        </h1>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
@@ -104,14 +89,17 @@ const Login = () => {
             {...register("email")}
             type="email"
             placeholder="이메일을 입력해주세요"
-            className={`min-h-12 w-full rounded-xl border px-4 py-3 text-base outline-none transition ${
+            aria-invalid={!!(touchedFields.email && errors.email)}
+            className={`h-[56px] w-full rounded-[18px] border bg-[#F8F9FD] px-5 text-[15.5px] font-medium outline-none transition placeholder:text-slate-400 focus:bg-white focus:ring-2 ${
               touchedFields.email && errors.email
-                ? "border-red-500"
-                : "border-slate-300 focus:border-emerald-500"
+                ? "border-rose-400 focus:border-rose-400 focus:ring-rose-100"
+                : "border-slate-100 focus:border-[#278DFD] focus:ring-blue-100"
             }`}
           />
           {touchedFields.email && errors.email && (
-            <p className="mt-2 text-sm text-red-500">{errors.email.message}</p>
+            <p className="mt-2 text-[13px] font-medium text-rose-500">
+              {errors.email.message}
+            </p>
           )}
         </div>
 
@@ -120,33 +108,38 @@ const Login = () => {
             {...register("password")}
             type="password"
             placeholder="비밀번호를 입력해주세요"
-            className={`min-h-12 w-full rounded-xl border px-4 py-3 text-base outline-none transition ${
+            aria-invalid={!!(touchedFields.password && errors.password)}
+            className={`h-[56px] w-full rounded-[18px] border bg-[#F8F9FD] px-5 text-[15.5px] font-medium outline-none transition placeholder:text-slate-400 focus:bg-white focus:ring-2 ${
               touchedFields.password && errors.password
-                ? "border-red-500"
-                : "border-slate-300 focus:border-emerald-500"
+                ? "border-rose-400 focus:border-rose-400 focus:ring-rose-100"
+                : "border-slate-100 focus:border-[#278DFD] focus:ring-blue-100"
             }`}
           />
           {touchedFields.password && errors.password && (
-            <p className="mt-2 text-sm text-red-500">{errors.password.message}</p>
+            <p className="mt-2 text-[13px] font-medium text-rose-500">
+              {errors.password.message}
+            </p>
           )}
         </div>
 
         {loginErrorMessage && (
-          <p className="text-sm text-red-500">{loginErrorMessage}</p>
+          <p className="rounded-[14px] bg-rose-50 px-4 py-3 text-[13px] font-bold text-rose-500">
+            {loginErrorMessage}
+          </p>
         )}
 
         <button
           type="submit"
           disabled={!canSubmit}
-          className="mt-2 min-h-12 rounded-xl bg-emerald-500 px-4 py-3 font-semibold text-white transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:bg-slate-300"
+          className="mt-2 h-[56px] rounded-[18px] bg-[#278DFD] px-4 text-[16px] font-bold text-white shadow-[0_8px_20px_rgba(39,141,253,0.3)] transition hover:brightness-105 active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
         >
           {isPending ? "로그인 중..." : "로그인"}
         </button>
       </form>
 
-      <div className="mt-6 text-center text-sm text-slate-500">
+      <div className="mt-6 text-center text-[14px] font-medium text-slate-500">
         계정이 없으신가요?{" "}
-        <Link to="/signup" className="font-semibold text-emerald-600">
+        <Link to="/signup" className="font-extrabold text-[#278DFD]">
           회원가입
         </Link>
       </div>
@@ -155,4 +148,3 @@ const Login = () => {
 };
 
 export default Login;
-

@@ -4,6 +4,7 @@ import {
   getStoredAccessToken,
   setStoredAccessToken,
 } from "../hooks/accessToken";
+import { postReissue } from "./auth";
 
 interface CustomInternalAxiosRequestConfig extends InternalAxiosRequestConfig {
   _retry?: boolean;
@@ -45,7 +46,6 @@ axiosInstance.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        const { postReissue } = await import("./auth");
         const response = await postReissue();
         const newAccessToken = response?.result?.accessToken;
 
