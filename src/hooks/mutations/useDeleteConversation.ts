@@ -5,7 +5,6 @@ import type {
   ConversationDetail,
   ConversationSummary,
 } from "../../types/freeConversationType";
-import { useGetMyInfo } from "../queries/useGetMyInfo";
 
 type DeleteConversationVariables = {
   conversationId: number;
@@ -19,8 +18,6 @@ type DeleteConversationContext = {
 
 export const useDeleteConversation = () => {
   const queryClient = useQueryClient();
-  const { data: myInfo } = useGetMyInfo();
-  const userId = myInfo?.memberId;
 
   return useMutation({
     mutationFn: ({ conversationId }: DeleteConversationVariables) =>
@@ -28,18 +25,18 @@ export const useDeleteConversation = () => {
     onMutate: async ({ conversationId, selectedConversationId }) => {
       await Promise.all([
         queryClient.cancelQueries({
-          queryKey: [QUERY_KEY.conversations, userId],
+          queryKey: [QUERY_KEY.conversations],
         }),
         queryClient.cancelQueries({
           queryKey: [QUERY_KEY.conversationDetail, conversationId],
         }),
       ]);
 
-      const previousConversations = queryClient.getQueryData<ConversationSummary[]>([QUERY_KEY.conversations, userId]);
+      const previousConversations = queryClient.getQueryData<ConversationSummary[]>([QUERY_KEY.conversations]);
       const previousConversationDetail = queryClient.getQueryData<ConversationDetail>([QUERY_KEY.conversationDetail, conversationId]);
 
       queryClient.setQueryData<ConversationSummary[]>(
-        [QUERY_KEY.conversations, userId],
+        [QUERY_KEY.conversations],
         (previous) =>
           previous?.filter(
             (conversation) => conversation.conversationId !== conversationId
@@ -66,7 +63,7 @@ export const useDeleteConversation = () => {
     },
     onError: (_, variables, context) => {
       queryClient.setQueryData(
-        [QUERY_KEY.conversations, userId],
+        [QUERY_KEY.conversations],
         context?.previousConversations
       );
       queryClient.setQueryData(
@@ -76,7 +73,7 @@ export const useDeleteConversation = () => {
     },
     onSuccess: (_, variables) => {
       void queryClient.invalidateQueries({
-        queryKey: [QUERY_KEY.conversations, userId],
+        queryKey: [QUERY_KEY.conversations],
       });
       queryClient.removeQueries({
         queryKey: [QUERY_KEY.conversationDetail, variables.conversationId],

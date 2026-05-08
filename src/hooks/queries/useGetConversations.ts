@@ -3,7 +3,6 @@ import { getConversationList } from "../../apis/conversation";
 import { QUERY_KEY } from "../../constants/key";
 import { useAuth } from "../../contexts/AuthContext";
 import type { ConversationSummary } from "../../types/freeConversationType";
-import { useGetMyInfo } from "./useGetMyInfo";
 
 const mapConversationSummary = (
   conversation: ConversationSummary
@@ -15,11 +14,9 @@ const mapConversationSummary = (
 
 export const useGetConversations = () => {
   const { accessToken } = useAuth();
-  const { data: myInfo } = useGetMyInfo();
-  const userId = myInfo?.memberId;
 
   return useQuery({
-    queryKey: [QUERY_KEY.conversations, userId],
+    queryKey: [QUERY_KEY.conversations],
     queryFn: async () => {
       const conversations = await getConversationList();
 
@@ -31,7 +28,7 @@ export const useGetConversations = () => {
             new Date(a.lastMessageAt).getTime()
         );
     },
-    enabled: !!accessToken && userId !== null && userId !== undefined,
+    enabled: !!accessToken,
     staleTime: 60 * 1000,
     refetchOnWindowFocus: false,
     retry: 1,

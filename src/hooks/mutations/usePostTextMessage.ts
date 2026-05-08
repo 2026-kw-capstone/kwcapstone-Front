@@ -8,7 +8,6 @@ import type {
   ConversationSummary,
   ResponsePostTextMessageDto,
 } from "../../types/freeConversationType";
-import { useGetMyInfo } from "../queries/useGetMyInfo";
 
 type PostTextMessageVariables = {
   conversationId: number | null;
@@ -91,8 +90,6 @@ const mergeConversationSummary = (
 
 export const usePostTextMessage = (options?: UsePostTextMessageOptions) => {
   const queryClient = useQueryClient();
-  const { data: myInfo } = useGetMyInfo();
-  const userId = myInfo?.memberId;
   const [pendingNewConversationMessages, setPendingNewConversationMessages] =
     useState<ConversationMessageGroup[]>([]);
 
@@ -109,7 +106,7 @@ export const usePostTextMessage = (options?: UsePostTextMessageOptions) => {
 
       await Promise.all([
         queryClient.cancelQueries({
-          queryKey: [QUERY_KEY.conversations, userId],
+          queryKey: [QUERY_KEY.conversations],
         }),
         ...(conversationId !== null
           ? [
@@ -120,7 +117,7 @@ export const usePostTextMessage = (options?: UsePostTextMessageOptions) => {
           : []),
       ]);
 
-      const previousConversations = queryClient.getQueryData<ConversationSummary[]>([QUERY_KEY.conversations, userId]);
+      const previousConversations = queryClient.getQueryData<ConversationSummary[]>([QUERY_KEY.conversations]);
       const previousConversationDetail =
         conversationId !== null
           ? queryClient.getQueryData<ConversationDetail>([
@@ -130,7 +127,7 @@ export const usePostTextMessage = (options?: UsePostTextMessageOptions) => {
           : undefined;
 
       queryClient.setQueryData<ConversationSummary[]>(
-        [QUERY_KEY.conversations, userId],
+        [QUERY_KEY.conversations],
         (previous) =>
           conversationId !== null
             ? mergeConversationSummary(previous, conversationId, "New conversation")
@@ -164,7 +161,7 @@ export const usePostTextMessage = (options?: UsePostTextMessageOptions) => {
     },
     onError: (_, variables, context) => {
       queryClient.setQueryData(
-        [QUERY_KEY.conversations, userId],
+        [QUERY_KEY.conversations],
         context?.previousConversations
       );
 
@@ -231,7 +228,7 @@ export const usePostTextMessage = (options?: UsePostTextMessageOptions) => {
       );
 
       queryClient.setQueryData<ConversationSummary[]>(
-        [QUERY_KEY.conversations, userId],
+        [QUERY_KEY.conversations],
         (previous) =>
           mergeConversationSummary(
             previous,
@@ -251,7 +248,7 @@ export const usePostTextMessage = (options?: UsePostTextMessageOptions) => {
       }
 
       void queryClient.invalidateQueries({
-        queryKey: [QUERY_KEY.conversations, userId],
+        queryKey: [QUERY_KEY.conversations],
       });
       void queryClient.invalidateQueries({
         queryKey: [QUERY_KEY.conversationDetail, resolvedConversationId],
