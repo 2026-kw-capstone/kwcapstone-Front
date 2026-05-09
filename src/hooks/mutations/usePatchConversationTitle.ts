@@ -1,7 +1,6 @@
 ﻿import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { patchConversationTitle } from "../../apis/conversation";
 import { QUERY_KEY } from "../../constants/key";
-import { useGetMyInfo } from "../queries/useGetMyInfo";
 import type {
   ConversationDetail,
   ConversationSummary,
@@ -14,8 +13,6 @@ type PatchConversationTitleVariables = {
 
 export const usePatchConversationTitle = () => {
   const queryClient = useQueryClient();
-  const { data: myInfo } = useGetMyInfo();
-  const userId = myInfo?.memberId;
 
   return useMutation({
     mutationFn: ({ conversationId, title }: PatchConversationTitleVariables) =>
@@ -23,7 +20,7 @@ export const usePatchConversationTitle = () => {
     onMutate: async ({ conversationId, title }) => {
       await Promise.all([
         queryClient.cancelQueries({
-          queryKey: [QUERY_KEY.conversations, userId],
+          queryKey: [QUERY_KEY.conversations],
         }),
         queryClient.cancelQueries({
           queryKey: [QUERY_KEY.conversationDetail, conversationId],
@@ -31,7 +28,7 @@ export const usePatchConversationTitle = () => {
       ]);
 
       const previousConversations = queryClient.getQueryData<ConversationSummary[]>(
-        [QUERY_KEY.conversations, userId]
+        [QUERY_KEY.conversations]
       );
       const previousConversationDetail = queryClient.getQueryData<ConversationDetail>([
         QUERY_KEY.conversationDetail,
@@ -39,7 +36,7 @@ export const usePatchConversationTitle = () => {
       ]);
 
       queryClient.setQueryData<ConversationSummary[]>(
-        [QUERY_KEY.conversations, userId],
+        [QUERY_KEY.conversations],
         (previous) =>
           previous?.map((conversation) =>
             conversation.conversationId === conversationId
@@ -66,7 +63,7 @@ export const usePatchConversationTitle = () => {
     },
     onError: (_, variables, context) => {
       queryClient.setQueryData(
-        [QUERY_KEY.conversations, userId],
+        [QUERY_KEY.conversations],
         context?.previousConversations
       );
       queryClient.setQueryData(
@@ -76,7 +73,7 @@ export const usePatchConversationTitle = () => {
     },
     onSuccess: (_, variables) => {
       void queryClient.invalidateQueries({
-        queryKey: [QUERY_KEY.conversations, userId],
+        queryKey: [QUERY_KEY.conversations],
       });
       void queryClient.invalidateQueries({
         queryKey: [QUERY_KEY.conversationDetail, variables.conversationId],

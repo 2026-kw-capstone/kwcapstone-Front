@@ -12,16 +12,17 @@ const stopAudioInstance = (audio: HTMLAudioElement | null) => {
   audio.currentTime = 0;
 };
 
-// 재생 전용 훅:
-// - 현재 재생 주소 상태 관리
-// - 오디오 재생/중지 처리
-// - URL 교체/언마운트 시 blob URL 정리
 export const useAudioPlayer = () => {
   const [audioUrl, setAudioUrlState] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const finishPlaybackRef = useRef<(() => void) | null>(null);
 
-  // 재생 URL 교체 시 이전 blob URL은 즉시 해제합니다.
+  const finishCurrentPlayback = useCallback(() => {
+    finishPlaybackRef.current?.();
+    finishPlaybackRef.current = null;
+  }, []);
+
   const setAudioUrl = useCallback((nextUrl: string | null) => {
     setAudioUrlState((prev) => {
       if (prev !== nextUrl) {
@@ -31,55 +32,78 @@ export const useAudioPlayer = () => {
     });
   }, []);
 
-  // 현재 재생 중인 오디오를 멈추고 URL 상태를 비웁니다.
   const clearAudioUrl = useCallback(() => {
     setAudioUrl(null);
+    finishCurrentPlayback();
     stopAudioInstance(audioRef.current);
     audioRef.current = null;
     setIsPlaying(false);
-  }, [setAudioUrl]);
+  }, [finishCurrentPlayback, setAudioUrl]);
 
-  // 전달된 URL(또는 저장된 audioUrl)을 새 Audio 인스턴스로 재생합니다.
   const playAudio = useCallback(
     async (targetUrl?: string | null) => {
       const url = targetUrl ?? audioUrl;
       if (!url) return;
 
+      finishCurrentPlayback();
       stopAudioInstance(audioRef.current);
 
       const audio = new Audio(url);
       audioRef.current = audio;
       setIsPlaying(true);
 
-      // 재생 종료/오류 시 공통적으로 재생 상태를 해제합니다.
-      audio.onended = () => {
-        setIsPlaying(false);
-        audioRef.current = null;
-      };
-
-      audio.onerror = () => {
-        setIsPlaying(false);
-        audioRef.current = null;
-      };
-
       try {
         await audio.play();
-      } catch {
-        setIsPlaying(false);
-        audioRef.current = null;
+
+        await new Promise<void>((resolve) => {
+          const finish = () => {
+            if (audioRef.current === audio) {
+              setIsPlaying(false);
+              audioRef.current = null;
+            }
+            if (finishPlaybackRef.current === finish) {
+              finishPlaybackRef.current = null;
+            }
+            resolve();
+          };
+
+          finishPlaybackRef.current = finish;
+
+          audio.onended = finish;
+          audio.onerror = () => {
+            console.error("[audio] audio element error", audio.error, {
+              urlType: url.slice(0, 64),
+            });
+            finish();
+          };
+        });
+      } catch (error) {
+        if (!(error instanceof DOMException && error.name === "AbortError")) {
+          console.error("[audio] play failed", error, {
+            urlType: url.slice(0, 64),
+          });
+        }
+
+        if (audioRef.current === audio) {
+          setIsPlaying(false);
+          audioRef.current = null;
+        }
+        if (finishPlaybackRef.current) {
+          finishPlaybackRef.current = null;
+        }
       }
     },
-    [audioUrl]
+    [audioUrl, finishCurrentPlayback]
   );
 
-  // 훅 언마운트 또는 URL 변경 시 리소스를 정리합니다.
   useEffect(() => {
     return () => {
+      finishCurrentPlayback();
       stopAudioInstance(audioRef.current);
       audioRef.current = null;
       revokeObjectUrlIfNeeded(audioUrl);
     };
-  }, [audioUrl]);
+  }, [audioUrl, finishCurrentPlayback]);
 
   return {
     audioUrl,

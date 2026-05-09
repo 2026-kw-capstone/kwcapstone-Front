@@ -6,15 +6,17 @@ interface MyNoteSentenceListProps {
   sentences: MyNoteSentenceItem[];
   selectedSentenceId: number | null;
   isAdding?: boolean;
-  onAddSentence: (text: string) => void;
+  isDeleting?: boolean;
+  onAddSentence: (text: string) => Promise<void> | void;
   onSelectSentence: (sentence: MyNoteSentenceItem) => void;
-  onDeleteSentence: (id: number) => void;
+  onDeleteSentence: (id: number) => Promise<void> | void;
 }
 
 const MyNoteSentenceList = ({
   sentences,
   selectedSentenceId,
   isAdding = false,
+  isDeleting = false,
   onAddSentence,
   onSelectSentence,
   onDeleteSentence,
@@ -22,13 +24,13 @@ const MyNoteSentenceList = ({
   const [inputValue, setInputValue] = useState("");
   const canSubmit = !!inputValue.trim() && !isAdding;
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     const trimmed = inputValue.trim();
     if (!trimmed) return;
 
-    onAddSentence(trimmed);
+    await onAddSentence(trimmed);
     setInputValue("");
   };
 
@@ -43,7 +45,7 @@ const MyNoteSentenceList = ({
           <input
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
-            placeholder="연습할 새 문장을 입력해주세요"
+            placeholder="연습할 문장을 입력해주세요"
             className="h-[54px] w-full flex-1 rounded-[16px] border border-slate-200 bg-white px-4 text-[15px] font-medium text-slate-700 shadow-[0_2px_10px_rgba(0,0,0,0.02)] outline-none transition-all placeholder:text-slate-400 focus:border-[#278DFD] focus:ring-1 focus:ring-[#278DFD]"
           />
           <button
@@ -68,11 +70,11 @@ const MyNoteSentenceList = ({
           </div>
         ) : (
           sentences.map((sentence) => {
-            const isActive = selectedSentenceId === sentence.id;
+            const isActive = selectedSentenceId === sentence.sentenceId;
 
             return (
               <div
-                key={sentence.id}
+                key={sentence.sentenceId}
                 className={`flex items-center gap-3 rounded-[20px] bg-white p-4 shadow-[0_2px_10px_rgba(0,0,0,0.02)] transition-all ${
                   isActive
                     ? "scale-[1.01] border border-[#278DFD] shadow-[0_4px_16px_rgba(39,141,253,0.10)]"
@@ -97,14 +99,15 @@ const MyNoteSentenceList = ({
                         : "font-bold text-slate-400"
                     }`}
                   >
-                    {sentence.text}
+                    {sentence.sentenceContent}
                   </p>
                 </button>
 
                 <button
                   type="button"
-                  onClick={() => onDeleteSentence(sentence.id)}
-                  className={`inline-flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-full transition-colors ${
+                  onClick={() => onDeleteSentence(sentence.sentenceId)}
+                  disabled={isDeleting}
+                  className={`inline-flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
                     isActive
                       ? "text-[#278DFD]/50 hover:bg-blue-50 hover:text-[#278DFD]"
                       : "text-slate-300 hover:bg-rose-50 hover:text-rose-500"

@@ -8,7 +8,6 @@ import type {
   ConversationSummary,
   ResponsePostVoiceMessageDto,
 } from "../../types/freeConversationType";
-import { useGetMyInfo } from "../queries/useGetMyInfo";
 
 type PostVoiceMessageVariables = {
   conversationId: number | null;
@@ -92,8 +91,6 @@ const mergeConversationSummary = (
 
 export const usePostVoiceMessage = (options?: UsePostVoiceMessageOptions) => {
   const queryClient = useQueryClient();
-  const { data: myInfo } = useGetMyInfo();
-  const userId = myInfo?.memberId;
   const [pendingNewConversationMessages, setPendingNewConversationMessages] =
     useState<ConversationMessageGroup[]>([]);
 
@@ -114,7 +111,7 @@ export const usePostVoiceMessage = (options?: UsePostVoiceMessageOptions) => {
 
       await Promise.all([
         queryClient.cancelQueries({
-          queryKey: [QUERY_KEY.conversations, userId],
+          queryKey: [QUERY_KEY.conversations],
         }),
         ...(conversationId !== null
           ? [
@@ -127,7 +124,6 @@ export const usePostVoiceMessage = (options?: UsePostVoiceMessageOptions) => {
 
       const previousConversations = queryClient.getQueryData<ConversationSummary[]>([
         QUERY_KEY.conversations,
-        userId,
       ]);
       const previousConversationDetail =
         conversationId !== null
@@ -138,7 +134,7 @@ export const usePostVoiceMessage = (options?: UsePostVoiceMessageOptions) => {
           : undefined;
 
       queryClient.setQueryData<ConversationSummary[]>(
-        [QUERY_KEY.conversations, userId],
+        [QUERY_KEY.conversations],
         (previous) =>
           conversationId !== null
             ? mergeConversationSummary(previous, conversationId, "New conversation")
@@ -177,7 +173,7 @@ export const usePostVoiceMessage = (options?: UsePostVoiceMessageOptions) => {
       }
 
       queryClient.setQueryData(
-        [QUERY_KEY.conversations, userId],
+        [QUERY_KEY.conversations],
         context?.previousConversations
       );
 
@@ -248,7 +244,7 @@ export const usePostVoiceMessage = (options?: UsePostVoiceMessageOptions) => {
       );
 
       queryClient.setQueryData<ConversationSummary[]>(
-        [QUERY_KEY.conversations, userId],
+        [QUERY_KEY.conversations],
         (previous) =>
           mergeConversationSummary(
             previous,
@@ -268,7 +264,7 @@ export const usePostVoiceMessage = (options?: UsePostVoiceMessageOptions) => {
       }
 
       void queryClient.invalidateQueries({
-        queryKey: [QUERY_KEY.conversations, userId],
+        queryKey: [QUERY_KEY.conversations],
       });
       void queryClient.invalidateQueries({
         queryKey: [QUERY_KEY.conversationDetail, resolvedConversationId],
