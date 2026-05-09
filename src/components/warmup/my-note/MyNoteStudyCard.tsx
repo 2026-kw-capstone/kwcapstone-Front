@@ -22,7 +22,7 @@ const MyNoteStudyCard = ({
           <NotebookPen size={16} />
         </div>
         <h2 className="text-[16px] font-extrabold text-slate-800">
-          학습 문장
+          연습 문장
         </h2>
       </div>
 
@@ -52,7 +52,7 @@ const MyNoteStudyCard = ({
           {isRecording ? (
             <>
               <MicOff size={20} />
-              듣고 있어요...
+              녹음 중...
             </>
           ) : (
             <>

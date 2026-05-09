@@ -15,33 +15,9 @@ interface MyNoteResultCardProps {
 
 const syllableStatusClassName: Record<MyNoteSyllableStatus, string> = {
   good: "border-emerald-100 bg-emerald-50 text-emerald-600",
-  warning: "border-amber-100 bg-amber-50 text-amber-600",
+  warn: "border-amber-100 bg-amber-50 text-amber-600",
   bad: "border-rose-100 bg-rose-50 text-rose-600",
 };
-
-const MY_NOTE_METRICS = [
-  {
-    label: "발음 정확도",
-    value: 88,
-    unit: "%",
-    colorClassName: "text-[#278DFD]",
-    highlight: true,
-  },
-  {
-    label: "발화 속도",
-    value: 80,
-    unit: "점",
-    colorClassName: "text-slate-800",
-    highlight: false,
-  },
-  {
-    label: "침묵 비율",
-    value: 13,
-    unit: "%",
-    colorClassName: "text-slate-800",
-    highlight: false,
-  },
-];
 
 const MetricItem = ({
   label,
@@ -87,6 +63,30 @@ const MyNoteResultCard = ({
   onPlayTts,
   onPlayRecordedAudio,
 }: MyNoteResultCardProps) => {
+  const metrics = [
+    {
+      label: "발음 정확도",
+      value: result.pronunciationScore,
+      unit: "%",
+      colorClassName: "text-[#278DFD]",
+      highlight: true,
+    },
+    {
+      label: "발화 속도",
+      value: result.speechRate,
+      unit: "점",
+      colorClassName: "text-slate-800",
+      highlight: false,
+    },
+    {
+      label: "침묵 비율",
+      value: result.silenceRatio,
+      unit: "%",
+      colorClassName: "text-slate-800",
+      highlight: false,
+    },
+  ];
+
   return (
     <section className="animate-slide-up rounded-[24px] border border-slate-100 bg-white p-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)]">
       <h2 className="mb-4 flex items-center gap-2 text-[16px] font-extrabold text-slate-900">
@@ -95,7 +95,7 @@ const MyNoteResultCard = ({
       </h2>
 
       <div className="mb-6 grid grid-cols-3 gap-2">
-        {MY_NOTE_METRICS.map((metric) => (
+        {metrics.map((metric) => (
           <MetricItem key={metric.label} {...metric} />
         ))}
       </div>
@@ -126,11 +126,11 @@ const MyNoteResultCard = ({
         음절별 상세 피드백
       </p>
       <div className="mb-6 flex gap-1.5 overflow-x-auto pb-2 hide-scrollbar">
-        {result.syllables.map((syllable, index) => (
+        {result.syllableAnalysis.map((syllable, index) => (
           <span
             key={`${syllable.text}-${index}`}
             className={`flex h-[44px] min-w-[40px] shrink-0 items-center justify-center rounded-[12px] border text-[16px] font-extrabold shadow-sm ${
-              syllableStatusClassName[syllable.status]
+              syllableStatusClassName[syllable.grade]
             }`}
           >
             {syllable.text}
