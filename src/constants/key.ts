@@ -7,4 +7,7 @@ export const QUERY_KEY = {
   myInfo: "myInfo",
   conversations: "conversations",
   conversationDetail: "conversationDetail",
+  myNoteSentences: "myNoteSentences",
+  myNoteTts: "myNoteTts",
+  myNoteUserAudio: "myNoteUserAudio",
 } as const;
