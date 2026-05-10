@@ -1,7 +1,8 @@
 import { Activity, Lightbulb, Play, Volume2 } from "lucide-react";
 
 interface BasicSpeakResult {
-  pronunciationScore: number;
+  accuracyScore: number;
+  feedback: string;
 }
 
 interface BasicSpeakResultCardProps {
@@ -56,7 +57,7 @@ const BasicSpeakResultCard = ({
             발음 정확도
           </span>
           <span className="text-[28px] font-black text-indigo-500">
-            {result.pronunciationScore}
+            {Math.round(result.accuracyScore)}
             <span className="ml-1 text-[16px] font-bold text-indigo-400">%</span>
           </span>
         </div>
@@ -67,7 +68,7 @@ const BasicSpeakResultCard = ({
             AI 피드백
           </p>
           <p className="text-[14.5px] font-bold leading-relaxed text-slate-800 break-keep">
-            입 모양이 안정적이에요. 같은 길이로 천천히 한 번 더 이어서 연습해보세요.
+            {result.feedback}
           </p>
         </div>
       </div>
