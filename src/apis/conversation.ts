@@ -5,9 +5,11 @@ import type {
   RequestPostTextMessageDto,
   RequestPatchConversationTitleDto,
   ResponseDeleteConversationDto,
+  ResponseGetConversationVoiceAudioDto,
   ResponsePostTextMessageDto,
   ResponsePostVoiceMessageDto,
   ResponsePatchConversationTitleDto,
+  ConversationVoiceAudioResult,
 } from "../types/freeConversationType";
 
 export const getConversationList = async (): Promise<ConversationSummary[]> => {
@@ -59,6 +61,15 @@ export const postVoiceMessage = async ({
 
   const { data } = await axiosInstance.post("/api/messages/voice", formData);
   return data;
+};
+
+export const getConversationVoiceAudio = async (
+  messageId: number
+): Promise<ConversationVoiceAudioResult> => {
+  const { data } = await axiosInstance.get<ResponseGetConversationVoiceAudioDto>(
+    `/api/messages/${messageId}/voice`
+  );
+  return data.result;
 };
 
 export const deleteConversation = async (
