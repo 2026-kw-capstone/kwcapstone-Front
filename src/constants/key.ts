@@ -7,6 +7,7 @@ export const QUERY_KEY = {
   myInfo: "myInfo",
   conversations: "conversations",
   conversationDetail: "conversationDetail",
+  conversationVoiceAudio: "conversationVoiceAudio",
   myNoteSentences: "myNoteSentences",
   myNoteTts: "myNoteTts",
   myNoteUserAudio: "myNoteUserAudio",

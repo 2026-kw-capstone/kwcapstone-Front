@@ -1,7 +1,7 @@
 import { Activity, Lightbulb, Play, Volume2 } from "lucide-react";
 import type {
   MyNoteAnalysisResult,
-  MyNoteSyllableStatus,
+  MyNoteWordStatus,
 } from "../../../types/myNoteType";
 
 interface MyNoteResultCardProps {
@@ -13,10 +13,10 @@ interface MyNoteResultCardProps {
   onPlayRecordedAudio: () => void;
 }
 
-const syllableStatusClassName: Record<MyNoteSyllableStatus, string> = {
+const wordStatusClassName: Record<MyNoteWordStatus, string> = {
   good: "border-emerald-100 bg-emerald-50 text-emerald-600",
   warn: "border-amber-100 bg-amber-50 text-amber-600",
-  bad: "border-rose-100 bg-rose-50 text-rose-600",
+  error: "border-rose-100 bg-rose-50 text-rose-600",
 };
 
 const MetricItem = ({
@@ -48,7 +48,7 @@ const MetricItem = ({
         {label}
       </p>
       <p className={`text-[18px] font-black ${colorClassName}`}>
-        {value}
+        {Math.round(value)}
         <span className="ml-0.5 text-[12px] font-bold">{unit}</span>
       </p>
     </div>
@@ -73,7 +73,7 @@ const MyNoteResultCard = ({
     },
     {
       label: "발화 속도",
-      value: result.speechRate,
+      value: result.speechRateScore,
       unit: "점",
       colorClassName: "text-slate-800",
       highlight: false,
@@ -126,14 +126,15 @@ const MyNoteResultCard = ({
         음절별 상세 피드백
       </p>
       <div className="mb-6 flex gap-1.5 overflow-x-auto pb-2 hide-scrollbar">
-        {result.syllableAnalysis.map((syllable, index) => (
+        {result.wordAnalysis.map((word, index) => (
           <span
-            key={`${syllable.text}-${index}`}
+            key={`${word.refChar}-${word.hypChar}-${index}`}
+            title={word.hypChar ? `${word.refChar} / ${word.hypChar}` : word.refChar}
             className={`flex h-[44px] min-w-[40px] shrink-0 items-center justify-center rounded-[12px] border text-[16px] font-extrabold shadow-sm ${
-              syllableStatusClassName[syllable.grade]
+              wordStatusClassName[word.grade]
             }`}
           >
-            {syllable.text}
+            {word.refChar}
           </span>
         ))}
       </div>
@@ -144,7 +145,7 @@ const MyNoteResultCard = ({
           AI 피드백
         </div>
         <p className="mt-2 break-keep text-[14px] font-medium leading-relaxed text-slate-700">
-          {result.feedback}
+          {result.aiFeedback}
         </p>
       </div>
     </section>

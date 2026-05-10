@@ -81,3 +81,11 @@ export type ResponseDeleteConversationDto = {
   code: string;
   message: string;
 };
+
+export type ConversationVoiceAudioResult = {
+  messageId: number;
+  voiceUrl: string;
+};
+
+export type ResponseGetConversationVoiceAudioDto =
+  ApiResponse<ConversationVoiceAudioResult>;
