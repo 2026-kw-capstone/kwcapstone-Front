@@ -9,7 +9,7 @@ export const WARMUP_MENU_ITEMS: MenuItem[] = [
     icon: FilePenLine,
     badgeIcon: NotebookPen,
     badgeText: "나만의 문장",
-    footerText: "12개 문장 저장중",
+    footerText: "문장을 연습할 수 있어요",
     iconClassName: "text-[#278DFD]",
     badgeClassName: "bg-blue-50 text-[#278DFD]",
     backgroundIconClassName: "text-[#278DFD] rotate-12",

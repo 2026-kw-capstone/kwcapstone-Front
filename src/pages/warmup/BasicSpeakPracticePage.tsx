@@ -3,6 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Navigate, useParams } from "react-router-dom";
 import BasicSpeakResultCard from "../../components/warmup/basic-speak/BasicSpeakResultCard";
 import BasicSpeakStudyCard from "../../components/warmup/basic-speak/BasicSpeakStudyCard";
+import { isAudioUrlFresh } from "../../constants/audio";
 import { getBasicSpeakCardById } from "../../constants/basicSpeak";
 import { getRecordErrorMessage } from "../../constants/recordingMessage";
 import { useRecord } from "../../contexts/RecordContext";
@@ -84,23 +85,36 @@ const BasicSpeakPracticePage = () => {
     await toggleRecordAndUpload();
   };
 
-  const handlePlayRecordedAudio = async () => {
-    if (!result?.voiceUrl) return;
+  const getPlayablePractice = async () => {
+    if (!result) return null;
 
+    if (isAudioUrlFresh(latestPracticeQuery.dataUpdatedAt)) {
+      return result;
+    }
+
+    const { data } = await latestPracticeQuery.refetch();
+    return data?.result.practice ?? null;
+  };
+
+  const handlePlayRecordedAudio = async () => {
     setIsPlayingUserAudio(true);
     try {
-      await playAudio(result.voiceUrl);
+      const playablePractice = await getPlayablePractice();
+      if (playablePractice?.voiceUrl) {
+        await playAudio(playablePractice.voiceUrl);
+      }
     } finally {
       setIsPlayingUserAudio(false);
     }
   };
 
   const handlePlayModelAudio = async () => {
-    if (!result?.modelVoiceUrl) return;
-
     setIsPlayingModelAudio(true);
     try {
-      await playAudio(result.modelVoiceUrl);
+      const playablePractice = await getPlayablePractice();
+      if (playablePractice?.modelVoiceUrl) {
+        await playAudio(playablePractice.modelVoiceUrl);
+      }
     } finally {
       setIsPlayingModelAudio(false);
     }

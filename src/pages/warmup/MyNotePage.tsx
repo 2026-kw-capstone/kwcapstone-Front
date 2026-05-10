@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useQueryClient, type QueryClient } from "@tanstack/react-query";
 import { getMyNoteTts, getMyNoteUserAudio } from "../../apis/myNote";
+import { getAudioUrlExpiresAt, isAudioUrlFresh } from "../../constants/audio";
 import { QUERY_KEY } from "../../constants/key";
 import { getRecordErrorMessage } from "../../constants/recordingMessage";
 import MyNoteDeleteConfirmModal from "../../components/warmup/my-note/MyNoteDeleteConfirmModal";
@@ -22,16 +23,10 @@ import type {
   ResponseMyNoteAnalyzeDto,
 } from "../../types/myNoteType";
 
-const AUDIO_URL_EXPIRY_BUFFER_MS = 60 * 1000;
-
 interface PreparedAudioUrl {
   url: string;
   expiresAt: number;
 }
-
-const getAudioExpiresAt = (expiresIn: number) => {
-  return Date.now() + Math.max(expiresIn * 1000 - AUDIO_URL_EXPIRY_BUFFER_MS, 0);
-};
 
 const getFreshPreparedAudioUrl = (audio: PreparedAudioUrl | null) => {
   if (!audio || Date.now() >= audio.expiresAt) {
@@ -41,7 +36,7 @@ const getFreshPreparedAudioUrl = (audio: PreparedAudioUrl | null) => {
   return audio.url;
 };
 
-const getFreshCachedAudio = <T extends { expiresIn: number }>(
+const getFreshCachedAudio = <T,>(
   queryClient: QueryClient,
   queryKey: readonly unknown[]
 ) => {
@@ -52,11 +47,7 @@ const getFreshCachedAudio = <T extends { expiresIn: number }>(
     return null;
   }
 
-  const expiresAt =
-    queryState.dataUpdatedAt +
-    Math.max(data.expiresIn * 1000 - AUDIO_URL_EXPIRY_BUFFER_MS, 0);
-
-  return Date.now() < expiresAt ? data : null;
+  return isAudioUrlFresh(queryState.dataUpdatedAt) ? data : null;
 };
 
 const getMyNoteAudioQueryKeys = (sentenceId: number) => [
@@ -154,7 +145,7 @@ const MyNotePage = () => {
           .then((userAudio) => {
             setPreparedUserAudio({
               url: userAudio.userAudioUrl,
-              expiresAt: getAudioExpiresAt(userAudio.expiresIn),
+              expiresAt: getAudioUrlExpiresAt(),
             });
           });
 
@@ -167,7 +158,7 @@ const MyNotePage = () => {
           .then((tts) => {
             setPreparedTtsAudio({
               url: tts.aiAudioUrl,
-              expiresAt: getAudioExpiresAt(tts.expiresIn),
+              expiresAt: getAudioUrlExpiresAt(),
             });
           });
 
@@ -215,7 +206,7 @@ const MyNotePage = () => {
       if (tts.aiAudioUrl) {
         setPreparedTtsAudio({
           url: tts.aiAudioUrl,
-          expiresAt: getAudioExpiresAt(tts.expiresIn),
+          expiresAt: getAudioUrlExpiresAt(),
         });
         await playAudio(tts.aiAudioUrl);
       }
@@ -264,7 +255,7 @@ const MyNotePage = () => {
       if (userAudio.userAudioUrl) {
         setPreparedUserAudio({
           url: userAudio.userAudioUrl,
-          expiresAt: getAudioExpiresAt(userAudio.expiresIn),
+          expiresAt: getAudioUrlExpiresAt(),
         });
         await playAudio(userAudio.userAudioUrl);
       }

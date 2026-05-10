@@ -1,6 +1,14 @@
-import { Lightbulb, Smile, Sparkles } from "lucide-react";
-import { useEffect, useRef } from "react";
-import type { ConversationMessageGroup } from "../../types/freeConversationType";
+import { useQueryClient } from "@tanstack/react-query";
+import { Lightbulb, Play, Smile, Sparkles } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { getConversationVoiceAudio } from "../../apis/conversation";
+import { AUDIO_URL_TTL_MS } from "../../constants/audio";
+import { QUERY_KEY } from "../../constants/key";
+import { useAudioPlayer } from "../../hooks/audio/useAudioPlayer";
+import type {
+  ConversationMessageGroup,
+  ConversationVoiceAudioResult,
+} from "../../types/freeConversationType";
 import {
   ConversationMessagesErrorState,
   ConversationMessagesLoadingState,
@@ -15,6 +23,9 @@ type ConversationMessagesProps = {
   onRetry: () => void;
 };
 
+const getConversationVoiceAudioQueryKey = (messageId: number) =>
+  [QUERY_KEY.conversationVoiceAudio, messageId] as const;
+
 const ConversationMessages = ({
   conversationId,
   messages,
@@ -23,9 +34,35 @@ const ConversationMessages = ({
   errorMessage,
   onRetry,
 }: ConversationMessagesProps) => {
+  const queryClient = useQueryClient();
+  const { playAudio } = useAudioPlayer();
   const bottomRef = useRef<HTMLLIElement | null>(null);
   const prevConversationIdRef = useRef<number | null>(conversationId);
   const shouldScrollOnConversationChangeRef = useRef(false);
+  const [playingMessageId, setPlayingMessageId] = useState<number | null>(null);
+  const [preparingMessageId, setPreparingMessageId] = useState<number | null>(null);
+
+  const voiceMessageIds = useMemo(
+    () =>
+      messages.flatMap((group) => {
+        const message = group.userMessage;
+
+        return message?.inputType === "VOICE" && message.messageId > 0
+          ? [message.messageId]
+          : [];
+      }),
+    [messages]
+  );
+
+  useEffect(() => {
+    for (const messageId of voiceMessageIds) {
+      void queryClient.prefetchQuery({
+        queryKey: getConversationVoiceAudioQueryKey(messageId),
+        queryFn: () => getConversationVoiceAudio(messageId),
+        staleTime: AUDIO_URL_TTL_MS,
+      });
+    }
+  }, [queryClient, voiceMessageIds]);
 
   useEffect(() => {
     if (prevConversationIdRef.current !== conversationId) {
@@ -48,6 +85,31 @@ const ConversationMessages = ({
       bottomRef.current?.scrollIntoView({ block: "end" });
     }
   }, [isLoading, messages.length]);
+
+  const handlePlayVoiceMessage = async (messageId: number, localVoiceUrl: string | null) => {
+    setPreparingMessageId(messageId);
+    setPlayingMessageId(messageId);
+
+    try {
+      if (messageId < 0 && localVoiceUrl) {
+        setPreparingMessageId(null);
+        await playAudio(localVoiceUrl);
+        return;
+      }
+
+      const voiceAudio = await queryClient.fetchQuery<ConversationVoiceAudioResult>({
+        queryKey: getConversationVoiceAudioQueryKey(messageId),
+        queryFn: () => getConversationVoiceAudio(messageId),
+        staleTime: AUDIO_URL_TTL_MS,
+      });
+
+      setPreparingMessageId(null);
+      await playAudio(voiceAudio.voiceUrl || localVoiceUrl);
+    } finally {
+      setPreparingMessageId(null);
+      setPlayingMessageId(null);
+    }
+  };
 
   if (isLoading) {
     return <ConversationMessagesLoadingState />;
@@ -76,7 +138,7 @@ const ConversationMessages = ({
         <p className="text-[14.5px] font-medium leading-relaxed text-slate-500">
           음성 또는 텍스트로 자유롭게 대화해보세요.
           <br />
-          AI가 자연스럽게 응답하며 피드백을 드립니다.
+          AI가 자연스럽게 응답하고 피드백을 드립니다.
         </p>
       </div>
     );
@@ -96,25 +158,27 @@ const ConversationMessages = ({
                 {userMessage.inputType === "TEXT" && userMessage.content ? (
                   <p>{userMessage.content}</p>
                 ) : null}
-                {userMessage.inputType === "VOICE" && userMessage.voiceUrl ? (
-                  <audio
-                    controls
-                    src={userMessage.voiceUrl}
-                    className="h-9 w-full max-w-[240px] rounded-md bg-white/80"
+                {userMessage.inputType === "VOICE" ? (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      void handlePlayVoiceMessage(
+                        userMessage.messageId,
+                        userMessage.voiceUrl
+                      )
+                    }
+                    disabled={
+                      preparingMessageId !== null || playingMessageId !== null
+                    }
+                    className="flex h-10 min-w-[132px] items-center justify-center gap-2 rounded-xl bg-white/95 px-3 text-[13px] font-extrabold text-[#278DFD] transition-colors hover:bg-blue-50 disabled:cursor-not-allowed disabled:bg-white/70 disabled:text-slate-400"
                   >
-                    브라우저가 음성 재생을 지원하지 않습니다.
-                  </audio>
-                ) : null}
-                {userMessage.inputType === "VOICE" &&
-                (!userMessage.content || !userMessage.content.trim()) ? (
-                  <p className="text-xs text-blue-50/90">
-                    녹음본을 생성 중입니다.
-                  </p>
-                ) : null}
-                {userMessage.inputType === "VOICE" && !userMessage.voiceUrl ? (
-                  <p className="text-xs text-blue-50/90">
-                    음성 파일을 불러오지 못했어요.
-                  </p>
+                    <Play size={15} fill="currentColor" />
+                    {preparingMessageId === userMessage.messageId
+                      ? "준비 중..."
+                      : playingMessageId === userMessage.messageId
+                        ? "재생 중..."
+                        : "내 음성 듣기"}
+                  </button>
                 ) : null}
               </div>
             </li>
