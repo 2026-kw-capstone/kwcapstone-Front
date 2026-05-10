@@ -10,4 +10,5 @@ export const QUERY_KEY = {
   myNoteSentences: "myNoteSentences",
   myNoteTts: "myNoteTts",
   myNoteUserAudio: "myNoteUserAudio",
+  basicSpeakPractice: "basicSpeakPractice",
 } as const;
