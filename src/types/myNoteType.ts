@@ -3,23 +3,22 @@ export interface MyNoteSentenceItem {
   sentenceContent: string;
 }
 
-export type MyNoteSyllableStatus = "good" | "warn" | "bad";
+export type MyNoteWordStatus = "good" | "warn" | "error";
 
-export interface MyNoteSyllableFeedback {
-  text: string;
-  grade: MyNoteSyllableStatus;
+export interface MyNoteWordFeedback {
+  refChar: string;
+  hypChar: string;
+  grade: MyNoteWordStatus;
 }
 
 export interface MyNoteAnalysisResult {
   analysisId: number;
   sentenceId: number;
-  referenceText: string;
-  sttText: string;
   pronunciationScore: number;
-  speechRate: number;
+  speechRateScore: number;
   silenceRatio: number;
-  feedback: string;
-  syllableAnalysis: MyNoteSyllableFeedback[];
+  aiFeedback: string;
+  wordAnalysis: MyNoteWordFeedback[];
 }
 
 export interface RequestPostMyNoteSentenceDto {
