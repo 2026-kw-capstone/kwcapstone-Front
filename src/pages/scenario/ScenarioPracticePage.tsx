@@ -1,143 +1,243 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   Navigate,
   useBeforeUnload,
   useBlocker,
   useNavigate,
-  useOutletContext,
   useParams,
 } from "react-router-dom";
-import { uploadScenarioVoice } from "../../apis/voicePlaceholder";
+import { getApiErrorMessage } from "../../apis/apiError";
 import PracticeHeader from "../../components/scenario/practice/PracticeHeader";
 import PracticeStepPanel from "../../components/scenario/practice/PracticeStepPanel";
 import PracticeSummaryPanel from "../../components/scenario/practice/PracticeSummaryPanel";
+import { QUERY_KEY } from "../../constants/key";
 import { getRecordErrorMessage } from "../../constants/recordingMessage";
-import { PRACTICE_STEPS, buildMockResult } from "../../constants/scenarioPractice";
 import { useRecord } from "../../contexts/RecordContext";
 import {
   revokeObjectUrlIfNeeded,
   useAudioPlayer,
 } from "../../hooks/audio/useAudioPlayer";
 import { useRecordUploadFlow } from "../../hooks/audio/useRecordUploadFlow";
-import type { StepResult } from "../../types/scenarioPracticeType";
-import type { ScenarioOutletContext } from "../../types/scenarioType";
+import { usePostScenarioAnswer } from "../../hooks/mutations/usePostScenarioAnswer";
+import {
+  getScenarioAnswerQueryKey,
+  useGetScenarioAnswer,
+} from "../../hooks/queries/useGetScenarioAnswer";
+import { useGetScenarioResult } from "../../hooks/queries/useGetScenarioResult";
+import { useGetScenarioStep } from "../../hooks/queries/useGetScenarioStep";
+import type {
+  PracticeStep,
+  ScenarioSyllableStatus,
+  StepResult,
+} from "../../types/scenarioPracticeType";
+import type {
+  ScenarioAnswerResultDto,
+  ScenarioLevel,
+  ScenarioStepDto,
+} from "../../types/scenarioType";
+
+const DEFAULT_TOTAL_STEP_COUNT = 3;
+
+const isScenarioLevel = (value: number): value is ScenarioLevel =>
+  value === 1 || value === 2 || value === 3;
+
+const normalizeSyllableStatus = (grade: string): ScenarioSyllableStatus => {
+  if (grade === "good" || grade === "warning" || grade === "bad") {
+    return grade;
+  }
+
+  return "warning";
+};
+
+const mapStepToPracticeStep = (step: ScenarioStepDto | undefined): PracticeStep => ({
+  step: (step?.stepNo ?? 1) as ScenarioLevel,
+  title: step?.step ?? "",
+  prompt: step?.assistantMessage ?? "",
+  hint: step?.hint || step?.userIntent || "",
+});
+
+const mapAnswerToStepResult = (answer: ScenarioAnswerResultDto): StepResult => ({
+  transcript: answer.userIntent,
+  accuracy: Math.round(answer.pronunciationScore),
+  semanticRate: Math.round(answer.meaningDeliveryScore),
+  speed: Math.round(answer.speechRateScore),
+  silenceRatio: Math.round(answer.silenceRatio),
+  feedback: answer.feedback,
+  syllables: answer.wordAnalysis.map((word, index) => ({
+    text: word.hypChar || word.refChar || String(index + 1),
+    status: normalizeSyllableStatus(word.grade),
+  })),
+});
 
 const ScenarioPracticePage = () => {
   const { scenarioId, level } = useParams<{ scenarioId: string; level: string }>();
   const navigate = useNavigate();
-  const { myScenarios } = useOutletContext<ScenarioOutletContext>();
+  const queryClient = useQueryClient();
   const { isRecording, status, lastError, startRecording, stopRecording } =
     useRecord();
   const { isPlaying, playAudio } = useAudioPlayer();
+  const { analyzeScenarioAnswer } = usePostScenarioAnswer();
 
-  const createInitialResults = (): Array<StepResult | null> =>
-    Array.from({ length: PRACTICE_STEPS.length }, () => null);
-  const createInitialMp3Urls = (): Array<string | null> =>
-    Array.from({ length: PRACTICE_STEPS.length }, () => null);
+  const numericScenarioId = Number(scenarioId);
+  const numericLevel = Number(level);
+  const isValidScenarioId = Number.isFinite(numericScenarioId);
+  const isValidLevel = isScenarioLevel(numericLevel);
+  const resolvedScenarioId = isValidScenarioId ? numericScenarioId : undefined;
+  const resolvedLevel = isValidLevel ? numericLevel : undefined;
 
-  const [currentStepIndex, setCurrentStepIndex] = useState(0);
+  const [currentStepNo, setCurrentStepNo] = useState(1);
   const [isSummaryMode, setIsSummaryMode] = useState(false);
-  const [resultsByStep, setResultsByStep] = useState<Array<StepResult | null>>(
-    createInitialResults
-  );
-  const [recordedMp3UrlByStep, setRecordedMp3UrlByStep] = useState<
-    Array<string | null>
-  >(createInitialMp3Urls);
-  const recordedMp3UrlByStepRef = useRef<Array<string | null>>(createInitialMp3Urls());
+  const [hasResetPracticeCache, setHasResetPracticeCache] = useState(false);
+  const [recordedAudioUrlByStep, setRecordedAudioUrlByStep] = useState<
+    Record<number, string | null>
+  >({});
+  const recordedAudioUrlByStepRef = useRef<Record<number, string | null>>({});
 
-  const scenario = myScenarios.find((item) => item.id === (scenarioId ?? ""));
-  const currentStep = PRACTICE_STEPS[currentStepIndex];
-  const currentResult = resultsByStep[currentStepIndex];
-  const currentMp3Url = recordedMp3UrlByStep[currentStepIndex];
+  const {
+    data: currentStepData,
+    isLoading: isStepLoading,
+    isError: isStepError,
+    error: stepError,
+  } = useGetScenarioStep({
+    scenarioId: resolvedScenarioId,
+    level: resolvedLevel,
+    stepNo: currentStepNo,
+  });
+  const { data: currentAnswer } = useGetScenarioAnswer({
+    scenarioId: resolvedScenarioId,
+    level: resolvedLevel,
+    stepNo: currentStepNo,
+  });
+  const {
+    data: summaryResult,
+    isLoading: isSummaryLoading,
+    isError: isSummaryError,
+    error: summaryError,
+  } = useGetScenarioResult({
+    scenarioId: resolvedScenarioId,
+    level: resolvedLevel,
+    enabled: isSummaryMode,
+  });
+
+  const currentStep = mapStepToPracticeStep(currentStepData);
+  const totalStepCount = currentStepData?.totalStepCount ?? DEFAULT_TOTAL_STEP_COUNT;
+  const steps = Array.from({ length: totalStepCount }, (_, index) => ({
+    step: (index + 1) as ScenarioLevel,
+    title:
+      index + 1 === currentStepNo && currentStepData
+        ? currentStepData.step
+        : `Step ${index + 1}`,
+    prompt: "",
+    hint: "",
+  }));
+  const currentStepIndex = currentStepNo - 1;
+  const currentResult = currentAnswer ? mapAnswerToStepResult(currentAnswer) : null;
+  const currentAudioUrl =
+    recordedAudioUrlByStep[currentStepNo] ?? currentAnswer?.userAudioUrl ?? null;
 
   const { isUploading: isAnalyzing, toggleRecordAndUpload } = useRecordUploadFlow({
     isRecording,
     status,
     startRecording,
     stopRecording,
-    uploadFn: uploadScenarioVoice,
+    isBlocked: !resolvedScenarioId || !resolvedLevel || isStepLoading,
+    uploadFn: (voiceFile) =>
+      analyzeScenarioAnswer({
+        scenarioId: resolvedScenarioId!,
+        level: resolvedLevel!,
+        stepNo: currentStepNo,
+        voiceFile,
+      }),
     onBeforeStart: () => {
       setIsSummaryMode(false);
     },
-    onUploadSuccess: ({ analysis, mp3Url }, blob) => {
-      const mockResult = buildMockResult(currentStep.step);
+    onUploadSuccess: (response, blob) => {
+      const nextAudioUrl = response.result.userAudioUrl || URL.createObjectURL(blob);
 
-      setResultsByStep((prev) => {
-        const next = [...prev];
-        next[currentStepIndex] = {
-          ...mockResult,
-          accuracy: analysis.pronunciationScore,
+      setRecordedAudioUrlByStep((prev) => {
+        const previousUrl = prev[currentStepNo];
+        if (previousUrl !== response.result.userAudioUrl) {
+          revokeObjectUrlIfNeeded(previousUrl);
+        }
+
+        return {
+          ...prev,
+          [currentStepNo]: nextAudioUrl,
         };
-        return next;
-      });
-
-      setRecordedMp3UrlByStep((prev) => {
-        const next = [...prev];
-        revokeObjectUrlIfNeeded(next[currentStepIndex]);
-        next[currentStepIndex] = mp3Url || URL.createObjectURL(blob);
-        return next;
       });
     },
   });
 
-  const hasAnyProgress = resultsByStep.some(Boolean) || isRecording || isAnalyzing;
+  const hasAnyProgress = !!currentAnswer || isRecording || isAnalyzing;
   const shouldBlockNavigation = hasAnyProgress && !isSummaryMode;
-
-  const levelLabel = level ? `Level ${level}` : "Level 1";
+  const levelLabel = resolvedLevel ? `Level ${resolvedLevel}` : "Level 1";
   const isNavigationLocked =
     isRecording ||
     isAnalyzing ||
+    isStepLoading ||
     status === "requesting_permission" ||
     status === "stopping";
-  const canGoPrev = currentStepIndex > 0 && !isNavigationLocked;
-  const canGoNext = !!currentResult && !isNavigationLocked;
-  const progressPercent = ((currentStepIndex + 1) / PRACTICE_STEPS.length) * 100;
-
-  const averageAccuracy = useMemo(() => {
-    const completeResults = resultsByStep.filter(
-      (result): result is StepResult => result !== null
-    );
-    if (completeResults.length === 0) return 0;
-    return Math.round(
-      completeResults.reduce((acc, result) => acc + result.accuracy, 0) /
-        completeResults.length
-    );
-  }, [resultsByStep]);
-
-  const averageSemanticRate = useMemo(() => {
-    const completeResults = resultsByStep.filter(
-      (result): result is StepResult => result !== null
-    );
-    if (completeResults.length === 0) return 0;
-    return Math.round(
-      completeResults.reduce((acc, result) => acc + result.semanticRate, 0) /
-        completeResults.length
-    );
-  }, [resultsByStep]);
-
+  const canGoPrev = currentStepNo > 1 && !isNavigationLocked;
+  const canGoNext = !!currentAnswer && !isNavigationLocked;
+  const progressPercent = (currentStepNo / totalStepCount) * 100;
   const blocker = useBlocker(shouldBlockNavigation);
+
+  useLayoutEffect(() => {
+    if (!resolvedScenarioId || !resolvedLevel) {
+      return;
+    }
+
+    setHasResetPracticeCache(false);
+    setCurrentStepNo(1);
+    setIsSummaryMode(false);
+    Object.values(recordedAudioUrlByStepRef.current).forEach((url) =>
+      revokeObjectUrlIfNeeded(url)
+    );
+    recordedAudioUrlByStepRef.current = {};
+    setRecordedAudioUrlByStep({});
+    queryClient.removeQueries({
+      queryKey: [QUERY_KEY.scenarioAnswer, resolvedScenarioId, resolvedLevel],
+      exact: false,
+    });
+    queryClient.removeQueries({
+      queryKey: [QUERY_KEY.scenarioResult, resolvedScenarioId, resolvedLevel],
+      exact: true,
+    });
+    setHasResetPracticeCache(true);
+  }, [queryClient, resolvedLevel, resolvedScenarioId]);
 
   useEffect(() => {
     if (blocker.state !== "blocked") return;
 
     const shouldLeave = window.confirm(
-      "연습 결과가 저장되지 않고 사라집니다. 정말 이동하시겠어요?"
+      "?곗뒿 寃곌낵媛 ??λ릺吏 ?딄퀬 ?щ씪吏묐땲?? ?뺣쭚 ?대룞?섏떆寃좎뼱??"
     );
 
     if (shouldLeave) {
-      blocker.proceed();
+      const proceedAfterCleanup = async () => {
+        if (isRecording) {
+          await stopRecording();
+        }
+
+        blocker.proceed();
+      };
+
+      void proceedAfterCleanup();
     } else {
       blocker.reset();
     }
-  }, [blocker]);
+  }, [blocker, isRecording, stopRecording]);
 
   useEffect(() => {
-    recordedMp3UrlByStepRef.current = recordedMp3UrlByStep;
-  }, [recordedMp3UrlByStep]);
+    recordedAudioUrlByStepRef.current = recordedAudioUrlByStep;
+  }, [recordedAudioUrlByStep]);
 
   useEffect(() => {
     return () => {
-      recordedMp3UrlByStepRef.current.forEach((url) => revokeObjectUrlIfNeeded(url));
+      Object.values(recordedAudioUrlByStepRef.current).forEach((url) =>
+        revokeObjectUrlIfNeeded(url)
+      );
     };
   }, []);
 
@@ -147,8 +247,18 @@ const ScenarioPracticePage = () => {
     event.returnValue = "";
   });
 
-  if (!scenario) {
+  if (!isValidScenarioId || !isValidLevel) {
     return <Navigate to="/ai-practice/scenario" replace />;
+  }
+
+  if (!hasResetPracticeCache) {
+    return (
+      <div className="mx-auto flex min-h-full w-full max-w-md items-center justify-center">
+        <p className="text-[14px] font-bold text-slate-400">
+          ?곗뒿???덈줈 ?쒖옉?섎뒗 以묒엯?덈떎...
+        </p>
+      </div>
+    );
   }
 
   const handleRecord = async () => {
@@ -160,42 +270,47 @@ const ScenarioPracticePage = () => {
       return;
     }
 
-    setResultsByStep((prev) => {
-      const next = [...prev];
-      next[currentStepIndex] = null;
-      return next;
-    });
+    setRecordedAudioUrlByStep((prev) => {
+      const previousUrl = prev[currentStepNo];
+      revokeObjectUrlIfNeeded(previousUrl);
 
-    setRecordedMp3UrlByStep((prev) => {
-      const next = [...prev];
-      revokeObjectUrlIfNeeded(next[currentStepIndex]);
-      next[currentStepIndex] = null;
-      return next;
+      return {
+        ...prev,
+        [currentStepNo]: null,
+      };
     });
+    queryClient.setQueryData(
+      getScenarioAnswerQueryKey({
+        scenarioId: resolvedScenarioId,
+        level: resolvedLevel,
+        stepNo: currentStepNo,
+      }),
+      null
+    );
 
     setIsSummaryMode(false);
     await startRecording();
   };
 
   const handlePlayRecordedAudio = async () => {
-    if (!currentMp3Url) return;
-    await playAudio(currentMp3Url);
+    if (!currentAudioUrl) return;
+    await playAudio(currentAudioUrl);
   };
 
   const handlePrevStep = () => {
     if (!canGoPrev) return;
-    setCurrentStepIndex((prev) => prev - 1);
+    setCurrentStepNo((prev) => prev - 1);
   };
 
   const handleNextStep = () => {
-    if (!canGoNext) return;
+    if (!canGoNext || !currentAnswer) return;
 
-    if (currentStepIndex === PRACTICE_STEPS.length - 1) {
+    if (currentAnswer.isLastStep || currentStepNo >= totalStepCount) {
       setIsSummaryMode(true);
       return;
     }
 
-    setCurrentStepIndex((prev) => prev + 1);
+    setCurrentStepNo(currentAnswer.nextStepNo ?? currentStepNo + 1);
   };
 
   const handleBackToList = () => {
@@ -203,15 +318,39 @@ const ScenarioPracticePage = () => {
   };
 
   const recordErrorMessage = getRecordErrorMessage(lastError);
+  const apiErrorMessage = isStepError ? getApiErrorMessage(stepError) : "";
 
   if (isSummaryMode) {
     return (
       <div className="mx-auto flex min-h-full w-full max-w-md">
-        <PracticeSummaryPanel
-          averageAccuracy={averageAccuracy}
-          averageSemanticRate={averageSemanticRate}
-          onBackToList={handleBackToList}
-        />
+        {isSummaryLoading ? (
+          <section className="flex min-h-full w-full items-center justify-center rounded-[28px] bg-white p-6 text-center">
+            <p className="text-[14px] font-bold text-slate-400">
+              寃곌낵瑜??덈윭?ㅻ뒗 以묒엯?덈떎...
+            </p>
+          </section>
+        ) : isSummaryError || !summaryResult ? (
+          <section className="flex min-h-full w-full flex-col items-center justify-center gap-4 rounded-[28px] bg-white p-6 text-center">
+            <p className="rounded-2xl bg-rose-50 px-4 py-3 text-xs font-semibold text-rose-500">
+              {getApiErrorMessage(summaryError)}
+            </p>
+            <button
+              type="button"
+              onClick={handleBackToList}
+              className="h-12 rounded-2xl bg-[#278DFD] px-5 text-[14px] font-bold text-white"
+            >
+              紐⑸줉?쇰줈 ?뚯븘媛湲?
+            </button>
+          </section>
+        ) : (
+          <PracticeSummaryPanel
+            averageAccuracy={Math.round(summaryResult.averagePronunciationScore)}
+            averageSemanticRate={Math.round(
+              summaryResult.averageMeaningDeliveryScore
+            )}
+            onBackToList={handleBackToList}
+          />
+        )}
       </div>
     );
   }
@@ -229,32 +368,40 @@ const ScenarioPracticePage = () => {
         levelLabel={levelLabel}
         currentStepIndex={currentStepIndex}
         currentStep={currentStep}
-        steps={PRACTICE_STEPS}
+        steps={steps}
       />
 
-      {recordErrorMessage ? (
+      {recordErrorMessage || apiErrorMessage ? (
         <p className="rounded-2xl bg-rose-50 px-4 py-3 text-xs font-semibold text-rose-500">
-          {recordErrorMessage}
+          {recordErrorMessage || apiErrorMessage}
         </p>
       ) : null}
 
-      <PracticeStepPanel
-        currentStep={currentStep}
-        currentStepIndex={currentStepIndex}
-        totalSteps={PRACTICE_STEPS.length}
-        currentResult={currentResult}
-        isRecording={isRecording}
-        isAnalyzing={isAnalyzing}
-        canGoPrev={canGoPrev}
-        canGoNext={canGoNext}
-        hasRecordedAudio={!!currentMp3Url}
-        isPlayingUserAudio={isPlaying}
-        onRecord={handleRecord}
-        onReRecord={handleReRecord}
-        onPlayRecordedAudio={handlePlayRecordedAudio}
-        onPrev={handlePrevStep}
-        onNext={handleNextStep}
-      />
+      {isStepLoading ? (
+        <div className="flex min-h-0 flex-1 items-center justify-center">
+          <p className="text-[14px] font-bold text-slate-400">
+            ????④퀎瑜??덈윭?ㅻ뒗 以묒엯?덈떎...
+          </p>
+        </div>
+      ) : (
+        <PracticeStepPanel
+          currentStep={currentStep}
+          currentStepIndex={currentStepIndex}
+          totalSteps={totalStepCount}
+          currentResult={currentResult}
+          isRecording={isRecording}
+          isAnalyzing={isAnalyzing}
+          canGoPrev={canGoPrev}
+          canGoNext={canGoNext}
+          hasRecordedAudio={!!currentAudioUrl}
+          isPlayingUserAudio={isPlaying}
+          onRecord={handleRecord}
+          onReRecord={handleReRecord}
+          onPlayRecordedAudio={handlePlayRecordedAudio}
+          onPrev={handlePrevStep}
+          onNext={handleNextStep}
+        />
+      )}
     </div>
   );
 };

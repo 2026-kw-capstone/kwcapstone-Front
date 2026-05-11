@@ -4,6 +4,7 @@ import { useForm, type SubmitHandler } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
+import { getApiErrorMessage } from "../apis/apiError";
 import { postSignup } from "../apis/auth";
 
 type SignupErrorResponse = {
@@ -33,7 +34,9 @@ const schema = z
 
 type FormFields = z.infer<typeof schema>;
 
-const extractSignupErrorMessage = (error: unknown): string => {
+const extractSignupErrorMessage = (error: any): string => {
+  return getApiErrorMessage(error, "회원가입에 실패했습니다.");
+
   if (!axios.isAxiosError<SignupErrorResponse>(error)) {
     return "회원가입에 실패했습니다.";
   }
@@ -53,7 +56,7 @@ const extractSignupErrorMessage = (error: unknown): string => {
     if (data?.result && typeof data.result === "object") {
       const firstMessage = Object.values(data.result)[0];
       if (firstMessage) {
-        return firstMessage;
+        return String(firstMessage);
       }
     }
 

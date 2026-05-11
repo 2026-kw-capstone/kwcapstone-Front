@@ -14,7 +14,7 @@ import PasswordChangeModal from "../components/mypage/PasswordChangeModal";
 import WithdrawModal from "../components/mypage/WithdrawModal";
 import { useAuth } from "../contexts/AuthContext";
 import { usePostSignout } from "../hooks/mutations/usePostSignout";
-import { useGetMyInfo } from "../hooks/queries/useGetMyInfo";
+// import { useGetMyInfo } from "../hooks/queries/useGetMyInfo";
 
 type ModalType = "password" | "withdraw" | null;
 
@@ -52,12 +52,13 @@ const MenuListItem = ({
 const MyPage = () => {
   const navigate = useNavigate();
   const { isLoggedIn } = useAuth();
-  const { data: myInfo } = useGetMyInfo();
+  // TODO: Restore this after the backend exposes GET /auth/myinfo.
+  // const { data: myInfo } = useGetMyInfo();
   const { mutate: signout, isPending: isSignoutPending } = usePostSignout();
   const [openedModal, setOpenedModal] = useState<ModalType>(null);
 
-  const displayName = isLoggedIn ? myInfo?.nickname ?? "-" : "-";
-  const displayEmail = isLoggedIn ? myInfo?.email ?? "-" : "-";
+  const displayName = isLoggedIn ? "-" : "-";
+  const displayEmail = isLoggedIn ? "-" : "-";
 
   const closeModal = () => {
     setOpenedModal(null);

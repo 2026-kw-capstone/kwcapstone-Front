@@ -4,6 +4,7 @@ import { useForm, type SubmitHandler } from "react-hook-form";
 import { Link } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
+import { getApiErrorMessage } from "../apis/apiError";
 import { usePostSignin } from "../hooks/mutations/usePostSignin";
 
 type SigninErrorResponse = {
@@ -12,7 +13,9 @@ type SigninErrorResponse = {
   message?: string;
 };
 
-const extractSigninErrorMessage = (error: unknown): string => {
+const extractSigninErrorMessage = (error: any): string => {
+  return getApiErrorMessage(error, "로그인에 실패했습니다.");
+
   if (!axios.isAxiosError<SigninErrorResponse>(error)) {
     return "로그인에 실패했습니다.";
   }

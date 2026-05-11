@@ -1,5 +1,5 @@
-import { isAxiosError } from "axios";
 import { useEffect, useMemo, useState } from "react";
+import { getApiErrorMessage } from "../apis/apiError";
 import { getRecordErrorMessage } from "../constants/recordingMessage";
 import { useAuth } from "../contexts/AuthContext";
 import { useRecord } from "../contexts/RecordContext";
@@ -12,20 +12,8 @@ import { useGetConversationDetail } from "./queries/useGetConversationDetail";
 import { useGetConversations } from "./queries/useGetConversations";
 
 // 서버/클라이언트 에러에서 사용자에게 보여줄 문구를 추출한다.
-const getApiErrorMessage = (error: unknown, fallbackMessage: string) => {
-  if (isAxiosError(error)) {
-    const message = error.response?.data?.message;
-
-    if (typeof message === "string" && message.trim()) {
-      return message;
-    }
-  }
-
-  if (error instanceof Error && error.message.trim()) {
-    return error.message;
-  }
-
-  return fallbackMessage;
+const getFreeConversationErrorMessage = (error: unknown, fallbackMessage: string) => {
+  return getApiErrorMessage(error, fallbackMessage);
 };
 
 type UseFreeConversationControllerOptions = {
@@ -140,7 +128,7 @@ export const useFreeConversationController = ({
     try {
       await toggleRecordAndUpload();
     } catch (error) {
-      alert(getApiErrorMessage(error, "Failed to send voice message."));
+      alert(getFreeConversationErrorMessage(error, "음성 메시지 전송에 실패했습니다."));
     }
   };
 
@@ -152,7 +140,7 @@ export const useFreeConversationController = ({
         content,
       });
     } catch (error) {
-      alert(getApiErrorMessage(error, "Failed to send message."));
+      alert(getFreeConversationErrorMessage(error, "메시지 전송에 실패했습니다."));
       throw error;
     }
   };
@@ -189,7 +177,7 @@ export const useFreeConversationController = ({
         setSelectedConversationId(conversationId);
       }
 
-      alert(getApiErrorMessage(error, "Failed to delete conversation."));
+      alert(getFreeConversationErrorMessage(error, "대화 삭제에 실패했습니다."));
       throw error;
     }
   };
@@ -233,9 +221,12 @@ export const useFreeConversationController = ({
       isLoading: isConversationListLoading,
       isError: isConversationListError,
       errorMessage:
-        conversationListError instanceof Error
-          ? conversationListError.message
-          : "Failed to load conversation list.",
+        conversationListError
+          ? getFreeConversationErrorMessage(
+              conversationListError,
+              "대화 목록을 불러오지 못했습니다."
+            )
+          : "대화 목록을 불러오지 못했습니다.",
       onRetry: () => void refetchConversationList(),
     },
     // 메시지 영역(상세) UI에 필요한 상태 묶음
@@ -243,9 +234,12 @@ export const useFreeConversationController = ({
       isLoading: isConversationDetailLoadingState,
       isError: isConversationDetailError,
       errorMessage:
-        conversationDetailError instanceof Error
-          ? conversationDetailError.message
-          : "Failed to load conversation details.",
+        conversationDetailError
+          ? getFreeConversationErrorMessage(
+              conversationDetailError,
+              "대화 내용을 불러오지 못했습니다."
+            )
+          : "대화 내용을 불러오지 못했습니다.",
       onRetry: () => void refetchConversationDetail(),
     },
     // 사이드바에서 사용하는 제출/삭제 진행 상태
