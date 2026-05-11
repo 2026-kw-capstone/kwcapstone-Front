@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useQueryClient, type QueryClient } from "@tanstack/react-query";
+import { getApiErrorMessage } from "../../apis/apiError";
 import { getMyNoteTts, getMyNoteUserAudio } from "../../apis/myNote";
 import { getAudioUrlExpiresAt, isAudioUrlFresh } from "../../constants/audio";
 import { QUERY_KEY } from "../../constants/key";
@@ -80,6 +81,7 @@ const MyNotePage = () => {
   const [deleteTarget, setDeleteTarget] = useState<MyNoteSentenceItem | null>(
     null
   );
+  const [apiErrorMessage, setApiErrorMessage] = useState("");
 
   const selectedSentence = useMemo(() => {
     return (
@@ -96,6 +98,7 @@ const MyNotePage = () => {
     setPreparedTtsAudio(null);
     clearAudioUrl();
     setResult(null);
+    setApiErrorMessage("");
   };
 
   const { isUploading, toggleRecordAndUpload } =
@@ -116,6 +119,7 @@ const MyNotePage = () => {
         });
       },
       onBeforeStart: () => {
+        setApiErrorMessage("");
         setResult(null);
         setIsAudioPreparing(false);
         setPreparedUserAudio(null);
@@ -177,6 +181,7 @@ const MyNotePage = () => {
     if (!selectedSentence) return;
 
     setIsPlayingTts(true);
+    setApiErrorMessage("");
 
     try {
       const preparedUrl = getFreshPreparedAudioUrl(preparedTtsAudio);
@@ -210,7 +215,10 @@ const MyNotePage = () => {
         });
         await playAudio(tts.aiAudioUrl);
       }
-    } catch {
+    } catch (error) {
+      setApiErrorMessage(
+        getApiErrorMessage(error, "AI 음성을 불러오지 못했습니다.")
+      );
       // 재생 실패는 useAudioPlayer에서 처리합니다.
     } finally {
       setIsPlayingTts(false);
@@ -219,13 +227,22 @@ const MyNotePage = () => {
 
   const handleRecord = async () => {
     if (!selectedSentence) return;
-    await toggleRecordAndUpload();
+    setApiErrorMessage("");
+
+    try {
+      await toggleRecordAndUpload();
+    } catch (error) {
+      setApiErrorMessage(
+        getApiErrorMessage(error, "발음 분석에 실패했습니다.")
+      );
+    }
   };
 
   const handlePlayRecordedAudio = async () => {
     if (!selectedSentence) return;
 
     setIsPlayingUserAudio(true);
+    setApiErrorMessage("");
 
     try {
       const preparedUrl = getFreshPreparedAudioUrl(preparedUserAudio);
@@ -259,7 +276,10 @@ const MyNotePage = () => {
         });
         await playAudio(userAudio.userAudioUrl);
       }
-    } catch {
+    } catch (error) {
+      setApiErrorMessage(
+        getApiErrorMessage(error, "내 녹음 음성을 불러오지 못했습니다.")
+      );
       // 재생 실패는 useAudioPlayer에서 처리합니다.
     } finally {
       setIsPlayingUserAudio(false);
@@ -267,9 +287,17 @@ const MyNotePage = () => {
   };
 
   const handleAddSentence = async (text: string) => {
-    const response = await postSentenceMutation.mutateAsync(text);
-    setSelectedSentenceId(response.result.sentenceId);
-    resetStudyState();
+    setApiErrorMessage("");
+
+    try {
+      const response = await postSentenceMutation.mutateAsync(text);
+      setSelectedSentenceId(response.result.sentenceId);
+      resetStudyState();
+    } catch (error) {
+      setApiErrorMessage(
+        getApiErrorMessage(error, "문장 추가에 실패했습니다.")
+      );
+    }
   };
 
   const handleDeleteSentence = (id: number) => {
@@ -283,12 +311,20 @@ const MyNotePage = () => {
     if (!deleteTarget) return;
 
     const targetId = deleteTarget.sentenceId;
-    await deleteSentenceMutation.mutateAsync(targetId);
-    setDeleteTarget(null);
+    setApiErrorMessage("");
 
-    if (selectedSentenceId === targetId) {
-      setSelectedSentenceId(null);
-      resetStudyState();
+    try {
+      await deleteSentenceMutation.mutateAsync(targetId);
+      setDeleteTarget(null);
+
+      if (selectedSentenceId === targetId) {
+        setSelectedSentenceId(null);
+        resetStudyState();
+      }
+    } catch (error) {
+      setApiErrorMessage(
+        getApiErrorMessage(error, "문장 삭제에 실패했습니다.")
+      );
     }
   };
 
@@ -310,6 +346,12 @@ const MyNotePage = () => {
       {isError ? (
         <p className="rounded-[14px] bg-rose-50 px-4 py-3 text-[13px] font-bold text-rose-500">
           문장 목록을 불러오지 못했습니다.
+        </p>
+      ) : null}
+
+      {apiErrorMessage ? (
+        <p className="rounded-[14px] bg-rose-50 px-4 py-3 text-[13px] font-bold text-rose-500">
+          {apiErrorMessage}
         </p>
       ) : null}
 
