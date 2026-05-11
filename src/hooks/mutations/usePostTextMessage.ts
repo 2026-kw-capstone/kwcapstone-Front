@@ -88,6 +88,29 @@ const mergeConversationSummary = (
   ];
 };
 
+const createMessageGroupFromResponse = (
+  response: ResponsePostTextMessageDto,
+  fallbackClientRequestId: string
+): ConversationMessageGroup => {
+  const receivedAt = new Date().toISOString();
+
+  return {
+    clientRequestId: response.clientRequestId ?? fallbackClientRequestId,
+    userMessage: {
+      ...response.result.userMessage,
+      createdAt: receivedAt,
+    },
+    aiMessage: {
+      ...response.result.aiMessage,
+      createdAt: receivedAt,
+    },
+    feedback: {
+      ...response.result.feedback,
+      createdAt: receivedAt,
+    },
+  };
+};
+
 export const usePostTextMessage = (options?: UsePostTextMessageOptions) => {
   const queryClient = useQueryClient();
   const [pendingNewConversationMessages, setPendingNewConversationMessages] =
@@ -185,14 +208,10 @@ export const usePostTextMessage = (options?: UsePostTextMessageOptions) => {
       }
 
       const resolvedConversationId = response.result.conversationId;
-      const serverClientRequestId =
-        response.clientRequestId ?? context.optimisticMessageGroup.clientRequestId;
-      const messageGroup: ConversationMessageGroup = {
-        clientRequestId: serverClientRequestId,
-        userMessage: response.result.userMessage,
-        aiMessage: response.result.aiMessage,
-        feedback: response.result.feedback,
-      };
+      const messageGroup = createMessageGroupFromResponse(
+        response,
+        context.optimisticMessageGroup.clientRequestId
+      );
 
       queryClient.setQueryData<ConversationDetail>(
         [QUERY_KEY.conversationDetail, resolvedConversationId],
