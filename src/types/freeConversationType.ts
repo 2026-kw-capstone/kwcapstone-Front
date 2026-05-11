@@ -30,6 +30,15 @@ export type ConversationFeedback = {
   createdAt: string;
 };
 
+export type SentConversationUserMessage = Omit<
+  ConversationUserMessage,
+  "createdAt"
+>;
+
+export type SentConversationAiMessage = Omit<ConversationAiMessage, "createdAt">;
+
+export type SentConversationFeedback = Omit<ConversationFeedback, "createdAt">;
+
 export type ConversationMessageGroup = {
   clientRequestId: string;
   userMessage: ConversationUserMessage | null;
@@ -51,9 +60,9 @@ export type RequestPostTextMessageDto = {
 
 export type PostConversationMessageResult = {
   conversationId: number;
-  userMessage: ConversationUserMessage;
-  aiMessage: ConversationAiMessage;
-  feedback: ConversationFeedback;
+  userMessage: SentConversationUserMessage;
+  aiMessage: SentConversationAiMessage;
+  feedback: SentConversationFeedback;
 };
 
 export type RequestPatchConversationTitleDto = {
