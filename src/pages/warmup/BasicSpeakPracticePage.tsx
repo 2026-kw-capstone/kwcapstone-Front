@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Navigate, useParams } from "react-router-dom";
+import { getApiErrorMessage } from "../../apis/apiError";
 import BasicSpeakResultCard from "../../components/warmup/basic-speak/BasicSpeakResultCard";
 import BasicSpeakStudyCard from "../../components/warmup/basic-speak/BasicSpeakStudyCard";
 import { isAudioUrlFresh } from "../../constants/audio";
@@ -32,9 +33,11 @@ const BasicSpeakPracticePage = () => {
 
   const [isPlayingModelAudio, setIsPlayingModelAudio] = useState(false);
   const [isPlayingUserAudio, setIsPlayingUserAudio] = useState(false);
+  const [apiErrorMessage, setApiErrorMessage] = useState("");
 
   useEffect(() => {
     clearAudioUrl();
+    setApiErrorMessage("");
   }, [card?.targetVowel, clearAudioUrl]);
 
   const result = latestPracticeQuery.data?.result.practice ?? null;
@@ -57,6 +60,7 @@ const BasicSpeakPracticePage = () => {
         });
       },
       onBeforeStart: () => {
+        setApiErrorMessage("");
         clearAudioUrl();
         if (!card) return;
 
@@ -82,7 +86,15 @@ const BasicSpeakPracticePage = () => {
   }
 
   const handleRecord = async () => {
-    await toggleRecordAndUpload();
+    setApiErrorMessage("");
+
+    try {
+      await toggleRecordAndUpload();
+    } catch (error) {
+      setApiErrorMessage(
+        getApiErrorMessage(error, "발음 분석에 실패했습니다.")
+      );
+    }
   };
 
   const getPlayablePractice = async () => {
@@ -98,11 +110,16 @@ const BasicSpeakPracticePage = () => {
 
   const handlePlayRecordedAudio = async () => {
     setIsPlayingUserAudio(true);
+    setApiErrorMessage("");
     try {
       const playablePractice = await getPlayablePractice();
       if (playablePractice?.voiceUrl) {
         await playAudio(playablePractice.voiceUrl);
       }
+    } catch (error) {
+      setApiErrorMessage(
+        getApiErrorMessage(error, "내 녹음 음성을 불러오지 못했습니다.")
+      );
     } finally {
       setIsPlayingUserAudio(false);
     }
@@ -110,11 +127,16 @@ const BasicSpeakPracticePage = () => {
 
   const handlePlayModelAudio = async () => {
     setIsPlayingModelAudio(true);
+    setApiErrorMessage("");
     try {
       const playablePractice = await getPlayablePractice();
       if (playablePractice?.modelVoiceUrl) {
         await playAudio(playablePractice.modelVoiceUrl);
       }
+    } catch (error) {
+      setApiErrorMessage(
+        getApiErrorMessage(error, "모범 발음 음성을 불러오지 못했습니다.")
+      );
     } finally {
       setIsPlayingModelAudio(false);
     }
@@ -135,6 +157,12 @@ const BasicSpeakPracticePage = () => {
       {latestPracticeQuery.isError ? (
         <p className="rounded-2xl bg-rose-50 px-4 py-3 text-xs font-semibold text-rose-500">
           최근 기초 발성 연습 결과를 불러오지 못했습니다.
+        </p>
+      ) : null}
+
+      {apiErrorMessage ? (
+        <p className="rounded-2xl bg-rose-50 px-4 py-3 text-xs font-semibold text-rose-500">
+          {apiErrorMessage}
         </p>
       ) : null}
 
