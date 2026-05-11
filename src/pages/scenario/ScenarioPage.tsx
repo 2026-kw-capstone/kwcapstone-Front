@@ -1,45 +1,40 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { Plus } from "lucide-react";
 import { useNavigate, useOutlet } from "react-router-dom";
-import {
-  createScenarioRequest,
-  deleteMyScenarioRequest,
-  getMyScenariosRequest,
-  getMyScenariosSnapshot,
-} from "../../apis/scenario";
+import { getApiErrorMessage } from "../../apis/apiError";
 import ScenarioCreateModal from "../../components/scenario/ScenarioCreateModal";
 import ScenarioOnboarding from "../../components/scenario/ScenarioOnboarding";
 import ScenarioRowCard from "../../components/scenario/ScenarioRowCard";
-import type { ScenarioItem, ScenarioOutletContext } from "../../types/scenarioType";
+import { usePostScenario } from "../../hooks/mutations/usePostScenario";
+import { useGetScenarios } from "../../hooks/queries/useGetScenarios";
+import type { ScenarioOutletContext } from "../../types/scenarioType";
 
 const ScenarioPage = () => {
   const navigate = useNavigate();
 
-  const [myScenarios, setMyScenarios] = useState<ScenarioItem[]>(
-    getMyScenariosSnapshot()
-  );
-  const [isLoading, setIsLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isCreating, setIsCreating] = useState(false);
   const [titleInput, setTitleInput] = useState("");
   const [descriptionInput, setDescriptionInput] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
+  const {
+    data: myScenarios = [],
+    isLoading,
+    isError,
+    error,
+  } = useGetScenarios();
+  const { createScenario, isPending: isCreating } = usePostScenario();
   const scenarioOutletContext: ScenarioOutletContext = { myScenarios };
   const outlet = useOutlet(scenarioOutletContext);
 
-  const refreshScenarios = async () => {
-    setIsLoading(true);
-    try {
-      const nextScenarios = await getMyScenariosRequest();
-      setMyScenarios(nextScenarios);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   useEffect(() => {
-    void refreshScenarios();
-  }, []);
+    if (!isError) {
+      setErrorMessage("");
+      return;
+    }
+
+    setErrorMessage(getApiErrorMessage(error));
+  }, [error, isError]);
 
   if (outlet) {
     return outlet;
@@ -68,34 +63,47 @@ const ScenarioPage = () => {
       return;
     }
 
-    setIsCreating(true);
     try {
-      await createScenarioRequest({
+      setErrorMessage("");
+      await createScenario({
         title: trimmedTitle,
         description: trimmedDescription,
       });
-      await refreshScenarios();
       closeModal();
-    } finally {
-      setIsCreating(false);
+    } catch (submitError) {
+      setErrorMessage(getApiErrorMessage(submitError));
     }
   };
 
-  const handleDeleteScenario = async (scenarioId: string) => {
-    await deleteMyScenarioRequest(scenarioId);
-    await refreshScenarios();
-  };
+  const handleDeleteScenario = () => undefined;
+
+  if (isLoading) {
+    return (
+      <div className="mx-auto flex min-h-full w-full max-w-md items-center justify-center">
+        <p className="text-[14px] font-bold text-slate-400">
+          ?쒕굹由ъ삤 紐⑸줉???덈윭?ㅻ뒗 以묒엯?덈떎...
+        </p>
+      </div>
+    );
+  }
 
   if (!isLoading && myScenarios.length === 0) {
     return (
-      <ScenarioOnboarding
-        title={titleInput}
-        description={descriptionInput}
-        isCreating={isCreating}
-        onSubmit={handleCreateScenario}
-        onTitleChange={setTitleInput}
-        onDescriptionChange={setDescriptionInput}
-      />
+      <div className="mx-auto flex min-h-full w-full max-w-md flex-col gap-3">
+        {errorMessage ? (
+          <p className="rounded-2xl bg-rose-50 px-4 py-3 text-xs font-semibold text-rose-500">
+            {errorMessage}
+          </p>
+        ) : null}
+        <ScenarioOnboarding
+          title={titleInput}
+          description={descriptionInput}
+          isCreating={isCreating}
+          onSubmit={handleCreateScenario}
+          onTitleChange={setTitleInput}
+          onDescriptionChange={setDescriptionInput}
+        />
+      </div>
     );
   }
 
@@ -122,15 +130,19 @@ const ScenarioPage = () => {
           </button>
         </section>
 
+        {errorMessage ? (
+          <p className="rounded-2xl bg-rose-50 px-4 py-3 text-xs font-semibold text-rose-500">
+            {errorMessage}
+          </p>
+        ) : null}
+
         <section className="flex flex-col gap-3">
           {myScenarios.map((scenario) => (
             <ScenarioRowCard
               key={scenario.id}
               scenario={scenario}
               onClick={() => moveToLevelSelect(scenario.id)}
-              onDelete={() => {
-                void handleDeleteScenario(scenario.id);
-              }}
+              onDelete={handleDeleteScenario}
             />
           ))}
         </section>

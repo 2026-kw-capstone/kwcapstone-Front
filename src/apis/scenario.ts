@@ -1,48 +1,100 @@
-import { Target } from "lucide-react";
 import type {
-  CreateScenarioPayload,
-  ScenarioItem,
+  RequestCreateScenarioDto,
+  ResponseCreateScenarioDto,
+  ResponseGetScenarioDetailDto,
+  ResponseGetScenarioResultDto,
+  ResponseGetScenariosDto,
+  ResponseGetScenarioStepDto,
+  ResponsePostScenarioAnswerDto,
+  ScenarioLevel,
 } from "../types/scenarioType";
+import { axiosInstance } from "./axios";
 
-// 테스트용 Mock DB입니다.
-// TODO: 실제 API 연결 시 axios 요청으로 교체하세요.
-let mockMyScenarios: ScenarioItem[] = [];
+const SCENARIO_BASE_URL = "/api/conversations/scenarios";
 
-const delay = (ms: number) =>
-  new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
+const getVoiceFileName = (mimeType: string) => {
+  if (mimeType.includes("wav")) return "scenario-answer.wav";
+  if (mimeType.includes("mp4") || mimeType.includes("m4a")) {
+    return "scenario-answer.m4a";
+  }
+  if (mimeType.includes("mpeg") || mimeType.includes("mp3")) {
+    return "scenario-answer.mp3";
+  }
 
-export const getMyScenariosSnapshot = (): ScenarioItem[] => {
-  return [...mockMyScenarios];
+  return "scenario-answer.webm";
 };
 
-export const getMyScenariosRequest = async (): Promise<ScenarioItem[]> => {
-  await delay(200);
-  return getMyScenariosSnapshot();
+export const getScenarios = async (): Promise<ResponseGetScenariosDto> => {
+  const { data } = await axiosInstance.get<ResponseGetScenariosDto>(
+    SCENARIO_BASE_URL
+  );
+  return data;
 };
 
-export const createScenarioRequest = async (
-  payload: CreateScenarioPayload
-): Promise<ScenarioItem> => {
-  await delay(300);
-
-  const createdScenario: ScenarioItem = {
-    id: `custom-${Date.now()}`,
-    title: payload.title,
-    description:
-      payload.description.trim() || "내가 직접 만든 맞춤 시나리오입니다.",
-    icon: Target,
-    iconClassName: "bg-emerald-50 text-emerald-500",
-  };
-
-  mockMyScenarios = [createdScenario, ...mockMyScenarios];
-  return createdScenario;
+export const postScenario = async (
+  payload: RequestCreateScenarioDto
+): Promise<ResponseCreateScenarioDto> => {
+  const { data } = await axiosInstance.post<ResponseCreateScenarioDto>(
+    SCENARIO_BASE_URL,
+    payload
+  );
+  return data;
 };
 
-export const deleteMyScenarioRequest = async (
-  scenarioId: string
-): Promise<void> => {
-  await delay(200);
-  mockMyScenarios = mockMyScenarios.filter((scenario) => scenario.id !== scenarioId);
+export const getScenarioDetail = async (
+  scenarioId: number
+): Promise<ResponseGetScenarioDetailDto> => {
+  const { data } = await axiosInstance.get<ResponseGetScenarioDetailDto>(
+    `${SCENARIO_BASE_URL}/${scenarioId}`
+  );
+  return data;
+};
+
+export const getScenarioStep = async ({
+  scenarioId,
+  level,
+  stepNo,
+}: {
+  scenarioId: number;
+  level: ScenarioLevel;
+  stepNo: number;
+}): Promise<ResponseGetScenarioStepDto> => {
+  const { data } = await axiosInstance.get<ResponseGetScenarioStepDto>(
+    `${SCENARIO_BASE_URL}/${scenarioId}/levels/${level}/steps/${stepNo}`
+  );
+  return data;
+};
+
+export const postScenarioAnswer = async ({
+  scenarioId,
+  level,
+  stepNo,
+  voiceFile,
+}: {
+  scenarioId: number;
+  level: ScenarioLevel;
+  stepNo: number;
+  voiceFile: Blob;
+}): Promise<ResponsePostScenarioAnswerDto> => {
+  const formData = new FormData();
+  formData.append("audioFile", voiceFile, getVoiceFileName(voiceFile.type));
+
+  const { data } = await axiosInstance.post<ResponsePostScenarioAnswerDto>(
+    `${SCENARIO_BASE_URL}/${scenarioId}/levels/${level}/steps/${stepNo}/answers`,
+    formData
+  );
+  return data;
+};
+
+export const getScenarioResult = async ({
+  scenarioId,
+  level,
+}: {
+  scenarioId: number;
+  level: ScenarioLevel;
+}): Promise<ResponseGetScenarioResultDto> => {
+  const { data } = await axiosInstance.get<ResponseGetScenarioResultDto>(
+    `${SCENARIO_BASE_URL}/${scenarioId}/levels/${level}/result`
+  );
+  return data;
 };
