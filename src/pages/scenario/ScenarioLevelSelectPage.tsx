@@ -47,7 +47,7 @@ const ScenarioLevelSelectPage = () => {
     return (
       <div className="mx-auto flex min-h-full w-full max-w-md items-center justify-center">
         <p className="text-[14px] font-bold text-slate-400">
-          ?덈꺼 ?뺣낫瑜??덈윭?ㅻ뒗 以묒엯?덈떎...
+          레벨 정보를 불러오는 중입니다...
         </p>
       </div>
     );
@@ -64,7 +64,7 @@ const ScenarioLevelSelectPage = () => {
           onClick={() => navigate("/ai-practice/scenario")}
           className="h-12 rounded-2xl bg-[#278DFD] px-5 text-[14px] font-bold text-white"
         >
-          紐⑸줉?쇰줈 ?뚯븘媛湲?
+          목록으로 돌아가기
         </button>
       </div>
     );
@@ -77,7 +77,7 @@ const ScenarioLevelSelectPage = () => {
           {scenario.title}
         </p>
         <h1 className="text-[24px] font-extrabold leading-tight text-slate-900">
-          어떤 난이도로
+          어떤 레벨로
           <br />
           연습해볼까요?
         </h1>

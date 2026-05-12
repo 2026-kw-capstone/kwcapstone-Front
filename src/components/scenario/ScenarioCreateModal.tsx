@@ -63,7 +63,7 @@ const ScenarioCreateModal = ({
               required
               value={title}
               onChange={(event) => onTitleChange(event.target.value)}
-              placeholder="예: 해외 여행 식당에서 주문하기"
+              placeholder="예: 카페에서 주문하기"
               className="h-[56px] w-full rounded-[18px] border border-slate-100 bg-[#F8F9FD] px-5 text-[15.5px] font-medium text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-[#278DFD] focus:bg-white focus:ring-2 focus:ring-blue-100"
             />
           </label>

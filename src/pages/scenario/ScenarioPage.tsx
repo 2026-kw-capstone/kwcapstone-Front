@@ -75,13 +75,11 @@ const ScenarioPage = () => {
     }
   };
 
-  const handleDeleteScenario = () => undefined;
-
   if (isLoading) {
     return (
       <div className="mx-auto flex min-h-full w-full max-w-md items-center justify-center">
         <p className="text-[14px] font-bold text-slate-400">
-          ?쒕굹由ъ삤 紐⑸줉???덈윭?ㅻ뒗 以묒엯?덈떎...
+          시나리오 목록을 불러오는 중입니다...
         </p>
       </div>
     );
@@ -116,7 +114,7 @@ const ScenarioPage = () => {
               시나리오 목록
             </h1>
             <p className="text-[14px] font-medium text-slate-500">
-              내가 만든 맞춤 상황으로 연습해요.
+              내가 만든 맞춤 상황으로 연습해보세요.
             </p>
           </div>
 
@@ -142,7 +140,6 @@ const ScenarioPage = () => {
               key={scenario.id}
               scenario={scenario}
               onClick={() => moveToLevelSelect(scenario.id)}
-              onDelete={handleDeleteScenario}
             />
           ))}
         </section>
