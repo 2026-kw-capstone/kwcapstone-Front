@@ -21,10 +21,6 @@ import {
 } from "../../hooks/audio/useAudioPlayer";
 import { useRecordUploadFlow } from "../../hooks/audio/useRecordUploadFlow";
 import { usePostScenarioAnswer } from "../../hooks/mutations/usePostScenarioAnswer";
-import {
-  getScenarioAnswerQueryKey,
-  useGetScenarioAnswer,
-} from "../../hooks/queries/useGetScenarioAnswer";
 import { useGetScenarioResult } from "../../hooks/queries/useGetScenarioResult";
 import { useGetScenarioStep } from "../../hooks/queries/useGetScenarioStep";
 import type {
@@ -80,8 +76,15 @@ const mapAnswerToStepResult = (answer: ScenarioAnswerResultDto): StepResult => (
   })),
 });
 
-const ScenarioPracticePage = () => {
-  const { scenarioId, level } = useParams<{ scenarioId: string; level: string }>();
+interface ScenarioPracticeContentProps {
+  resolvedScenarioId: number;
+  resolvedLevel: ScenarioLevel;
+}
+
+const ScenarioPracticeContent = ({
+  resolvedScenarioId,
+  resolvedLevel,
+}: ScenarioPracticeContentProps) => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { isRecording, status, lastError, startRecording, stopRecording } =
@@ -89,16 +92,11 @@ const ScenarioPracticePage = () => {
   const { isPlaying, playAudio } = useAudioPlayer();
   const { analyzeScenarioAnswer } = usePostScenarioAnswer();
 
-  const numericScenarioId = Number(scenarioId);
-  const numericLevel = Number(level);
-  const isValidScenarioId = Number.isFinite(numericScenarioId);
-  const isValidLevel = isScenarioLevel(numericLevel);
-  const resolvedScenarioId = isValidScenarioId ? numericScenarioId : undefined;
-  const resolvedLevel = isValidLevel ? numericLevel : undefined;
-
   const [currentStepNo, setCurrentStepNo] = useState(1);
   const [isSummaryMode, setIsSummaryMode] = useState(false);
-  const [hasResetPracticeCache, setHasResetPracticeCache] = useState(false);
+  const [answerByStep, setAnswerByStep] = useState<
+    Record<number, ScenarioAnswerResultDto | null>
+  >({});
   const [recordedAudioUrlByStep, setRecordedAudioUrlByStep] = useState<
     Record<number, string | null>
   >({});
@@ -110,11 +108,6 @@ const ScenarioPracticePage = () => {
     isError: isStepError,
     error: stepError,
   } = useGetScenarioStep({
-    scenarioId: resolvedScenarioId,
-    level: resolvedLevel,
-    stepNo: currentStepNo,
-  });
-  const { data: currentAnswer } = useGetScenarioAnswer({
     scenarioId: resolvedScenarioId,
     level: resolvedLevel,
     stepNo: currentStepNo,
@@ -142,6 +135,7 @@ const ScenarioPracticePage = () => {
     hint: "",
   }));
   const currentStepIndex = currentStepNo - 1;
+  const currentAnswer = answerByStep[currentStepNo] ?? null;
   const currentResult = currentAnswer ? mapAnswerToStepResult(currentAnswer) : null;
   const currentAudioUrl = recordedAudioUrlByStep[currentStepNo] ?? null;
 
@@ -150,20 +144,24 @@ const ScenarioPracticePage = () => {
     status,
     startRecording,
     stopRecording,
-    isBlocked: !resolvedScenarioId || !resolvedLevel || isStepLoading,
+    isBlocked: isStepLoading,
     uploadFn: (voiceFile) =>
       analyzeScenarioAnswer({
-        scenarioId: resolvedScenarioId!,
-        level: resolvedLevel!,
+        scenarioId: resolvedScenarioId,
+        level: resolvedLevel,
         stepNo: currentStepNo,
         voiceFile,
       }),
     onBeforeStart: () => {
       setIsSummaryMode(false);
     },
-    onUploadSuccess: (_response, blob) => {
+    onUploadSuccess: (response, blob) => {
       const nextAudioUrl = URL.createObjectURL(blob);
 
+      setAnswerByStep((prev) => ({
+        ...prev,
+        [currentStepNo]: response.result,
+      }));
       setRecordedAudioUrlByStep((prev) => {
         const previousUrl = prev[currentStepNo];
         revokeObjectUrlIfNeeded(previousUrl);
@@ -192,27 +190,10 @@ const ScenarioPracticePage = () => {
   const blocker = useBlocker(shouldBlockNavigation);
 
   useLayoutEffect(() => {
-    if (!resolvedScenarioId || !resolvedLevel) {
-      return;
-    }
-
-    setHasResetPracticeCache(false);
-    setCurrentStepNo(1);
-    setIsSummaryMode(false);
-    Object.values(recordedAudioUrlByStepRef.current).forEach((url) =>
-      revokeObjectUrlIfNeeded(url)
-    );
-    recordedAudioUrlByStepRef.current = {};
-    setRecordedAudioUrlByStep({});
-    queryClient.removeQueries({
-      queryKey: [QUERY_KEY.scenarioAnswer, resolvedScenarioId, resolvedLevel],
-      exact: false,
-    });
     queryClient.removeQueries({
       queryKey: [QUERY_KEY.scenarioResult, resolvedScenarioId, resolvedLevel],
       exact: true,
     });
-    setHasResetPracticeCache(true);
   }, [queryClient, resolvedLevel, resolvedScenarioId]);
 
   useEffect(() => {
@@ -255,20 +236,6 @@ const ScenarioPracticePage = () => {
     event.returnValue = "";
   });
 
-  if (!isValidScenarioId || !isValidLevel) {
-    return <Navigate to="/ai-practice/scenario" replace />;
-  }
-
-  if (!hasResetPracticeCache) {
-    return (
-      <div className="mx-auto flex min-h-full w-full max-w-md items-center justify-center">
-        <p className="text-[14px] font-bold text-slate-400">
-          훈련을 준비하는 중입니다...
-        </p>
-      </div>
-    );
-  }
-
   const handleRecord = async () => {
     await toggleRecordAndUpload();
   };
@@ -287,14 +254,10 @@ const ScenarioPracticePage = () => {
         [currentStepNo]: null,
       };
     });
-    queryClient.setQueryData(
-      getScenarioAnswerQueryKey({
-        scenarioId: resolvedScenarioId,
-        level: resolvedLevel,
-        stepNo: currentStepNo,
-      }),
-      null
-    );
+    setAnswerByStep((prev) => ({
+      ...prev,
+      [currentStepNo]: null,
+    }));
 
     setIsSummaryMode(false);
     await startRecording();
@@ -436,6 +399,27 @@ const ScenarioPracticePage = () => {
         />
       )}
     </div>
+  );
+};
+
+const ScenarioPracticePage = () => {
+  const { scenarioId, level } = useParams<{ scenarioId: string; level: string }>();
+
+  const numericScenarioId = Number(scenarioId);
+  const numericLevel = Number(level);
+  const isValidScenarioId = Number.isFinite(numericScenarioId);
+  const isValidLevel = isScenarioLevel(numericLevel);
+
+  if (!isValidScenarioId || !isValidLevel) {
+    return <Navigate to="/ai-practice/scenario" replace />;
+  }
+
+  return (
+    <ScenarioPracticeContent
+      key={`${numericScenarioId}-${numericLevel}`}
+      resolvedScenarioId={numericScenarioId}
+      resolvedLevel={numericLevel}
+    />
   );
 };
 
