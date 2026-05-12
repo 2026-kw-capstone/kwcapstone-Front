@@ -8,7 +8,6 @@ export interface ScenarioSyllableFeedback {
 }
 
 export interface StepResult {
-  transcript: string;
   accuracy: number;
   semanticRate: number;
   speed: number;

@@ -5,6 +5,7 @@ import type {
   ResponseGetScenarioResultDto,
   ResponseGetScenariosDto,
   ResponseGetScenarioStepDto,
+  ResponseGetScenarioUserAudioDto,
   ResponsePostScenarioAnswerDto,
   ScenarioLevel,
 } from "../types/scenarioType";
@@ -77,11 +78,26 @@ export const postScenarioAnswer = async ({
   voiceFile: Blob;
 }): Promise<ResponsePostScenarioAnswerDto> => {
   const formData = new FormData();
-  formData.append("audioFile", voiceFile, getVoiceFileName(voiceFile.type));
+  formData.append("voiceFile", voiceFile, getVoiceFileName(voiceFile.type));
 
   const { data } = await axiosInstance.post<ResponsePostScenarioAnswerDto>(
     `${SCENARIO_BASE_URL}/${scenarioId}/levels/${level}/steps/${stepNo}/answers`,
     formData
+  );
+  return data;
+};
+
+export const getScenarioUserAudio = async ({
+  scenarioId,
+  level,
+  stepNo,
+}: {
+  scenarioId: number;
+  level: ScenarioLevel;
+  stepNo: number;
+}): Promise<ResponseGetScenarioUserAudioDto> => {
+  const { data } = await axiosInstance.get<ResponseGetScenarioUserAudioDto>(
+    `${SCENARIO_BASE_URL}/${scenarioId}/levels/${level}/steps/${stepNo}/user-audio`
   );
   return data;
 };

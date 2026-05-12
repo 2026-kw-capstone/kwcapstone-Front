@@ -65,7 +65,6 @@ export interface ScenarioStepDto {
   step: string;
   assistantMessage: string;
   userIntent: string;
-  hint: string;
   isAnswered: boolean;
 }
 
@@ -82,11 +81,6 @@ export interface ScenarioAnswerResultDto {
   scenarioId: number;
   level: ScenarioLevel;
   stepNo: number;
-  levelTitle: string;
-  step: string;
-  assistantMessage: string;
-  userIntent: string;
-  userAudioUrl: string;
   pronunciationScore: number;
   meaningDeliveryScore: number;
   speechRateScore: number;
@@ -95,6 +89,15 @@ export interface ScenarioAnswerResultDto {
   isLastStep: boolean;
   nextStepNo: number | null;
   wordAnalysis: ScenarioWordAnalysisDto[];
+}
+
+export interface ScenarioUserAudioDto {
+  answerId: number;
+  scenarioId: number;
+  level: ScenarioLevel;
+  stepNo: number;
+  userAudioUrl: string;
+  expiresIn: number;
 }
 
 export interface ScenarioTrainingResultDto {
@@ -149,4 +152,11 @@ export interface ResponseGetScenarioResultDto {
   code: string;
   message: string;
   result: ScenarioTrainingResultDto;
+}
+
+export interface ResponseGetScenarioUserAudioDto {
+  isSuccess: boolean;
+  code: string;
+  message: string;
+  result: ScenarioUserAudioDto;
 }

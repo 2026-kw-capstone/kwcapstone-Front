@@ -17,4 +17,5 @@ export const QUERY_KEY = {
   scenarioStep: "scenarioStep",
   scenarioAnswer: "scenarioAnswer",
   scenarioResult: "scenarioResult",
+  scenarioUserAudio: "scenarioUserAudio",
 } as const;
