@@ -35,8 +35,8 @@ interface PracticeStepPanelProps {
 
 const syllableStatusClassName: Record<ScenarioSyllableStatus, string> = {
   good: "border-emerald-100 bg-emerald-50 text-emerald-600",
-  warning: "border-amber-100 bg-amber-50 text-amber-600",
-  bad: "border-rose-100 bg-rose-50 text-rose-600",
+  warn: "border-amber-100 bg-amber-50 text-amber-600",
+  error: "border-rose-100 bg-rose-50 text-rose-600",
 };
 
 const MetricBlock = ({
@@ -51,27 +51,25 @@ const MetricBlock = ({
   unit: string;
   colorClassName: string;
   highlight?: boolean;
-}) => {
-  return (
-    <div
-      className={`rounded-[16px] border p-3 text-center ${
-        highlight ? "border-blue-100 bg-blue-50" : "border-slate-100 bg-[#F8F9FD]"
+}) => (
+  <div
+    className={`rounded-[16px] border p-3 text-center ${
+      highlight ? "border-blue-100 bg-blue-50" : "border-slate-100 bg-[#F8F9FD]"
+    }`}
+  >
+    <p
+      className={`mb-1 text-[11px] font-semibold ${
+        highlight ? "text-blue-500" : "text-slate-500"
       }`}
     >
-      <p
-        className={`mb-1 text-[11px] font-semibold ${
-          highlight ? "text-blue-500" : "text-slate-500"
-        }`}
-      >
-        {label}
-      </p>
-      <p className={`text-[18px] font-black ${colorClassName}`}>
-        {value}
-        <span className="ml-0.5 text-[12px] font-bold">{unit}</span>
-      </p>
-    </div>
-  );
-};
+      {label}
+    </p>
+    <p className={`text-[18px] font-black ${colorClassName}`}>
+      {value}
+      <span className="ml-0.5 text-[12px] font-bold">{unit}</span>
+    </p>
+  </div>
+);
 
 const PracticeStepPanel = ({
   currentStep,
@@ -96,9 +94,9 @@ const PracticeStepPanel = ({
         <div className="flex min-h-full flex-col gap-4">
           <section className="relative shrink-0 rounded-[24px] border border-slate-100 bg-white p-6 shadow-[0_4px_16px_rgba(0,0,0,0.03)]">
             <div className="absolute -top-3.5 left-5 rounded-lg bg-slate-800 px-2.5 py-1 text-[10px] font-black uppercase tracking-widest text-white shadow-md">
-              AI 대화
+              AI 질문
             </div>
-            <p className="mt-3 mb-4 text-[18px] font-extrabold leading-relaxed text-slate-800 break-keep">
+            <p className="mb-4 mt-3 break-keep text-[18px] font-extrabold leading-relaxed text-slate-800">
               "{currentStep.prompt}"
             </p>
             <div className="rounded-[16px] border border-slate-100 bg-[#F8F9FD] p-4">
@@ -106,7 +104,7 @@ const PracticeStepPanel = ({
                 <Lightbulb size={14} />
                 힌트
               </p>
-              <p className="text-[13.5px] font-medium leading-relaxed text-slate-700 break-keep">
+              <p className="break-keep text-[13.5px] font-medium leading-relaxed text-slate-700">
                 {currentStep.hint}
               </p>
             </div>
@@ -129,10 +127,10 @@ const PracticeStepPanel = ({
                 </button>
                 <p className="mt-6 text-[15px] font-extrabold text-slate-400">
                   {isRecording
-                    ? "듣고 있습니다..."
+                    ? "녹음 중입니다..."
                     : isAnalyzing
                       ? "분석 중입니다..."
-                      : "버튼을 눌러 대답하세요"}
+                      : "버튼을 눌러 대답해보세요"}
                 </p>
               </div>
             ) : (
@@ -177,7 +175,7 @@ const PracticeStepPanel = ({
                     className="flex h-12 items-center justify-center gap-2 rounded-xl border border-transparent bg-slate-50 text-[14px] font-bold text-slate-700 transition-colors hover:bg-slate-100"
                   >
                     <RotateCcw size={16} />
-                    재녹음
+                    다시 녹음
                   </button>
                   <button
                     type="button"
@@ -186,12 +184,12 @@ const PracticeStepPanel = ({
                     className="flex h-12 items-center justify-center gap-2 rounded-xl border border-transparent bg-blue-50 text-[14px] font-bold text-[#278DFD] transition-colors hover:bg-blue-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
                   >
                     <Play size={16} fill="currentColor" />
-                    {isPlayingUserAudio ? "재생 중..." : "내 녹음 듣기"}
+                    {isPlayingUserAudio ? "재생 중..." : "녹음 듣기"}
                   </button>
                 </div>
 
                 <p className="mb-2.5 text-[13px] font-black text-slate-500">
-                  발음 음절 피드백
+                  발음 세부 피드백
                 </p>
                 <div className="mb-6 flex gap-1.5 overflow-x-auto pb-2 hide-scrollbar">
                   {currentResult.syllables.map((syllable, index) => (
@@ -211,7 +209,7 @@ const PracticeStepPanel = ({
                     <MessageSquare size={12} />
                     AI 코멘트
                   </div>
-                  <p className="mt-2 text-[14px] font-medium leading-relaxed text-slate-700 break-keep">
+                  <p className="mt-2 break-keep text-[14px] font-medium leading-relaxed text-slate-700">
                     {currentResult.feedback}
                   </p>
                 </div>
@@ -227,6 +225,7 @@ const PracticeStepPanel = ({
           onClick={onPrev}
           disabled={!canGoPrev}
           className="flex h-[56px] items-center justify-center rounded-[18px] bg-[#F8F9FD] text-slate-400 transition-colors active:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-30"
+          aria-label="이전 단계"
         >
           <StepBack size={22} />
         </button>

@@ -1,6 +1,6 @@
 import type { ScenarioLevel } from "./scenarioType";
 
-export type ScenarioSyllableStatus = "good" | "warning" | "bad";
+export type ScenarioSyllableStatus = "good" | "warn" | "error";
 
 export interface ScenarioSyllableFeedback {
   text: string;
@@ -8,7 +8,6 @@ export interface ScenarioSyllableFeedback {
 }
 
 export interface StepResult {
-  transcript: string;
   accuracy: number;
   semanticRate: number;
   speed: number;

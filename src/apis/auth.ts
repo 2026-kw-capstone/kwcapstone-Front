@@ -31,9 +31,3 @@ export const postReissue = async (): Promise<ResponseReissueDto> => {
   const { data } = await axiosInstance.post("/auth/reissue");
   return data;
 };
-
-// TODO: Restore this after the backend exposes GET /auth/myinfo.
-// export const getMyInfo = async (): Promise<Member> => {
-//   const { data } = await axiosInstance.get("/auth/myinfo");
-//   return data.result;
-// };
