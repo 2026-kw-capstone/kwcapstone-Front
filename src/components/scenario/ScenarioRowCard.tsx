@@ -48,7 +48,10 @@ const ScenarioRowCard = ({ scenario, onClick, onDelete }: ScenarioRowCardProps) 
             <Trash2 size={20} />
           </button>
         ) : null}
-        <ChevronRight className="text-slate-300 transition group-hover:text-slate-500" size={20} />
+        <ChevronRight
+          className="text-slate-300 transition group-hover:text-slate-500"
+          size={20}
+        />
       </div>
     </button>
   );

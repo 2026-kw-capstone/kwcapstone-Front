@@ -1,17 +1,19 @@
-// TODO: Restore this hook after the backend exposes GET /auth/myinfo.
-// import { useQuery } from "@tanstack/react-query";
-// import { getMyInfo } from "../../apis/auth";
-// import { QUERY_KEY } from "../../constants/key";
-// import { useAuth } from "../../contexts/AuthContext";
+import { useQuery } from "@tanstack/react-query";
+import { getMyProfile } from "../../apis/member";
+import { QUERY_KEY } from "../../constants/key";
+import { useAuth } from "../../contexts/AuthContext";
 
-// export const useGetMyInfo = () => {
-//   const { accessToken } = useAuth();
+export const getMyInfoQueryKey = () => [QUERY_KEY.myInfo] as const;
 
-//   return useQuery({
-//     queryKey: [QUERY_KEY.myInfo],
-//     queryFn: getMyInfo,
-//     enabled: !!accessToken,
-//   });
-// };
+export const useGetMyInfo = () => {
+  const { accessToken } = useAuth();
 
-export {};
+  return useQuery({
+    queryKey: getMyInfoQueryKey(),
+    queryFn: getMyProfile,
+    enabled: !!accessToken,
+    staleTime: 30 * 1000,
+    refetchOnWindowFocus: false,
+    select: (response) => response.result,
+  });
+};

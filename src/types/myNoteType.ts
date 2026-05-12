@@ -59,7 +59,9 @@ export interface ResponseDeleteMyNoteSentenceDto {
   isSuccess: boolean;
   code: string;
   message: string;
-  result: MyNoteSentenceItem;
+  result: {
+    sentenceId: number;
+  };
 }
 
 export interface ResponseMyNoteAnalyzeDto {
