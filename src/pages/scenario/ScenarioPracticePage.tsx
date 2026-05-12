@@ -54,11 +54,11 @@ const isScenarioLevel = (value: number): value is ScenarioLevel =>
   value === 1 || value === 2 || value === 3;
 
 const normalizeSyllableStatus = (grade: string): ScenarioSyllableStatus => {
-  if (grade === "good" || grade === "warning" || grade === "bad") {
+  if (grade === "good" || grade === "warn" || grade === "error") {
     return grade;
   }
 
-  return "warning";
+  return "warn";
 };
 
 const mapStepToPracticeStep = (step: ScenarioStepDto | undefined): PracticeStep => ({

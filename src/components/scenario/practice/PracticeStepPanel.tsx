@@ -35,8 +35,8 @@ interface PracticeStepPanelProps {
 
 const syllableStatusClassName: Record<ScenarioSyllableStatus, string> = {
   good: "border-emerald-100 bg-emerald-50 text-emerald-600",
-  warning: "border-amber-100 bg-amber-50 text-amber-600",
-  bad: "border-rose-100 bg-rose-50 text-rose-600",
+  warn: "border-amber-100 bg-amber-50 text-amber-600",
+  error: "border-rose-100 bg-rose-50 text-rose-600",
 };
 
 const MetricBlock = ({

@@ -68,7 +68,7 @@ export interface ScenarioStepDto {
   isAnswered: boolean;
 }
 
-export type ScenarioWordAnalysisGrade = "good" | "warning" | "bad" | string;
+export type ScenarioWordAnalysisGrade = "good" | "warn" | "error";
 
 export interface ScenarioWordAnalysisDto {
   refChar: string;
