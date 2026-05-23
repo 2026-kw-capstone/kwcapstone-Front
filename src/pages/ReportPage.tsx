@@ -99,7 +99,7 @@ const ReportPage = () => {
 
         <div className="relative z-10 flex flex-col gap-1.5">
           <p className="text-[14px] font-bold text-white/90">
-            {barPeriod === "week" ? "이번 주" : "이번 달"} 훈련 수
+            이번 주 훈련 수
           </p>
           <div className="flex items-end justify-between">
             <span className="text-[44px] font-black text-white leading-none tracking-tight">
@@ -109,7 +109,7 @@ const ReportPage = () => {
             <div className="flex items-center gap-1.5 bg-white/20 backdrop-blur-md px-3.5 py-1.5 rounded-[12px] border border-white/20 mb-1">
               <TrendingUp size={15} className="text-white" />
               <span className="text-[12.5px] font-bold text-white tracking-wide">
-                {barPeriod === "week" ? "전주" : "전달"} 대비 +4회
+                전주 대비 +4회
               </span>
             </div>
           </div>
