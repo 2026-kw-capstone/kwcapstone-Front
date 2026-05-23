@@ -13,6 +13,14 @@ import { axiosInstance } from "./axios";
 
 const SCENARIO_BASE_URL = "/api/conversations/scenarios";
 
+const getRequestId = () => {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return `uuid-${crypto.randomUUID()}`;
+  }
+
+  return `uuid-${Math.random().toString(16).slice(2)}`;
+};
+
 const getVoiceFileName = (mimeType: string) => {
   if (mimeType.includes("wav")) return "scenario-answer.wav";
   if (mimeType.includes("mp4") || mimeType.includes("m4a")) {
@@ -78,10 +86,14 @@ export const postScenarioAnswer = async ({
   voiceFile: Blob;
 }): Promise<ResponsePostScenarioAnswerDto> => {
   const formData = new FormData();
+  formData.append("clientRequestId", getRequestId());
+  formData.append("scenarioId", String(scenarioId));
+  formData.append("level", String(level));
+  formData.append("stepNo", String(stepNo));
   formData.append("voiceFile", voiceFile, getVoiceFileName(voiceFile.type));
 
   const { data } = await axiosInstance.post<ResponsePostScenarioAnswerDto>(
-    `${SCENARIO_BASE_URL}/${scenarioId}/levels/${level}/steps/${stepNo}/answers`,
+    `${SCENARIO_BASE_URL}/answers`,
     formData
   );
   return data;
