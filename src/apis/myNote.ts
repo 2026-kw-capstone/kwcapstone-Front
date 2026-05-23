@@ -12,6 +12,14 @@ import type {
 
 const MY_NOTE_BASE_URL = "/api/warmups/my-sentences";
 
+const getRequestId = () => {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return `uuid-${crypto.randomUUID()}`;
+  }
+
+  return `uuid-${Math.random().toString(16).slice(2)}`;
+};
+
 const getVoiceFileName = (mimeType: string) => {
   if (mimeType.includes("mp4") || mimeType.includes("m4a")) {
     return "my-note-voice.m4a";
@@ -69,10 +77,12 @@ export const postMyNotePronunciationAnalyze = async ({
   voiceFile: Blob;
 }): Promise<ResponseMyNoteAnalyzeDto> => {
   const formData = new FormData();
+  formData.append("clientRequestId", getRequestId());
+  formData.append("sentenceId", String(sentenceId));
   formData.append("voiceFile", voiceFile, getVoiceFileName(voiceFile.type));
 
   const { data } = await axiosInstance.post(
-    `${MY_NOTE_BASE_URL}/${sentenceId}/pronunciations/analyze`,
+    `${MY_NOTE_BASE_URL}/pronunciations/analyze`,
     formData
   );
 
