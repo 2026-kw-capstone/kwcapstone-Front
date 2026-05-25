@@ -36,7 +36,8 @@ export const mapAnswerToStepResult = (
   semanticRate: Math.round(answer.meaningDeliveryScore),
   speed: Math.round(answer.speechRateScore),
   silenceRatio: Math.round(answer.silenceRatio),
-  feedback: answer.feedback,
+  meaningFeedback: answer.meaningFeedback,
+  pronunciationFeedback: answer.pronunciationFeedback,
   syllables: (answer.wordAnalysis ?? []).map((word, index) => ({
     text: word.hypChar || word.refChar || String(index + 1),
     status: normalizeSyllableStatus(word.grade),
