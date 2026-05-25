@@ -101,6 +101,19 @@ export const useScenarioPracticeFlow = ({
   };
 
   const handleBackToList = () => {
+    const keysToRemove = new Set<string>([
+      QUERY_KEY.scenarioAnswer,
+      QUERY_KEY.scenarioResult,
+      QUERY_KEY.scenarioUserAudio,
+    ]);
+
+    queryClient.removeQueries({
+      predicate: ({ queryKey }) =>
+        keysToRemove.has(String(queryKey[0])) &&
+        queryKey[1] === scenarioId &&
+        queryKey[2] === level,
+    });
+
     navigate("/ai-practice/scenario");
   };
 

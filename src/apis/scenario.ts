@@ -7,6 +7,7 @@ import type {
   ResponseGetScenarioStepDto,
   ResponseGetScenarioUserAudioDto,
   ResponsePostScenarioAnswerDto,
+  ResponsePostScenarioRegenerateDto,
   ScenarioLevel,
 } from "../types/scenarioType";
 import { axiosInstance } from "./axios";
@@ -123,6 +124,21 @@ export const getScenarioResult = async ({
 }): Promise<ResponseGetScenarioResultDto> => {
   const { data } = await axiosInstance.get<ResponseGetScenarioResultDto>(
     `${SCENARIO_BASE_URL}/${scenarioId}/levels/${level}/result`
+  );
+  return data;
+};
+
+export const postScenarioRegenerate = async ({
+  scenarioId,
+  level,
+  stepNo,
+}: {
+  scenarioId: number;
+  level: ScenarioLevel;
+  stepNo: number;
+}): Promise<ResponsePostScenarioRegenerateDto> => {
+  const { data } = await axiosInstance.post<ResponsePostScenarioRegenerateDto>(
+    `${SCENARIO_BASE_URL}/${scenarioId}/levels/${level}/steps/${stepNo}/regenerate`
   );
   return data;
 };

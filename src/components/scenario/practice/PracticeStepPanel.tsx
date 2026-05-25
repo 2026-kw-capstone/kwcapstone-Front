@@ -15,6 +15,7 @@ interface PracticeStepPanelProps {
   isAnalyzing: boolean;
   canGoPrev: boolean;
   canGoNext: boolean;
+  isRegenerateDisabled: boolean;
   hasRecordedAudio: boolean;
   isPlayingUserAudio: boolean;
   onRecord: () => void;
@@ -22,6 +23,9 @@ interface PracticeStepPanelProps {
   onPlayRecordedAudio: () => void;
   onPrev: () => void;
   onNext: () => void;
+  onRegenerate: () => Promise<void>;
+  isRegenerating: boolean;
+  regenerateErrorMessage: string;
 }
 
 const PracticeStepPanel = ({
@@ -33,6 +37,7 @@ const PracticeStepPanel = ({
   isAnalyzing,
   canGoPrev,
   canGoNext,
+  isRegenerateDisabled,
   hasRecordedAudio,
   isPlayingUserAudio,
   onRecord,
@@ -40,8 +45,15 @@ const PracticeStepPanel = ({
   onPlayRecordedAudio,
   onPrev,
   onNext,
+  onRegenerate,
+  isRegenerating,
+  regenerateErrorMessage,
 }: PracticeStepPanelProps) => {
   const [isRegenerateModalOpen, setIsRegenerateModalOpen] = useState(false);
+
+  const handleRegenerateConfirm = async () => {
+    await onRegenerate();
+  };
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
@@ -50,9 +62,13 @@ const PracticeStepPanel = ({
           <AiQuestionCard
             currentStep={currentStep}
             currentResult={currentResult}
-            hasRecordedAudio={hasRecordedAudio}
-            isPlayingUserAudio={isPlayingUserAudio}
-            onOpenRegenerateModal={() => setIsRegenerateModalOpen(true)}
+          hasRecordedAudio={hasRecordedAudio}
+          isPlayingUserAudio={isPlayingUserAudio}
+          isRegenerateDisabled={isRegenerateDisabled}
+          onOpenRegenerateModal={() => {
+            if (isRegenerateDisabled) return;
+            setIsRegenerateModalOpen(true);
+          }}
             onReRecord={onReRecord}
             onPlayRecordedAudio={onPlayRecordedAudio}
           />
@@ -79,7 +95,12 @@ const PracticeStepPanel = ({
       />
 
       {isRegenerateModalOpen ? (
-        <RegenerateQuestionModal onClose={() => setIsRegenerateModalOpen(false)} />
+        <RegenerateQuestionModal
+          isPending={isRegenerating}
+          errorMessage={regenerateErrorMessage}
+          onClose={() => setIsRegenerateModalOpen(false)}
+          onConfirm={handleRegenerateConfirm}
+        />
       ) : null}
     </div>
   );

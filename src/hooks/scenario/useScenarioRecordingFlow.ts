@@ -21,6 +21,7 @@ interface UseScenarioRecordingFlowParams {
   isStepLoading: boolean;
   isSummaryMode: boolean;
   hasPracticeProgress: boolean;
+  shouldBypassNavigationBlock?: boolean;
   setIsSummaryMode: (value: boolean) => void;
   setMaxCompletedStepNo: Dispatch<SetStateAction<number>>;
 }
@@ -32,6 +33,7 @@ export const useScenarioRecordingFlow = ({
   isStepLoading,
   isSummaryMode,
   hasPracticeProgress,
+  shouldBypassNavigationBlock = false,
   setIsSummaryMode,
   setMaxCompletedStepNo,
 }: UseScenarioRecordingFlowParams) => {
@@ -83,7 +85,8 @@ export const useScenarioRecordingFlow = ({
   });
 
   const hasAnyProgress = hasPracticeProgress || isRecording || isAnalyzing;
-  const shouldBlockNavigation = hasAnyProgress && !isSummaryMode;
+  const shouldBlockNavigation =
+    hasAnyProgress && !isSummaryMode && !shouldBypassNavigationBlock;
   const isNavigationLocked =
     isRecording ||
     isAnalyzing ||
