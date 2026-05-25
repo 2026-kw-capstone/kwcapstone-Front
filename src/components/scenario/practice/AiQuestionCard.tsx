@@ -6,6 +6,7 @@ interface AiQuestionCardProps {
   currentResult: StepResult | null;
   hasRecordedAudio: boolean;
   isPlayingUserAudio: boolean;
+  isRegenerateDisabled: boolean;
   onOpenRegenerateModal: () => void;
   onReRecord: () => void;
   onPlayRecordedAudio: () => void;
@@ -16,6 +17,7 @@ const AiQuestionCard = ({
   currentResult,
   hasRecordedAudio,
   isPlayingUserAudio,
+  isRegenerateDisabled,
   onOpenRegenerateModal,
   onReRecord,
   onPlayRecordedAudio,
@@ -27,7 +29,8 @@ const AiQuestionCard = ({
     <button
       type="button"
       onClick={onOpenRegenerateModal}
-      className="absolute -top-3.5 right-5 flex h-7 items-center gap-1.5 rounded-lg border border-blue-100 bg-blue-50 px-2.5 text-[11px] font-extrabold text-[#278DFD] shadow-sm transition-colors hover:bg-blue-100"
+      disabled={isRegenerateDisabled}
+      className="absolute -top-3.5 right-5 flex h-7 items-center gap-1.5 rounded-lg border border-blue-100 bg-blue-50 px-2.5 text-[11px] font-extrabold text-[#278DFD] shadow-sm transition-colors hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-40"
     >
       <RefreshCw size={13} />
       질문 재생성
