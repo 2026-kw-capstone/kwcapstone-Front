@@ -1,8 +1,11 @@
-import { Navigate, useParams } from "react-router-dom";
+import { useState } from "react";
+import { flushSync } from "react-dom";
+import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { getApiErrorMessage } from "../../apis/apiError";
 import PracticeHeader from "../../components/scenario/practice/PracticeHeader";
 import PracticeStepPanel from "../../components/scenario/practice/PracticeStepPanel";
 import PracticeSummaryPanel from "../../components/scenario/practice/PracticeSummaryPanel";
+import { usePostScenarioRegenerate } from "../../hooks/mutations/usePostScenarioRegenerate";
 import { isScenarioLevel } from "../../hooks/scenario/scenarioPracticeMapper";
 import { useScenarioPracticeFlow } from "../../hooks/scenario/useScenarioPracticeFlow";
 import { useScenarioRecordingFlow } from "../../hooks/scenario/useScenarioRecordingFlow";
@@ -17,6 +20,9 @@ const ScenarioPracticeContent = ({
   resolvedScenarioId,
   resolvedLevel,
 }: ScenarioPracticeContentProps) => {
+  const navigate = useNavigate();
+  const [shouldBypassNavigationBlock, setShouldBypassNavigationBlock] =
+    useState(false);
   const {
     currentStepNo,
     maxCompletedStepNo,
@@ -64,14 +70,44 @@ const ScenarioPracticeContent = ({
     isStepLoading,
     isSummaryMode,
     hasPracticeProgress: maxCompletedStepNo > 0 || !!currentAnswer,
+    shouldBypassNavigationBlock,
     setIsSummaryMode,
     setMaxCompletedStepNo,
   });
+  const {
+    regenerateScenario,
+    isPending: isRegenerating,
+    error: regenerateError,
+  } = usePostScenarioRegenerate();
 
-  const canGoPrev = currentStepNo > 1 && !isNavigationLocked;
-  const canGoNext = !!currentAnswer && !isNavigationLocked;
+  const canGoPrev = currentStepNo > 1 && !isNavigationLocked && !isRegenerating;
+  const canGoNext = !!currentAnswer && !isNavigationLocked && !isRegenerating;
+  const isRegenerateDisabled = isNavigationLocked || isRegenerating;
   const apiErrorMessage = isStepError ? getApiErrorMessage(stepError) : "";
   const errorMessage = recordErrorMessage || uploadErrorMessage || apiErrorMessage;
+  const regenerateErrorMessage = regenerateError
+    ? getApiErrorMessage(regenerateError)
+    : "";
+
+  const handleRegenerate = async () => {
+    if (isRegenerateDisabled) return;
+
+    try {
+      await regenerateScenario({
+        scenarioId: resolvedScenarioId,
+        level: resolvedLevel,
+        stepNo: currentStepNo,
+      });
+      flushSync(() => {
+        setShouldBypassNavigationBlock(true);
+      });
+      navigate(`/ai-practice/scenario/${resolvedScenarioId}`, {
+        replace: true,
+      });
+    } catch {
+      // The modal reads mutation.error and keeps the user in place for retry.
+    }
+  };
 
   if (isSummaryMode) {
     return (
@@ -146,6 +182,7 @@ const ScenarioPracticeContent = ({
           isAnalyzing={isAnalyzing}
           canGoPrev={canGoPrev}
           canGoNext={canGoNext}
+          isRegenerateDisabled={isRegenerateDisabled}
           hasRecordedAudio={hasRecordedAudio}
           isPlayingUserAudio={isPlayingUserAudio}
           onRecord={handleRecord}
@@ -153,6 +190,9 @@ const ScenarioPracticeContent = ({
           onPlayRecordedAudio={handlePlayRecordedAudio}
           onPrev={handlePrevStep}
           onNext={handleNextStep}
+          onRegenerate={handleRegenerate}
+          isRegenerating={isRegenerating}
+          regenerateErrorMessage={regenerateErrorMessage}
         />
       )}
     </div>

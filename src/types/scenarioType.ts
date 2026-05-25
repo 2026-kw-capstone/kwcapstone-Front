@@ -81,11 +81,12 @@ export interface ScenarioAnswerResultDto {
   scenarioId: number;
   level: ScenarioLevel;
   stepNo: number;
-  pronunciationScore: number;
   meaningDeliveryScore: number;
+  meaningFeedback: string;
+  pronunciationScore: number;
   speechRateScore: number;
   silenceRatio: number;
-  feedback: string;
+  pronunciationFeedback: string;
   isLastStep: boolean;
   nextStepNo: number | null;
   wordAnalysis: ScenarioWordAnalysisDto[];
@@ -108,6 +109,27 @@ export interface ScenarioTrainingResultDto {
   averagePronunciationScore: number;
   averageMeaningDeliveryScore: number;
   isCompleted: boolean;
+}
+
+export interface ScenarioRegeneratedFromDto {
+  level: ScenarioLevel;
+  stepNo: number;
+}
+
+export interface ScenarioRegeneratedStepDto {
+  scenarioId: number;
+  level: ScenarioLevel;
+  stepNo: number;
+  levelTitle: string;
+  step: string;
+  assistantMessage: string;
+  userIntent: string;
+  isAnswered: boolean;
+}
+
+export interface ScenarioRegenerateResultDto extends ScenarioSummaryDto {
+  regeneratedFrom: ScenarioRegeneratedFromDto;
+  currentStep: ScenarioRegeneratedStepDto;
 }
 
 export interface ResponseCreateScenarioDto {
@@ -159,4 +181,11 @@ export interface ResponseGetScenarioUserAudioDto {
   code: string;
   message: string;
   result: ScenarioUserAudioDto;
+}
+
+export interface ResponsePostScenarioRegenerateDto {
+  isSuccess: boolean;
+  code: string;
+  message: string;
+  result: ScenarioRegenerateResultDto;
 }

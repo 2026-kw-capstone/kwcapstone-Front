@@ -1,18 +1,9 @@
 import { Lightbulb, MessageSquare, Signal } from "lucide-react";
-import type {
-  ScenarioSyllableStatus,
-  StepResult,
-} from "../../../types/scenarioPracticeType";
+import type { StepResult } from "../../../types/scenarioPracticeType";
 
 interface StepResultPanelProps {
   currentResult: StepResult;
 }
-
-const syllableStatusClassName: Record<ScenarioSyllableStatus, string> = {
-  good: "border-emerald-200 bg-emerald-50 text-emerald-600",
-  warn: "border-amber-200 bg-amber-50 text-amber-600",
-  error: "border-rose-200 bg-rose-50 text-rose-600",
-};
 
 const MetricBlock = ({
   label,
@@ -36,7 +27,7 @@ const MetricBlock = ({
 
 const StepResultPanel = ({ currentResult }: StepResultPanelProps) => (
   <section className="flex flex-col gap-5 animate-slide-up">
-    <div className="rounded-[24px] bg-white p-5 shadow-[0_4px_24px_rgba(0,0,0,0.03)] border border-slate-50">
+    <div className="rounded-[24px] border border-slate-50 bg-white p-5 shadow-[0_4px_24px_rgba(0,0,0,0.03)]">
       <h3 className="mb-5 flex items-center gap-2 text-[16px] font-extrabold text-slate-900">
         <Lightbulb size={18} className="text-[#10B981]" />
         의미 전달 분석
@@ -58,12 +49,12 @@ const StepResultPanel = ({ currentResult }: StepResultPanelProps) => (
           <span className="text-[12px] font-extrabold">AI 코멘트</span>
         </div>
         <p className="break-keep text-[13.5px] font-medium leading-relaxed text-slate-700">
-          의미 전달 분석 AI 피드백입니다
+          {currentResult.meaningFeedback}
         </p>
       </div>
     </div>
 
-    <div className="rounded-[24px] bg-white p-5 shadow-[0_4px_24px_rgba(0,0,0,0.03)] border border-slate-50">
+    <div className="rounded-[24px] border border-slate-50 bg-white p-5 shadow-[0_4px_24px_rgba(0,0,0,0.03)]">
       <h3 className="mb-5 flex items-center gap-2 text-[16px] font-extrabold text-slate-900">
         <Signal size={19} className="text-[#278DFD]" />
         발음 분석
@@ -91,28 +82,11 @@ const StepResultPanel = ({ currentResult }: StepResultPanelProps) => (
       </div>
 
       <p className="mb-3 text-[13px] font-black text-slate-900">
-        발음 세부 피드백
+        발음 AI 피드백
       </p>
-      <div className="mb-6 flex gap-2 overflow-x-auto pb-1 hide-scrollbar">
-        {currentResult.syllables.map((syllable, index) => (
-          <span
-            key={`${syllable.text}-${index}`}
-            className={`flex h-[42px] min-w-[40px] shrink-0 items-center justify-center rounded-[12px] border text-[16px] font-extrabold shadow-sm ${
-              syllableStatusClassName[syllable.status]
-            }`}
-          >
-            {syllable.text}
-          </span>
-        ))}
-      </div>
-
-      <div className="rounded-[18px] border border-blue-100 bg-blue-50/60 p-4">
-        <div className="mb-3 flex items-center gap-1.5 text-[#278DFD]">
-          <MessageSquare size={14} />
-          <span className="text-[12px] font-extrabold">AI 코멘트</span>
-        </div>
+      <div className="mb-6 rounded-[18px] border border-blue-100 bg-blue-50/60 p-4">
         <p className="break-keep text-[13.5px] font-medium leading-relaxed text-slate-700">
-          {currentResult.feedback}
+          {currentResult.pronunciationFeedback}
         </p>
       </div>
     </div>

@@ -12,7 +12,8 @@ export interface StepResult {
   semanticRate: number;
   speed: number;
   silenceRatio: number;
-  feedback: string;
+  meaningFeedback: string;
+  pronunciationFeedback: string;
   syllables: ScenarioSyllableFeedback[];
 }
 
