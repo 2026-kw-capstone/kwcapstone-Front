@@ -159,7 +159,11 @@ const ConversationMessages = ({
                   <p>{userMessage.content}</p>
                 ) : null}
                 {userMessage.inputType === "VOICE" ? (
-                  <button
+                  <div className="flex flex-col gap-2">
+                    <p className="break-keep text-white/95">
+                      {userMessage.content || "음성을 분석하고 있어요..."}
+                    </p>
+                    <button
                     type="button"
                     onClick={() =>
                       void handlePlayVoiceMessage(
@@ -178,7 +182,8 @@ const ConversationMessages = ({
                       : playingMessageId === userMessage.messageId
                         ? "재생 중..."
                         : "내 음성 듣기"}
-                  </button>
+                    </button>
+                  </div>
                 ) : null}
               </div>
             </li>
