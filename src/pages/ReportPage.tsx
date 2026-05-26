@@ -1,5 +1,4 @@
 import { useMemo, useState } from "react";
-import { Activity, TrendingUp } from "lucide-react";
 
 type Period = "week" | "month";
 type Feature = "note" | "basic" | "scenario";
@@ -54,6 +53,16 @@ const featureLabels: Record<Feature, string> = {
   scenario: "시나리오",
 };
 
+const weeklySteps = [
+  { day: "월", completed: true },
+  { day: "화", completed: true },
+  { day: "수", completed: false },
+  { day: "목", completed: true },
+  { day: "금", completed: false },
+  { day: "토", completed: true },
+  { day: "일", completed: false },
+];
+
 const buildLinePath = (values: number[]) => {
   if (values.length === 0) return "";
 
@@ -92,27 +101,38 @@ const ReportPage = () => {
         </p>
       </div>
 
-      <div className="bg-[#278DFD] rounded-[28px] py-7 px-7 shadow-lg shadow-blue-200/50 flex flex-col justify-center relative overflow-hidden">
-        <div className="absolute -right-6 top-1/2 -translate-y-1/2 p-4 opacity-[0.15] text-white">
-          <Activity size={180} strokeWidth={1.5} />
-        </div>
+      <div className="rounded-[32px] border border-slate-100 bg-white px-6 py-6 shadow-[0_4px_24px_rgba(0,0,0,0.02)]">
+        <h2 className="mb-5 text-[17px] font-black leading-none text-slate-950">
+          이번 주 한 걸음 <span aria-hidden="true">👣</span>
+        </h2>
 
-        <div className="relative z-10 flex flex-col gap-1.5">
-          <p className="text-[14px] font-bold text-white/90">
-            이번 주 훈련 수
-          </p>
-          <div className="flex items-end justify-between">
-            <span className="text-[44px] font-black text-white leading-none tracking-tight">
-              12
-              <span className="text-[22px] font-bold text-white ml-1">회</span>
-            </span>
-            <div className="flex items-center gap-1.5 bg-white/20 backdrop-blur-md px-3.5 py-1.5 rounded-[12px] border border-white/20 mb-1">
-              <TrendingUp size={15} className="text-white" />
-              <span className="text-[12.5px] font-bold text-white tracking-wide">
-                전주 대비 +4회
+        <div className="grid grid-cols-7 gap-1">
+          {weeklySteps.map((step) => (
+            <div
+              key={step.day}
+              className="flex min-h-[80px] min-w-0 flex-col items-center justify-between rounded-[12px] border border-slate-100 bg-[#F7F8FC] px-1.5 py-3"
+            >
+              <div className="flex h-7 items-center justify-center">
+                {step.completed ? (
+                  <span className="text-[20px] leading-none" aria-label={`${step.day}요일 완료`}>
+                    🌱
+                  </span>
+                ) : (
+                  <span
+                    className="h-5 w-5 rounded-full border-2 border-dashed border-slate-300"
+                    aria-label={`${step.day}요일 미완료`}
+                  />
+                )}
+              </div>
+              <span
+                className={`text-[15px] font-extrabold ${
+                  step.completed ? "text-slate-900" : "text-slate-400"
+                }`}
+              >
+                {step.day}
               </span>
             </div>
-          </div>
+          ))}
         </div>
       </div>
 
