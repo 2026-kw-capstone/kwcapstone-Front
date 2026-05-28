@@ -1,4 +1,4 @@
-import { FilePenLine, History, Mic } from "lucide-react";
+import { FilePenLine, History, MessageCircle, Mic, Volume2 } from "lucide-react";
 import LockedSection from "./LockedSection";
 import ContinueTrainingCard from "./ContinueTrainingCard";
 
@@ -21,6 +21,24 @@ const continueTrainingItems = [
     title: "나만의 문장 노트",
     description: "12문장 저장됨",
   },
+  {
+    to: "/warmup/basic-speak",
+    icon: Volume2,
+    iconClassName: "bg-violet-50 text-violet-500",
+    hoverBorderClassName: "hover:border-violet-100",
+    label: "워밍업",
+    title: "기초 발성 연습",
+    description: "'아' 연습 완료",
+  },
+  {
+    to: "/ai-practice/free-conversation",
+    icon: MessageCircle,
+    iconClassName: "bg-sky-50 text-sky-500",
+    hoverBorderClassName: "hover:border-sky-100",
+    label: "AI 연습",
+    title: "AI 자유 대화",
+    description: "카페 주문 연습",
+  },
 ];
 
 const ContinueTrainingSection = () => {
@@ -32,7 +50,7 @@ const ContinueTrainingSection = () => {
       </h3>
 
       <LockedSection message="로그인하고 학습을 이어가세요">
-        <div className="grid grid-cols-2 gap-3">
+        <div className="-mx-1 flex gap-3 overflow-x-auto px-1 pb-2 hide-scrollbar">
           {continueTrainingItems.map((item) => (
             <ContinueTrainingCard key={item.to} {...item} />
           ))}

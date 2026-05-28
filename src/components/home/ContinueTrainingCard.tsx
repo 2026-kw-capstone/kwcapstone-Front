@@ -23,7 +23,7 @@ const ContinueTrainingCard = ({
   return (
     <Link
       to={to}
-      className={`group flex min-h-[150px] flex-col justify-between rounded-[20px] border border-slate-100 bg-white p-5 shadow-[0_4px_16px_rgba(0,0,0,0.03)] transition-all ${hoverBorderClassName} active:scale-95`}
+      className={`group flex min-h-[150px] w-[154px] shrink-0 flex-col justify-between rounded-[20px] border border-slate-100 bg-white p-5 shadow-[0_4px_16px_rgba(0,0,0,0.03)] transition-all ${hoverBorderClassName} active:scale-95`}
     >
       <div className="mb-4 flex items-center justify-between">
         <div
