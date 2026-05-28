@@ -88,6 +88,9 @@ const getChartPoints = (values: Array<number | null>) =>
     value === null ? [] : [getChartPoint(value, index, values.length)]
   );
 
+const getValidPointCount = (values: Array<number | null>) =>
+  values.filter((value) => value !== null).length;
+
 const hasAnyTrendData = (points: AchievementTrendPoint[]) =>
   points.some(
     (point) =>
@@ -118,6 +121,8 @@ const AchievementTrendSection = ({
       deliveryPaths: buildLineSegments(deliveryValues),
       accuracyPoints: getChartPoints(accuracyValues),
       deliveryPoints: getChartPoints(deliveryValues),
+      shouldShowAccuracyLine: getValidPointCount(accuracyValues) > 1,
+      shouldShowDeliveryLine: getValidPointCount(deliveryValues) > 1,
     };
   }, [trendPoints]);
 
@@ -199,34 +204,38 @@ const AchievementTrendSection = ({
               preserveAspectRatio="none"
               className="absolute inset-0 h-full w-full overflow-visible py-4"
             >
-              {trendChart.accuracyPaths.map((path) => (
-                <path
-                  key={`accuracy-${path}`}
-                  d={path}
-                  fill="none"
-                  stroke="#278DFD"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                />
-              ))}
-              {trendChart.deliveryPaths.map((path) => (
-                <path
-                  key={`delivery-${path}`}
-                  d={path}
-                  fill="none"
-                  stroke="#10B981"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                />
-              ))}
+              {trendChart.shouldShowAccuracyLine
+                ? trendChart.accuracyPaths.map((path) => (
+                    <path
+                      key={`accuracy-${path}`}
+                      d={path}
+                      fill="none"
+                      stroke="#278DFD"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                    />
+                  ))
+                : null}
+              {trendChart.shouldShowDeliveryLine
+                ? trendChart.deliveryPaths.map((path) => (
+                    <path
+                      key={`delivery-${path}`}
+                      d={path}
+                      fill="none"
+                      stroke="#10B981"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                    />
+                  ))
+                : null}
               {trendChart.accuracyPoints.map((point) => (
                 <circle
                   key={`accuracy-point-${point.x}-${point.y}`}
                   cx={point.x}
                   cy={point.y}
-                  r="2"
+                  r="4"
                   fill="#278DFD"
                 />
               ))}
@@ -235,7 +244,7 @@ const AchievementTrendSection = ({
                   key={`delivery-point-${point.x}-${point.y}`}
                   cx={point.x}
                   cy={point.y}
-                  r="2"
+                  r="4"
                   fill="#10B981"
                 />
               ))}
