@@ -226,7 +226,7 @@ const AchievementTrendSection = ({
                   key={`accuracy-point-${point.x}-${point.y}`}
                   cx={point.x}
                   cy={point.y}
-                  r="4"
+                  r="2.5"
                   fill="#278DFD"
                 />
               ))}
@@ -235,7 +235,7 @@ const AchievementTrendSection = ({
                   key={`delivery-point-${point.x}-${point.y}`}
                   cx={point.x}
                   cy={point.y}
-                  r="4"
+                  r="2.5"
                   fill="#10B981"
                 />
               ))}
