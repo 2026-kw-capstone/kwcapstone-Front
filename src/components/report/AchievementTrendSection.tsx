@@ -59,28 +59,19 @@ const getChartPoint = (
 };
 
 const buildLineSegments = (values: Array<number | null>) => {
-  const segments: string[] = [];
-  let currentSegment: string[] = [];
+  const segment: string[] = [];
 
   values.forEach((value, index) => {
     if (value === null) {
-      if (currentSegment.length > 0) {
-        segments.push(currentSegment.join(" "));
-        currentSegment = [];
-      }
       return;
     }
 
     const point = getChartPoint(value, index, values.length);
-    const command = currentSegment.length === 0 ? "M" : "L";
-    currentSegment.push(`${command} ${point.x} ${point.y}`);
+    const command = segment.length === 0 ? "M" : "L";
+    segment.push(`${command} ${point.x} ${point.y}`);
   });
 
-  if (currentSegment.length > 0) {
-    segments.push(currentSegment.join(" "));
-  }
-
-  return segments;
+  return segment.length > 0 ? [segment.join(" ")] : [];
 };
 
 const getChartPoints = (values: Array<number | null>) =>
