@@ -3,11 +3,12 @@ import { Plus } from "lucide-react";
 import { useNavigate, useOutlet } from "react-router-dom";
 import { getApiErrorMessage } from "../../apis/apiError";
 import ScenarioCreateModal from "../../components/scenario/ScenarioCreateModal";
+import ScenarioDeleteConfirmModal from "../../components/scenario/ScenarioDeleteConfirmModal";
 import ScenarioOnboarding from "../../components/scenario/ScenarioOnboarding";
 import ScenarioRowCard from "../../components/scenario/ScenarioRowCard";
 import { usePostScenario } from "../../hooks/mutations/usePostScenario";
 import { useGetScenarios } from "../../hooks/queries/useGetScenarios";
-import type { ScenarioOutletContext } from "../../types/scenarioType";
+import type { ScenarioItem, ScenarioOutletContext } from "../../types/scenarioType";
 
 const ScenarioPage = () => {
   const navigate = useNavigate();
@@ -16,6 +17,7 @@ const ScenarioPage = () => {
   const [titleInput, setTitleInput] = useState("");
   const [descriptionInput, setDescriptionInput] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [deleteTarget, setDeleteTarget] = useState<ScenarioItem | null>(null);
 
   const {
     data: myScenarios = [],
@@ -52,6 +54,18 @@ const ScenarioPage = () => {
   const closeModal = () => {
     setIsModalOpen(false);
     resetForm();
+  };
+
+  const openDeleteConfirmModal = (scenario: ScenarioItem) => {
+    setDeleteTarget(scenario);
+  };
+
+  const closeDeleteConfirmModal = () => {
+    setDeleteTarget(null);
+  };
+
+  const handleDeleteScenario = () => {
+    // TODO: Connect scenario delete API when it is ready.
   };
 
   const handleCreateScenario = async (event: FormEvent<HTMLFormElement>) => {
@@ -140,6 +154,7 @@ const ScenarioPage = () => {
               key={scenario.id}
               scenario={scenario}
               onClick={() => moveToLevelSelect(scenario.id)}
+              onOpenDeleteConfirm={() => openDeleteConfirmModal(scenario)}
             />
           ))}
         </section>
@@ -154,6 +169,11 @@ const ScenarioPage = () => {
         onSubmit={handleCreateScenario}
         onTitleChange={setTitleInput}
         onDescriptionChange={setDescriptionInput}
+      />
+      <ScenarioDeleteConfirmModal
+        scenario={deleteTarget}
+        onClose={closeDeleteConfirmModal}
+        onDelete={handleDeleteScenario}
       />
     </>
   );

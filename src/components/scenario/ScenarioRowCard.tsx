@@ -1,25 +1,38 @@
 import { ChevronRight, Trash2 } from "lucide-react";
-import type { MouseEvent } from "react";
+import type { KeyboardEvent, MouseEvent } from "react";
 import type { ScenarioItem } from "../../types/scenarioType";
 
 interface ScenarioRowCardProps {
   scenario: ScenarioItem;
   onClick: () => void;
-  onDelete?: () => void;
+  onOpenDeleteConfirm: () => void;
 }
 
-const ScenarioRowCard = ({ scenario, onClick, onDelete }: ScenarioRowCardProps) => {
+const ScenarioRowCard = ({
+  scenario,
+  onClick,
+  onOpenDeleteConfirm,
+}: ScenarioRowCardProps) => {
   const Icon = scenario.icon;
 
   const handleDelete = (event: MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();
-    onDelete?.();
+    onOpenDeleteConfirm();
+  };
+
+  const handleCardKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+
+    event.preventDefault();
+    onClick();
   };
 
   return (
-    <button
-      type="button"
+    <div
+      role="button"
+      tabIndex={0}
       onClick={onClick}
+      onKeyDown={handleCardKeyDown}
       className="group flex w-full items-center gap-4 rounded-[24px] border border-slate-50 bg-white p-5 text-left shadow-[0_4px_16px_rgba(0,0,0,0.03)] transition-all hover:border-slate-200 active:scale-[0.98]"
     >
       <div
@@ -38,22 +51,20 @@ const ScenarioRowCard = ({ scenario, onClick, onDelete }: ScenarioRowCardProps) 
       </div>
 
       <div className="flex shrink-0 items-center gap-1">
-        {onDelete ? (
-          <button
-            type="button"
-            onClick={handleDelete}
-            className="flex h-11 w-11 items-center justify-center rounded-[16px] text-slate-300 transition hover:bg-rose-50 hover:text-rose-500 active:scale-95"
-            aria-label="시나리오 삭제"
-          >
-            <Trash2 size={20} />
-          </button>
-        ) : null}
+        <button
+          type="button"
+          onClick={handleDelete}
+          className="flex h-11 w-11 items-center justify-center rounded-[16px] text-slate-300 transition hover:bg-rose-50 hover:text-rose-500 active:scale-95"
+          aria-label="시나리오 삭제"
+        >
+          <Trash2 size={20} />
+        </button>
         <ChevronRight
           className="text-slate-300 transition group-hover:text-slate-500"
           size={20}
         />
       </div>
-    </button>
+    </div>
   );
 };
 
