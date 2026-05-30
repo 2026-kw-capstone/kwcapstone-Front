@@ -18,4 +18,9 @@ export const QUERY_KEY = {
   scenarioAnswer: "scenarioAnswer",
   scenarioResult: "scenarioResult",
   scenarioUserAudio: "scenarioUserAudio",
+  reportWeeklyStamps: "reportWeeklyStamps",
+  reportAchievementTrend: "reportAchievementTrend",
+  reportPronunciationAccuracy: "reportPronunciationAccuracy",
+  homeContinueLearning: "homeContinueLearning",
+  homeWeeklySummary: "homeWeeklySummary",
 } as const;

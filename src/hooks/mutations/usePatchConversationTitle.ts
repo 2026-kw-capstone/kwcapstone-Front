@@ -1,6 +1,7 @@
 ﻿import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { patchConversationTitle } from "../../apis/conversation";
 import { QUERY_KEY } from "../../constants/key";
+import { invalidateHomeQueries } from "../queries/home";
 import type {
   ConversationDetail,
   ConversationSummary,
@@ -78,6 +79,7 @@ export const usePatchConversationTitle = () => {
       void queryClient.invalidateQueries({
         queryKey: [QUERY_KEY.conversationDetail, variables.conversationId],
       });
+      invalidateHomeQueries(queryClient);
     },
   });
 };

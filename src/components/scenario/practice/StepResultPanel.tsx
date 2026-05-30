@@ -1,5 +1,8 @@
 import { Lightbulb, MessageSquare, Signal } from "lucide-react";
-import type { StepResult } from "../../../types/scenarioPracticeType";
+import type {
+  ScenarioSyllableStatus,
+  StepResult,
+} from "../../../types/scenarioPracticeType";
 
 interface StepResultPanelProps {
   currentResult: StepResult;
@@ -24,6 +27,12 @@ const MetricBlock = ({
     </p>
   </div>
 );
+
+const syllableStatusClassName: Record<ScenarioSyllableStatus, string> = {
+  good: "border-emerald-200 bg-emerald-50 text-emerald-600",
+  warn: "border-amber-200 bg-amber-50 text-amber-600",
+  error: "border-rose-200 bg-rose-50 text-rose-600",
+};
 
 const StepResultPanel = ({ currentResult }: StepResultPanelProps) => (
   <section className="flex flex-col gap-5 animate-slide-up">
@@ -81,10 +90,29 @@ const StepResultPanel = ({ currentResult }: StepResultPanelProps) => (
         />
       </div>
 
-      <p className="mb-3 text-[13px] font-black text-slate-900">
-        발음 AI 피드백
-      </p>
-      <div className="mb-6 rounded-[18px] border border-blue-100 bg-blue-50/60 p-4">
+      {currentResult.syllables.length > 0 ? (
+        <>
+          <p className="mb-3 text-[13px] font-black text-slate-900">
+            발음 세부 피드백
+          </p>
+          <div className="mb-6 flex gap-2 overflow-x-auto pb-1 hide-scrollbar">
+            {currentResult.syllables.map((syllable, index) => (
+              <span
+                key={`${syllable.text}-${index}`}
+                className={`flex h-[42px] min-w-[40px] shrink-0 items-center justify-center rounded-[12px] border text-[16px] font-extrabold shadow-sm ${syllableStatusClassName[syllable.status]}`}
+              >
+                {syllable.text}
+              </span>
+            ))}
+          </div>
+        </>
+      ) : null}
+
+      <div className="rounded-[18px] border border-blue-100 bg-blue-50/60 p-4">
+        <div className="mb-3 flex items-center gap-1.5 text-[#278DFD]">
+          <MessageSquare size={14} />
+          <span className="text-[12px] font-extrabold">AI 코멘트</span>
+        </div>
         <p className="break-keep text-[13.5px] font-medium leading-relaxed text-slate-700">
           {currentResult.pronunciationFeedback}
         </p>
