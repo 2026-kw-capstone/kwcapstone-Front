@@ -1,6 +1,7 @@
 import type {
   RequestCreateScenarioDto,
   ResponseCreateScenarioDto,
+  ResponseDeleteScenarioDto,
   ResponseGetScenarioDetailDto,
   ResponseGetScenarioResultDto,
   ResponseGetScenariosDto,
@@ -47,6 +48,15 @@ export const postScenario = async (
   const { data } = await axiosInstance.post<ResponseCreateScenarioDto>(
     SCENARIO_BASE_URL,
     payload
+  );
+  return data;
+};
+
+export const deleteScenario = async (
+  scenarioId: number
+): Promise<ResponseDeleteScenarioDto> => {
+  const { data } = await axiosInstance.delete<ResponseDeleteScenarioDto>(
+    `${SCENARIO_BASE_URL}/${scenarioId}`
   );
   return data;
 };

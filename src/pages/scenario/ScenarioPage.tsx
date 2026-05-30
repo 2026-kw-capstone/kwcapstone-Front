@@ -6,6 +6,7 @@ import ScenarioCreateModal from "../../components/scenario/ScenarioCreateModal";
 import ScenarioDeleteConfirmModal from "../../components/scenario/ScenarioDeleteConfirmModal";
 import ScenarioOnboarding from "../../components/scenario/ScenarioOnboarding";
 import ScenarioRowCard from "../../components/scenario/ScenarioRowCard";
+import { useDeleteScenario } from "../../hooks/mutations/useDeleteScenario";
 import { usePostScenario } from "../../hooks/mutations/usePostScenario";
 import { useGetScenarios } from "../../hooks/queries/useGetScenarios";
 import type { ScenarioItem, ScenarioOutletContext } from "../../types/scenarioType";
@@ -26,6 +27,7 @@ const ScenarioPage = () => {
     error,
   } = useGetScenarios();
   const { createScenario, isPending: isCreating } = usePostScenario();
+  const { deleteScenario, isPending: isDeleting } = useDeleteScenario();
   const scenarioOutletContext: ScenarioOutletContext = { myScenarios };
   const outlet = useOutlet(scenarioOutletContext);
 
@@ -64,8 +66,24 @@ const ScenarioPage = () => {
     setDeleteTarget(null);
   };
 
-  const handleDeleteScenario = () => {
-    // TODO: Connect scenario delete API when it is ready.
+  const handleDeleteScenario = async () => {
+    if (!deleteTarget) {
+      return;
+    }
+
+    const scenarioId = Number(deleteTarget.id);
+    if (!Number.isFinite(scenarioId)) {
+      setErrorMessage("삭제할 시나리오 정보를 확인할 수 없습니다.");
+      return;
+    }
+
+    try {
+      setErrorMessage("");
+      await deleteScenario({ scenarioId });
+      closeDeleteConfirmModal();
+    } catch (submitError) {
+      setErrorMessage(getApiErrorMessage(submitError));
+    }
   };
 
   const handleCreateScenario = async (event: FormEvent<HTMLFormElement>) => {
@@ -172,6 +190,7 @@ const ScenarioPage = () => {
       />
       <ScenarioDeleteConfirmModal
         scenario={deleteTarget}
+        isSubmitting={isDeleting}
         onClose={closeDeleteConfirmModal}
         onDelete={handleDeleteScenario}
       />

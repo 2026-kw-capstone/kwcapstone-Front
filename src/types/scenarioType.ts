@@ -132,6 +132,10 @@ export interface ScenarioRegenerateResultDto extends ScenarioSummaryDto {
   currentStep: ScenarioRegeneratedStepDto;
 }
 
+export interface ScenarioDeleteResultDto {
+  scenarioId: number;
+}
+
 export interface ResponseCreateScenarioDto {
   isSuccess: boolean;
   code: string;
@@ -188,4 +192,11 @@ export interface ResponsePostScenarioRegenerateDto {
   code: string;
   message: string;
   result: ScenarioRegenerateResultDto;
+}
+
+export interface ResponseDeleteScenarioDto {
+  isSuccess: boolean;
+  code: string;
+  message: string;
+  result: ScenarioDeleteResultDto;
 }
