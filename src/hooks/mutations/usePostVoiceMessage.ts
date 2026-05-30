@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { postVoiceMessage } from "../../apis/conversation";
 import { QUERY_KEY } from "../../constants/key";
+import { invalidateHomeQueries } from "../queries/home";
 import type {
   ConversationDetail,
   ConversationMessageGroup,
@@ -288,6 +289,7 @@ export const usePostVoiceMessage = (options?: UsePostVoiceMessageOptions) => {
       void queryClient.invalidateQueries({
         queryKey: [QUERY_KEY.conversationDetail, resolvedConversationId],
       });
+      invalidateHomeQueries(queryClient);
     },
   });
 

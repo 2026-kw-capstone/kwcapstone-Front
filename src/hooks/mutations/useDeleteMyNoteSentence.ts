@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { deleteMyNoteSentence } from "../../apis/myNote";
 import { QUERY_KEY } from "../../constants/key";
+import { invalidateHomeQueries } from "../queries/home";
 import type { MyNoteSentenceItem } from "../../types/myNoteType";
 
 type DeleteMyNoteSentenceContext = {
@@ -40,6 +41,7 @@ export const useDeleteMyNoteSentence = () => {
       void queryClient.invalidateQueries({
         queryKey: [QUERY_KEY.myNoteSentences],
       });
+      invalidateHomeQueries(queryClient);
     },
   });
 };
