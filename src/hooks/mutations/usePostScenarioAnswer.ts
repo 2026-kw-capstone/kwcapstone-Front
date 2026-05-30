@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { postScenarioAnswer } from "../../apis/scenario";
+import { invalidateHomeQueries } from "../queries/home";
 import { invalidateReportQueries } from "../queries/report";
 import { getScenarioAnswerQueryKey } from "../queries/useGetScenarioAnswer";
 import { getScenarioResultQueryKey } from "../queries/useGetScenarioResult";
@@ -26,6 +27,7 @@ export const usePostScenarioAnswer = () => {
           level: variables.level as ScenarioLevel,
         }),
       });
+      invalidateHomeQueries(queryClient);
       invalidateReportQueries(queryClient);
     },
   });

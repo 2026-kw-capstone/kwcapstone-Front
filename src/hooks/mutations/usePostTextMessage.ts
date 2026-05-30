@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { postTextMessage } from "../../apis/conversation";
 import { QUERY_KEY } from "../../constants/key";
+import { invalidateHomeQueries } from "../queries/home";
 import type {
   ConversationDetail,
   ConversationMessageGroup,
@@ -272,6 +273,7 @@ export const usePostTextMessage = (options?: UsePostTextMessageOptions) => {
       void queryClient.invalidateQueries({
         queryKey: [QUERY_KEY.conversationDetail, resolvedConversationId],
       });
+      invalidateHomeQueries(queryClient);
     },
   });
 

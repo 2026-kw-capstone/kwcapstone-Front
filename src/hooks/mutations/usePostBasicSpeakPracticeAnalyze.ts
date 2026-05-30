@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { postBasicSpeakPracticeAnalyze } from "../../apis/basicSpeak";
+import { invalidateHomeQueries } from "../queries/home";
 import { invalidateReportQueries } from "../queries/report";
 import { getBasicSpeakPracticeQueryKey } from "../queries/useGetBasicSpeakLatestPractice";
 import type {
@@ -38,6 +39,7 @@ export const usePostBasicSpeakPracticeAnalyze = () => {
         getBasicSpeakPracticeQueryKey(variables.targetVowel),
         nextLatest
       );
+      invalidateHomeQueries(queryClient);
       invalidateReportQueries(queryClient);
     },
   });
