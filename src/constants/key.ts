@@ -21,4 +21,6 @@ export const QUERY_KEY = {
   reportWeeklyStamps: "reportWeeklyStamps",
   reportAchievementTrend: "reportAchievementTrend",
   reportPronunciationAccuracy: "reportPronunciationAccuracy",
+  homeContinueLearning: "homeContinueLearning",
+  homeWeeklySummary: "homeWeeklySummary",
 } as const;
