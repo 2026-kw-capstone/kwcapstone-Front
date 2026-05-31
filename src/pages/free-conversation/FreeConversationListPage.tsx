@@ -64,7 +64,7 @@ const FreeConversationListPage = () => {
       <div className="mb-6 flex items-end justify-between">
         <div>
           <p className="mb-1 px-1 text-[13px] font-bold text-slate-500">
-            자유 대화
+            자유 발화 연습
           </p>
           <h1 className="px-1 text-[24px] font-extrabold leading-tight text-slate-900">
             AI와 자유롭게

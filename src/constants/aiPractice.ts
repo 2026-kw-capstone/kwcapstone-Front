@@ -28,7 +28,7 @@ export const AI_PRACTICE_MENU_ITEMS: MenuItem[] = [
     variant: "dark",
   },
   {
-    title: "AI 자유 대화",
+    title: "자유 발화 연습",
     description:
       "주제 제한 없이 AI와 편하게 대화하며 자연스러운 피드백을 받아보세요.",
     to: "/ai-practice/free-conversation",
