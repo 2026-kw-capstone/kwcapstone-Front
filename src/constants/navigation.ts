@@ -85,8 +85,8 @@ export const getPageTitle = (pathname: string) => {
     return "대화 진행중";
   }
   if (pathname.includes("/ai-practice/scenario/")) return "레벨 선택";
-  if (pathname === "/ai-practice/free-conversation") return "AI 자유 대화";
-  if (pathname.startsWith("/ai-practice/free-conversation/chat/")) return "자유 대화";
+  if (pathname === "/ai-practice/free-conversation") return "자유 발화 연습";
+  if (pathname.startsWith("/ai-practice/free-conversation/chat/")) return "자유 발화 연습";
   if (pathname === "/report") return "학습 레포트";
   if (pathname === "/mypage") return "마이페이지";
   if (pathname === "/login") return "로그인";

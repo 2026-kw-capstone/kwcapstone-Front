@@ -58,7 +58,7 @@ const fallbackContinueTrainingItems: ContinueTrainingItem[] = [
     iconClassName: "bg-sky-50 text-sky-500",
     hoverBorderClassName: "hover:border-sky-100",
     label: "AI 연습",
-    title: "AI 자유 대화",
+    title: "자유 발화 연습",
     description: "카페 주문 연습",
   },
 ];
@@ -105,7 +105,7 @@ const mapContinueLearningContent = (
         hoverBorderClassName: "hover:border-sky-100",
         label: "AI 연습",
         title: content.data.conversationTitle,
-        description: "AI 자유 대화 이어가기",
+        description: "자유 발화 연습 이어가기",
       };
   }
 };
