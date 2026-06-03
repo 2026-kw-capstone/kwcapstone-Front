@@ -1,11 +1,11 @@
-import { useState } from "react";
-import { flushSync } from "react-dom";
-import { Navigate, useNavigate, useParams } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
+import { Navigate, useParams } from "react-router-dom";
 import { getApiErrorMessage } from "../../apis/apiError";
 import PracticeHeader from "../../components/scenario/practice/PracticeHeader";
 import PracticeStepPanel from "../../components/scenario/practice/PracticeStepPanel";
 import PracticeSummaryPanel from "../../components/scenario/practice/PracticeSummaryPanel";
 import { usePostScenarioRegenerate } from "../../hooks/mutations/usePostScenarioRegenerate";
+import { getScenarioStepQueryKey } from "../../hooks/queries/useGetScenarioStep";
 import { isScenarioLevel } from "../../hooks/scenario/scenarioPracticeMapper";
 import { useScenarioPracticeFlow } from "../../hooks/scenario/useScenarioPracticeFlow";
 import { useScenarioRecordingFlow } from "../../hooks/scenario/useScenarioRecordingFlow";
@@ -20,9 +20,7 @@ const ScenarioPracticeContent = ({
   resolvedScenarioId,
   resolvedLevel,
 }: ScenarioPracticeContentProps) => {
-  const navigate = useNavigate();
-  const [shouldBypassNavigationBlock, setShouldBypassNavigationBlock] =
-    useState(false);
+  const queryClient = useQueryClient();
   const {
     currentStepNo,
     maxCompletedStepNo,
@@ -63,6 +61,7 @@ const ScenarioPracticeContent = ({
     handleRecord,
     handleReRecord,
     handlePlayRecordedAudio,
+    clearRecordedAudioFromStep,
   } = useScenarioRecordingFlow({
     scenarioId: resolvedScenarioId,
     level: resolvedLevel,
@@ -70,7 +69,6 @@ const ScenarioPracticeContent = ({
     isStepLoading,
     isSummaryMode,
     hasPracticeProgress: maxCompletedStepNo > 0 || !!currentAnswer,
-    shouldBypassNavigationBlock,
     setIsSummaryMode,
     setMaxCompletedStepNo,
   });
@@ -98,11 +96,18 @@ const ScenarioPracticeContent = ({
         level: resolvedLevel,
         stepNo: currentStepNo,
       });
-      flushSync(() => {
-        setShouldBypassNavigationBlock(true);
-      });
-      navigate(`/ai-practice/scenario/${resolvedScenarioId}`, {
-        replace: true,
+
+      setIsSummaryMode(false);
+      setMaxCompletedStepNo((prev) => Math.min(prev, currentStepNo - 1));
+      clearRecordedAudioFromStep(currentStepNo);
+
+      await queryClient.refetchQueries({
+        queryKey: getScenarioStepQueryKey({
+          scenarioId: resolvedScenarioId,
+          level: resolvedLevel,
+          stepNo: currentStepNo,
+        }),
+        exact: true,
       });
     } catch {
       // The modal reads mutation.error and keeps the user in place for retry.

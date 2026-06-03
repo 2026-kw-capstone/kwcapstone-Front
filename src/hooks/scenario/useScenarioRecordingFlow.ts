@@ -179,6 +179,25 @@ export const useScenarioRecordingFlow = ({
     await playAudio(currentAudioUrl);
   };
 
+  const clearRecordedAudioFromStep = (startStepNo: number) => {
+    setRecordedAudioUrlByStep((prev) =>
+      Object.entries(prev).reduce<Record<number, string | null>>(
+        (next, [stepNoKey, url]) => {
+          const stepNo = Number(stepNoKey);
+
+          if (stepNo >= startStepNo) {
+            revokeObjectUrlIfNeeded(url);
+            return next;
+          }
+
+          next[stepNo] = url;
+          return next;
+        },
+        {}
+      )
+    );
+  };
+
   return {
     isRecording,
     isAnalyzing,
@@ -190,5 +209,6 @@ export const useScenarioRecordingFlow = ({
     handleRecord,
     handleReRecord,
     handlePlayRecordedAudio,
+    clearRecordedAudioFromStep,
   };
 };
